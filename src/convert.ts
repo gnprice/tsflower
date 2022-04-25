@@ -80,18 +80,14 @@ function convertVariableStatement(node: ts.VariableStatement): K.StatementKind {
       return b.variableDeclarator(
         b.identifier.from({
           name: (node.name /* TODO */ as ts.Identifier).text,
-          typeAnnotation:
-            node.type && b.tsTypeAnnotation(convertType(node.type)),
+          typeAnnotation: node.type && b.typeAnnotation(convertType(node.type)),
         })
       );
     })
   );
 }
 
-// Really we want a *Flow* type, not a TS type.  But it seems like a simple
-// type reference, i.e. referring to a type by name, gets put under
-// TSTypeKind only.  Odd.
-function convertType(node: ts.TypeNode): K.TSTypeKind {
+function convertType(node: ts.TypeNode): K.FlowTypeKind {
   switch (node.kind) {
     case ts.SyntaxKind.TypePredicate:
     case ts.SyntaxKind.TypeReference:
@@ -144,18 +140,20 @@ function errorStatement(
   });
 }
 
-function unimplementedType(node: ts.TypeNode): K.TSTypeKind {
+function unimplementedType(node: ts.TypeNode): K.FlowTypeKind {
   const msg = ` tsflow-unimplemented: ${ts.SyntaxKind[node.kind]} `;
-  return b.tsTypeReference.from({
-    typeName: b.identifier("$FlowFixMe"),
+  return b.genericTypeAnnotation.from({
+    id: b.identifier("$FlowFixMe"),
+    typeParameters: null,
     comments: [quotedInlineNode(node), b.commentBlock(msg, false, true)],
   });
 }
 
-function errorType(node: ts.TypeNode, description: string): K.TSTypeKind {
+function errorType(node: ts.TypeNode, description: string): K.FlowTypeKind {
   const msg = ` tsflow-error: ${description} `;
-  return b.tsTypeReference.from({
-    typeName: b.identifier("$FlowFixMe"),
+  return b.genericTypeAnnotation.from({
+    id: b.identifier("$FlowFixMe"),
+    typeParameters: null,
     comments: [quotedInlineNode(node), b.commentBlock(msg, false, true)],
   });
 }
