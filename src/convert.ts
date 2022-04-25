@@ -179,8 +179,10 @@ function convertType(node: ts.TypeNode): K.FlowTypeKind {
         (node as ts.TupleTypeNode).elements.map(convertType)
       );
 
-    case ts.SyntaxKind.TypePredicate:
     case ts.SyntaxKind.FunctionType:
+      return convertFunctionType(node as ts.FunctionTypeNode);
+
+    case ts.SyntaxKind.TypePredicate:
     case ts.SyntaxKind.ConstructorType:
     case ts.SyntaxKind.TypeQuery:
     case ts.SyntaxKind.TypeLiteral:
@@ -274,6 +276,46 @@ function convertEntityNameAsType(
 
 function convertUnionType(node: ts.UnionTypeNode): K.FlowTypeKind {
   return b.unionTypeAnnotation(node.types.map(convertType));
+}
+
+function convertFunctionType(node: ts.FunctionTypeNode): K.FlowTypeKind {
+  const typeParams = null; // TODO
+
+  const params: n.FunctionTypeParam[] = [];
+  let restParam = null;
+  for (let i = 0; i < node.parameters.length; i++) {
+    const param = node.parameters[i];
+
+    const name = b.identifier((param.name /* TODO */ as ts.Identifier).text);
+
+    if (param.dotDotDotToken) {
+      // This is a rest parameter, so (if valid TS) must be the last one.
+      restParam = b.functionTypeParam(
+        name,
+        // TS function parameter types must have names, but can lack types.
+        // When missing, for a rest param the type is implicitly `any[]`.
+        param.type
+          ? convertType(param.type)
+          : b.arrayTypeAnnotation(b.anyTypeAnnotation()),
+        false
+      );
+      break;
+    }
+
+    params.push(
+      b.functionTypeParam(
+        name,
+        // TS function parameter types must have names, but can lack types.
+        // When missing, the type is implicitly `any`.
+        param.type ? convertType(param.type) : b.anyTypeAnnotation(),
+        !!param.questionToken
+      )
+    );
+  }
+
+  const resultType = convertType(node.type);
+
+  return b.functionTypeAnnotation(params, resultType, restParam, typeParams);
 }
 
 function unimplementedStatement(node: ts.Statement): K.StatementKind {
