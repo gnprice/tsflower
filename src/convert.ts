@@ -368,7 +368,13 @@ function convertTypeLiteral(node: ts.TypeLiteralNode): K.FlowTypeKind {
 
   //   const indexers = undefined; // TODO
   //   const callProperties = undefined; // TODO
-  return b.objectTypeAnnotation(properties);
+  const exact = true; // TODO
+
+  return b.objectTypeAnnotation.from({
+    properties,
+    exact,
+    inexact: !exact,
+  });
 }
 
 function convertIdentifier(
