@@ -160,6 +160,9 @@ function convertType(node: ts.TypeNode): K.FlowTypeKind {
     case ts.SyntaxKind.StringKeyword:
       return b.stringTypeAnnotation();
 
+    case ts.SyntaxKind.LiteralType:
+      return convertLiteralType(node as ts.LiteralTypeNode);
+
     case ts.SyntaxKind.TypeReference:
       return convertTypeReference(node as ts.TypeReferenceNode);
 
@@ -192,6 +195,48 @@ function convertType(node: ts.TypeNode): K.FlowTypeKind {
       return errorType(
         node,
         `unexpected type kind: ${ts.SyntaxKind[node.kind]}`
+      );
+  }
+}
+
+function convertLiteralType(node: ts.LiteralTypeNode): K.FlowTypeKind {
+  switch (node.literal.kind) {
+    case ts.SyntaxKind.NullKeyword:
+      return b.nullTypeAnnotation();
+    case ts.SyntaxKind.FalseKeyword:
+      return b.booleanLiteralTypeAnnotation(false, "false");
+    case ts.SyntaxKind.TrueKeyword:
+      return b.booleanLiteralTypeAnnotation(true, "true");
+
+    case ts.SyntaxKind.PrefixUnaryExpression: {
+      const literal = node.literal as ts.PrefixUnaryExpression;
+      if (
+        literal.operator !== ts.SyntaxKind.MinusToken ||
+        !ts.isNumericLiteral(literal.operand)
+      )
+        throw 0; // TODO(error)
+      const { text } = literal.operand;
+      // TODO: is more conversion needed on these number literals?
+      return b.numberLiteralTypeAnnotation(-Number(text), text);
+    }
+
+    case ts.SyntaxKind.NumericLiteral: {
+      const { text } = node.literal;
+      // TODO: is more conversion needed on these number literals?
+      return b.numberLiteralTypeAnnotation(Number(text), text);
+    }
+
+    case ts.SyntaxKind.StringLiteral: {
+      const { text } = node.literal;
+      // TODO: is more conversion needed on these string literals?
+      return b.stringLiteralTypeAnnotation(text, text);
+    }
+
+    case ts.SyntaxKind.BigIntLiteral: // TODO is this possible?
+    default:
+      return errorType(
+        node,
+        `unexpected literal-type kind: ${ts.SyntaxKind[node.literal.kind]}`
       );
   }
 }
