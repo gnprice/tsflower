@@ -1,0 +1,8 @@
+# Each pattern should have a leading slash, unless it really is meant to
+# apply relative to any subdirectory as well as the root.
+#
+# For a `.gitignore` format and style primer, see:
+#   https://github.com/zulip/zulip/blob/main/.gitignore
+
+node_modules/
+/lib/
