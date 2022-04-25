@@ -150,6 +150,16 @@ function convertTypeAliasDeclaration(
 
 function convertType(node: ts.TypeNode): K.FlowTypeKind {
   switch (node.kind) {
+    case ts.SyntaxKind.UndefinedKeyword:
+    case ts.SyntaxKind.VoidKeyword:
+      return b.voidTypeAnnotation();
+    case ts.SyntaxKind.BooleanKeyword:
+      return b.booleanTypeAnnotation();
+    case ts.SyntaxKind.NumberKeyword:
+      return b.numberTypeAnnotation();
+    case ts.SyntaxKind.StringKeyword:
+      return b.stringTypeAnnotation();
+
     case ts.SyntaxKind.TypeReference:
       return convertTypeReference(node as ts.TypeReferenceNode);
 

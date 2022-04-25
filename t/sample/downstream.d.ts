@@ -5,7 +5,12 @@ export declare type RONumArray = ReadonlyArray<upstream.Num>;
 
 declare type ArrayArray<T, S extends T> = [S, T[]][];
 
-declare var a: string[], b: undefined;
+declare var a: undefined, b: void, c: boolean, d: number, e: string;
+var f: null, g: true, h: false, i: 3, j: "x";
+var k: boolean[], l: "a" | 3;
+
+declare function f(x: boolean): (b: true) => { y: number } {
+};
 
 export declare const _default: upstream.Num;
 
