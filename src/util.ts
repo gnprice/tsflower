@@ -12,6 +12,18 @@
  * implement equivalent functions here.  They're small and self-contained.
  */
 
+/** Like `Array#some`, but `undefined` behaves like an empty array. */
+export function some<T>(
+  array: readonly T[] | void,
+  predicate: (value: T) => boolean
+): boolean {
+  if (!array) return false;
+  for (let i = 0; i < array.length; i++) {
+    if (predicate(array[i])) return true;
+  }
+  return false;
+}
+
 /** Like `Array#map`, but `undefined` produces `undefined`. */
 export function map<T, U>(array: readonly T[], f: (x: T, i: number) => U): U[];
 export function map<T, U>(
