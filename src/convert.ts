@@ -104,8 +104,14 @@ function convertStatementExceptExport(node: ts.Statement): K.StatementKind {
 }
 
 function convertVariableStatement(node: ts.VariableStatement): K.StatementKind {
+  const flags =
+    node.declarationList.flags & (ts.NodeFlags.Const | ts.NodeFlags.Let);
   return b.variableDeclaration(
-    "var", // TODO
+    flags === ts.NodeFlags.Const
+      ? "const"
+      : flags === ts.NodeFlags.Let
+      ? "let"
+      : "var",
     map(node.declarationList.declarations, (node) => {
       return b.variableDeclarator(
         b.identifier.from({
