@@ -192,10 +192,12 @@ function convertType(node: ts.TypeNode): K.FlowTypeKind {
     case ts.SyntaxKind.FunctionType:
       return convertFunctionType(node as ts.FunctionTypeNode);
 
+    case ts.SyntaxKind.TypeLiteral:
+      return convertTypeLiteral(node as ts.TypeLiteralNode);
+
     case ts.SyntaxKind.TypePredicate:
     case ts.SyntaxKind.ConstructorType:
     case ts.SyntaxKind.TypeQuery:
-    case ts.SyntaxKind.TypeLiteral:
     case ts.SyntaxKind.OptionalType:
     case ts.SyntaxKind.RestType:
     case ts.SyntaxKind.IntersectionType:
@@ -330,6 +332,43 @@ function convertFunctionType(
   const resultType = node.type ? convertType(node.type) : b.anyTypeAnnotation();
 
   return b.functionTypeAnnotation(params, resultType, restParam, typeParams);
+}
+
+function convertTypeLiteral(node: ts.TypeLiteralNode): K.FlowTypeKind {
+  const properties: (n.ObjectTypeProperty | n.ObjectTypeSpreadProperty)[] = [];
+  for (let i = 0; i < node.members.length; i++) {
+    const member = node.members[i];
+    switch (member.kind) {
+      case ts.SyntaxKind.PropertySignature: {
+        const { name, questionToken, type } = member as ts.PropertySignature;
+        properties.push(
+          b.objectTypeProperty(
+            convertIdentifier(name /* TODO */ as ts.Identifier),
+            type ? convertType(type) : b.anyTypeAnnotation(),
+            !!questionToken
+          )
+        );
+        break;
+      }
+
+      case ts.SyntaxKind.CallSignature:
+      case ts.SyntaxKind.ConstructSignature:
+      case ts.SyntaxKind.MethodSignature:
+      case ts.SyntaxKind.GetAccessor:
+      case ts.SyntaxKind.SetAccessor:
+      case ts.SyntaxKind.IndexSignature:
+        throw new Error(
+          `unimplemented TypeElement kind: ${ts.SyntaxKind[member.kind]}`
+        );
+
+      default:
+        throw 0; // TODO(error)
+    }
+  }
+
+  //   const indexers = undefined; // TODO
+  //   const callProperties = undefined; // TODO
+  return b.objectTypeAnnotation(properties);
 }
 
 function convertIdentifier(
