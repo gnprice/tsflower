@@ -55,6 +55,9 @@ function convertStatementExceptExport(node: ts.Statement): K.StatementKind {
     case ts.SyntaxKind.TypeAliasDeclaration:
       return convertTypeAliasDeclaration(node as ts.TypeAliasDeclaration);
 
+    case ts.SyntaxKind.FunctionDeclaration:
+      return convertFunctionDeclaration(node as ts.FunctionDeclaration);
+
     case ts.SyntaxKind.Block:
     case ts.SyntaxKind.EmptyStatement:
     case ts.SyntaxKind.ExpressionStatement:
@@ -75,7 +78,6 @@ function convertStatementExceptExport(node: ts.Statement): K.StatementKind {
     case ts.SyntaxKind.DebuggerStatement:
     case ts.SyntaxKind.VariableDeclaration:
     case ts.SyntaxKind.VariableDeclarationList:
-    case ts.SyntaxKind.FunctionDeclaration:
     case ts.SyntaxKind.ClassDeclaration:
     case ts.SyntaxKind.InterfaceDeclaration:
     case ts.SyntaxKind.EnumDeclaration:
@@ -145,6 +147,17 @@ function convertTypeAliasDeclaration(
           )
         ),
     convertType(node.type)
+  );
+}
+
+function convertFunctionDeclaration(node: ts.FunctionDeclaration) {
+  if (!node.name) throw 0; // TODO(error)
+
+  return b.declareFunction(
+    b.identifier.from({
+      name: node.name.text,
+      typeAnnotation: b.typeAnnotation(convertFunctionType(node)),
+    })
   );
 }
 
@@ -278,7 +291,9 @@ function convertUnionType(node: ts.UnionTypeNode): K.FlowTypeKind {
   return b.unionTypeAnnotation(node.types.map(convertType));
 }
 
-function convertFunctionType(node: ts.FunctionTypeNode): K.FlowTypeKind {
+function convertFunctionType(
+  node: ts.FunctionTypeNode | ts.FunctionDeclaration
+): K.FlowTypeKind {
   const typeParams = null; // TODO
 
   const params: n.FunctionTypeParam[] = [];
@@ -313,7 +328,9 @@ function convertFunctionType(node: ts.FunctionTypeNode): K.FlowTypeKind {
     );
   }
 
-  const resultType = convertType(node.type);
+  // TS function types always have explicit return types, but
+  // FunctionDeclaration may not.  Implicitly that means `any`.
+  const resultType = node.type ? convertType(node.type) : b.anyTypeAnnotation();
 
   return b.functionTypeAnnotation(params, resultType, restParam, typeParams);
 }

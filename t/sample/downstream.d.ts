@@ -11,8 +11,11 @@ var k: boolean[], l: "a" | 3;
 var m: (x: string, y, ...b: boolean[]) => number;
 var n: (a: string, b?: number) => void;
 
-declare function f(x: boolean): (b: true) => { y: number } {
-};
+declare function f(x: boolean): { y: number };
+
+// TODO Function returning a function type:
+//   declare function f(x: boolean): (b: true) => { y: number };
+// Seems to be a bug in recast.print -- produces invalid syntax.
 
 export declare const _default: upstream.Num;
 
