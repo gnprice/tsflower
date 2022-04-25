@@ -118,10 +118,10 @@ function convertVariableStatement(node: ts.VariableStatement): K.StatementKind {
       : "var",
     map(node.declarationList.declarations, (node) => {
       return b.variableDeclarator(
-        b.identifier.from({
-          name: (node.name /* TODO */ as ts.Identifier).text,
-          typeAnnotation: node.type && b.typeAnnotation(convertType(node.type)),
-        })
+        convertIdentifier(
+          node.name /* TODO */ as ts.Identifier,
+          node.type && convertType(node.type)
+        )
       );
     })
   );
@@ -131,7 +131,7 @@ function convertTypeAliasDeclaration(
   node: ts.TypeAliasDeclaration
 ): K.StatementKind {
   return b.typeAlias(
-    b.identifier(node.name.text),
+    convertIdentifier(node.name),
     !node.typeParameters
       ? null
       : b.typeParameterDeclaration(
@@ -154,10 +154,7 @@ function convertFunctionDeclaration(node: ts.FunctionDeclaration) {
   if (!node.name) throw 0; // TODO(error)
 
   return b.declareFunction(
-    b.identifier.from({
-      name: node.name.text,
-      typeAnnotation: b.typeAnnotation(convertFunctionType(node)),
-    })
+    convertIdentifier(node.name, convertFunctionType(node))
   );
 }
 
@@ -280,10 +277,10 @@ function convertEntityNameAsType(
   node: ts.EntityName
 ): K.IdentifierKind | K.QualifiedTypeIdentifierKind {
   return ts.isIdentifier(node)
-    ? b.identifier(node.text)
+    ? convertIdentifier(node)
     : b.qualifiedTypeIdentifier(
         convertEntityNameAsType(node.left),
-        b.identifier(node.right.text)
+        convertIdentifier(node.right)
       );
 }
 
@@ -301,7 +298,7 @@ function convertFunctionType(
   for (let i = 0; i < node.parameters.length; i++) {
     const param = node.parameters[i];
 
-    const name = b.identifier((param.name /* TODO */ as ts.Identifier).text);
+    const name = convertIdentifier(param.name /* TODO */ as ts.Identifier);
 
     if (param.dotDotDotToken) {
       // This is a rest parameter, so (if valid TS) must be the last one.
@@ -333,6 +330,19 @@ function convertFunctionType(
   const resultType = node.type ? convertType(node.type) : b.anyTypeAnnotation();
 
   return b.functionTypeAnnotation(params, resultType, restParam, typeParams);
+}
+
+function convertIdentifier(
+  node: ts.Identifier,
+  type?: K.FlowTypeKind
+): K.IdentifierKind {
+  // TODO(rename): audit this function's callers
+  return !type
+    ? b.identifier(node.text)
+    : b.identifier.from({
+        name: node.text,
+        typeAnnotation: b.typeAnnotation(type),
+      });
 }
 
 function unimplementedStatement(node: ts.Statement): K.StatementKind {
