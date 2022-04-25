@@ -166,6 +166,9 @@ function convertType(node: ts.TypeNode): K.FlowTypeKind {
     case ts.SyntaxKind.TypeReference:
       return convertTypeReference(node as ts.TypeReferenceNode);
 
+    case ts.SyntaxKind.UnionType:
+      return convertUnionType(node as ts.UnionTypeNode);
+
     case ts.SyntaxKind.TypePredicate:
     case ts.SyntaxKind.FunctionType:
     case ts.SyntaxKind.ConstructorType:
@@ -175,7 +178,6 @@ function convertType(node: ts.TypeNode): K.FlowTypeKind {
     case ts.SyntaxKind.TupleType:
     case ts.SyntaxKind.OptionalType:
     case ts.SyntaxKind.RestType:
-    case ts.SyntaxKind.UnionType:
     case ts.SyntaxKind.IntersectionType:
     case ts.SyntaxKind.ConditionalType:
     case ts.SyntaxKind.InferType:
@@ -260,6 +262,10 @@ function convertEntityNameAsType(
         convertEntityNameAsType(node.left),
         b.identifier(node.right.text)
       );
+}
+
+function convertUnionType(node: ts.UnionTypeNode): K.FlowTypeKind {
+  return b.unionTypeAnnotation(node.types.map(convertType));
 }
 
 function unimplementedStatement(node: ts.Statement): K.StatementKind {
