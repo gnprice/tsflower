@@ -169,12 +169,16 @@ function convertType(node: ts.TypeNode): K.FlowTypeKind {
     case ts.SyntaxKind.UnionType:
       return convertUnionType(node as ts.UnionTypeNode);
 
+    case ts.SyntaxKind.ArrayType:
+      return b.arrayTypeAnnotation(
+        convertType((node as ts.ArrayTypeNode).elementType)
+      );
+
     case ts.SyntaxKind.TypePredicate:
     case ts.SyntaxKind.FunctionType:
     case ts.SyntaxKind.ConstructorType:
     case ts.SyntaxKind.TypeQuery:
     case ts.SyntaxKind.TypeLiteral:
-    case ts.SyntaxKind.ArrayType:
     case ts.SyntaxKind.TupleType:
     case ts.SyntaxKind.OptionalType:
     case ts.SyntaxKind.RestType:
