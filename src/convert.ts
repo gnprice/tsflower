@@ -174,12 +174,16 @@ function convertType(node: ts.TypeNode): K.FlowTypeKind {
         convertType((node as ts.ArrayTypeNode).elementType)
       );
 
+    case ts.SyntaxKind.TupleType:
+      return b.tupleTypeAnnotation(
+        (node as ts.TupleTypeNode).elements.map(convertType)
+      );
+
     case ts.SyntaxKind.TypePredicate:
     case ts.SyntaxKind.FunctionType:
     case ts.SyntaxKind.ConstructorType:
     case ts.SyntaxKind.TypeQuery:
     case ts.SyntaxKind.TypeLiteral:
-    case ts.SyntaxKind.TupleType:
     case ts.SyntaxKind.OptionalType:
     case ts.SyntaxKind.RestType:
     case ts.SyntaxKind.IntersectionType:
