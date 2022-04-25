@@ -91,8 +91,40 @@ function convertVariableStatement(node: ts.VariableStatement): K.StatementKind {
 // Really we want a *Flow* type, not a TS type.  But it seems like a simple
 // type reference, i.e. referring to a type by name, gets put under
 // TSTypeKind only.  Odd.
-function convertType(_node: ts.TypeNode): K.TSTypeKind {
-  return b.tsTypeReference(b.identifier("$FlowFixMe"));
+function convertType(node: ts.TypeNode): K.TSTypeKind {
+  switch (node.kind) {
+    case ts.SyntaxKind.TypePredicate:
+    case ts.SyntaxKind.TypeReference:
+    case ts.SyntaxKind.FunctionType:
+    case ts.SyntaxKind.ConstructorType:
+    case ts.SyntaxKind.TypeQuery:
+    case ts.SyntaxKind.TypeLiteral:
+    case ts.SyntaxKind.ArrayType:
+    case ts.SyntaxKind.TupleType:
+    case ts.SyntaxKind.OptionalType:
+    case ts.SyntaxKind.RestType:
+    case ts.SyntaxKind.UnionType:
+    case ts.SyntaxKind.IntersectionType:
+    case ts.SyntaxKind.ConditionalType:
+    case ts.SyntaxKind.InferType:
+    case ts.SyntaxKind.ParenthesizedType:
+    case ts.SyntaxKind.ThisType:
+    case ts.SyntaxKind.TypeOperator:
+    case ts.SyntaxKind.IndexedAccessType:
+    case ts.SyntaxKind.MappedType:
+    case ts.SyntaxKind.LiteralType:
+    case ts.SyntaxKind.NamedTupleMember:
+    case ts.SyntaxKind.TemplateLiteralType:
+    case ts.SyntaxKind.TemplateLiteralTypeSpan:
+    case ts.SyntaxKind.ImportType:
+      return unimplementedType(node);
+
+    default:
+      return errorType(
+        node,
+        `unexpected type kind: ${ts.SyntaxKind[node.kind]}`
+      );
+  }
 }
 
 function unimplementedStatement(node: ts.Statement): K.StatementKind {
@@ -112,7 +144,29 @@ function errorStatement(
   });
 }
 
+function unimplementedType(node: ts.TypeNode): K.TSTypeKind {
+  const msg = ` tsflow-unimplemented: ${ts.SyntaxKind[node.kind]} `;
+  return b.tsTypeReference.from({
+    typeName: b.identifier("$FlowFixMe"),
+    comments: [quotedInlineNode(node), b.commentBlock(msg, false, true)],
+  });
+}
+
+function errorType(node: ts.TypeNode, description: string): K.TSTypeKind {
+  const msg = ` tsflow-error: ${description} `;
+  return b.tsTypeReference.from({
+    typeName: b.identifier("$FlowFixMe"),
+    comments: [quotedInlineNode(node), b.commentBlock(msg, false, true)],
+  });
+}
+
 function quotedStatement(node: ts.Statement): K.CommentKind {
+  const sourceFile = node.getSourceFile();
+  const text = sourceFile.text.slice(node.pos, node.end);
+  return b.commentBlock(` ${text} `, false, true);
+}
+
+function quotedInlineNode(node: ts.Node): K.CommentKind {
   const sourceFile = node.getSourceFile();
   const text = sourceFile.text.slice(node.pos, node.end);
   return b.commentBlock(` ${text} `, false, true);
