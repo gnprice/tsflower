@@ -89,8 +89,10 @@ function convertVariableStatement(node: ts.VariableStatement): K.StatementKind {
 
 function convertType(node: ts.TypeNode): K.FlowTypeKind {
   switch (node.kind) {
-    case ts.SyntaxKind.TypePredicate:
     case ts.SyntaxKind.TypeReference:
+      return convertTypeReference(node as ts.TypeReferenceNode);
+
+    case ts.SyntaxKind.TypePredicate:
     case ts.SyntaxKind.FunctionType:
     case ts.SyntaxKind.ConstructorType:
     case ts.SyntaxKind.TypeQuery:
@@ -121,6 +123,27 @@ function convertType(node: ts.TypeNode): K.FlowTypeKind {
         `unexpected type kind: ${ts.SyntaxKind[node.kind]}`
       );
   }
+}
+
+function convertTypeReference(node: ts.TypeReferenceNode): K.FlowTypeKind {
+  return b.genericTypeAnnotation(
+    // TODO: Insert rewrites here.
+    convertEntityNameAsType(node.typeName),
+    !node.typeArguments
+      ? null
+      : b.typeParameterInstantiation(node.typeArguments.map(convertType))
+  );
+}
+
+function convertEntityNameAsType(
+  node: ts.EntityName
+): K.IdentifierKind | K.QualifiedTypeIdentifierKind {
+  return ts.isIdentifier(node)
+    ? b.identifier(node.text)
+    : b.qualifiedTypeIdentifier(
+        convertEntityNameAsType(node.left),
+        b.identifier(node.right.text)
+      );
 }
 
 function unimplementedStatement(node: ts.Statement): K.StatementKind {
