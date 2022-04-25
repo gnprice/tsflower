@@ -27,20 +27,40 @@ function convertFileToString(file: string): string {
     rootNames: [file],
     options: {},
   });
+  program.getTypeChecker(); // causes the binder to run, and set parent pointers
   const sourceFile = program.getSourceFile(file);
   if (!sourceFile) throw 0;
   const convertedFile = convertSourceFile(sourceFile);
-  return recast.print(convertedFile).code;
+  return recast.print(convertedFile).code + "\n";
 }
 
 function convertSourceFile(node: ts.SourceFile): n.File {
   return b.file(
     b.program.from({
       comments: [b.commentBlock(headerComment)],
-      body: [errorStatement(`unimplemented: file bodies :-)`)],
+      body: node.statements.map(convertStatement),
     }),
     node.fileName
   );
+}
+
+function convertStatement(node: ts.Statement): K.StatementKind {
+  switch (node.kind) {
+    default:
+      return unimplementedStatement(node);
+  }
+}
+
+function unimplementedStatement(node: ts.Statement): K.StatementKind {
+  const sourceFile = node.getSourceFile();
+  const text = sourceFile.text.slice(node.pos, node.end);
+  const msg = ` tsflow-unimplemented: ${ts.SyntaxKind[node.kind]} `;
+  return b.emptyStatement.from({
+    comments: [
+      b.commentBlock(msg, true, false),
+      b.commentBlock(` ${text} `, false, true),
+    ],
+  });
 }
 
 function errorStatement(description: string): K.StatementKind {
