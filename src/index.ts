@@ -46,25 +46,77 @@ function convertSourceFile(node: ts.SourceFile): n.File {
 
 function convertStatement(node: ts.Statement): K.StatementKind {
   switch (node.kind) {
-    default:
+    case ts.SyntaxKind.Block:
+    case ts.SyntaxKind.EmptyStatement:
+    case ts.SyntaxKind.VariableStatement:
+    case ts.SyntaxKind.ExpressionStatement:
+    case ts.SyntaxKind.IfStatement:
+    case ts.SyntaxKind.DoStatement:
+    case ts.SyntaxKind.WhileStatement:
+    case ts.SyntaxKind.ForStatement:
+    case ts.SyntaxKind.ForInStatement:
+    case ts.SyntaxKind.ForOfStatement:
+    case ts.SyntaxKind.ContinueStatement:
+    case ts.SyntaxKind.BreakStatement:
+    case ts.SyntaxKind.ReturnStatement:
+    case ts.SyntaxKind.WithStatement:
+    case ts.SyntaxKind.SwitchStatement:
+    case ts.SyntaxKind.LabeledStatement:
+    case ts.SyntaxKind.ThrowStatement:
+    case ts.SyntaxKind.TryStatement:
+    case ts.SyntaxKind.DebuggerStatement:
+    case ts.SyntaxKind.VariableDeclaration:
+    case ts.SyntaxKind.VariableDeclarationList:
+    case ts.SyntaxKind.FunctionDeclaration:
+    case ts.SyntaxKind.ClassDeclaration:
+    case ts.SyntaxKind.InterfaceDeclaration:
+    case ts.SyntaxKind.TypeAliasDeclaration:
+    case ts.SyntaxKind.EnumDeclaration:
+    case ts.SyntaxKind.ModuleDeclaration:
+    case ts.SyntaxKind.ModuleBlock:
+    case ts.SyntaxKind.CaseBlock:
+    case ts.SyntaxKind.NamespaceExportDeclaration:
+    case ts.SyntaxKind.ImportEqualsDeclaration:
+    case ts.SyntaxKind.ImportDeclaration:
+    case ts.SyntaxKind.ImportClause:
+    case ts.SyntaxKind.NamespaceImport:
+    case ts.SyntaxKind.NamedImports:
+    case ts.SyntaxKind.ImportSpecifier:
+    case ts.SyntaxKind.ExportAssignment:
+    case ts.SyntaxKind.ExportDeclaration:
+    case ts.SyntaxKind.NamedExports:
+    case ts.SyntaxKind.NamespaceExport:
+    case ts.SyntaxKind.ExportSpecifier:
+    case ts.SyntaxKind.MissingDeclaration:
       return unimplementedStatement(node);
+
+    default:
+      return errorStatement(
+        node,
+        `unexpected statement kind: ${ts.SyntaxKind[node.kind]}`
+      );
   }
 }
 
 function unimplementedStatement(node: ts.Statement): K.StatementKind {
-  const sourceFile = node.getSourceFile();
-  const text = sourceFile.text.slice(node.pos, node.end);
   const msg = ` tsflow-unimplemented: ${ts.SyntaxKind[node.kind]} `;
   return b.emptyStatement.from({
-    comments: [
-      b.commentBlock(msg, true, false),
-      b.commentBlock(` ${text} `, false, true),
-    ],
+    comments: [b.commentBlock(msg, true, false), quotedStatement(node)],
   });
 }
 
-function errorStatement(description: string): K.StatementKind {
+function errorStatement(
+  node: ts.Statement,
+  description: string
+): K.StatementKind {
+  const msg = ` tsflow-error: ${description} `;
   return b.emptyStatement.from({
-    comments: [b.commentBlock(` tsflow-error: ${description} `)],
+    comments: [b.commentBlock(msg, true, false), quotedStatement(node)],
   });
+}
+
+function quotedStatement(node: ts.Statement): K.CommentKind {
+  const sourceFile = node.getSourceFile();
+  const text = sourceFile.text.slice(node.pos, node.end);
+  return b.commentBlock(` ${text} `, false, true);
 }
