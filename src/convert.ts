@@ -52,6 +52,9 @@ function convertStatementExceptExport(node: ts.Statement): K.StatementKind {
     case ts.SyntaxKind.VariableStatement:
       return convertVariableStatement(node as ts.VariableStatement);
 
+    case ts.SyntaxKind.TypeAliasDeclaration:
+      return convertTypeAliasDeclaration(node as ts.TypeAliasDeclaration);
+
     case ts.SyntaxKind.Block:
     case ts.SyntaxKind.EmptyStatement:
     case ts.SyntaxKind.ExpressionStatement:
@@ -75,7 +78,6 @@ function convertStatementExceptExport(node: ts.Statement): K.StatementKind {
     case ts.SyntaxKind.FunctionDeclaration:
     case ts.SyntaxKind.ClassDeclaration:
     case ts.SyntaxKind.InterfaceDeclaration:
-    case ts.SyntaxKind.TypeAliasDeclaration:
     case ts.SyntaxKind.EnumDeclaration:
     case ts.SyntaxKind.ModuleDeclaration:
     case ts.SyntaxKind.ModuleBlock:
@@ -120,6 +122,29 @@ function convertVariableStatement(node: ts.VariableStatement): K.StatementKind {
         })
       );
     })
+  );
+}
+
+function convertTypeAliasDeclaration(
+  node: ts.TypeAliasDeclaration
+): K.StatementKind {
+  return b.typeAlias(
+    b.identifier(node.name.text),
+    !node.typeParameters
+      ? null
+      : b.typeParameterDeclaration(
+          node.typeParameters.map((param) =>
+            b.typeParameter(
+              param.name.text,
+              null,
+              // TODO per param.constraint jsdoc: Consider calling `getEffectiveConstraintOfTypeParameter`
+              !param.constraint
+                ? null
+                : b.typeAnnotation(convertType(param.constraint))
+            )
+          )
+        ),
+    convertType(node.type)
   );
 }
 
