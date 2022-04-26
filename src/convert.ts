@@ -37,7 +37,15 @@ function convertStatement(node: ts.Statement): K.StatementKind {
         return inner;
       }
 
-      return b.exportNamedDeclaration(inner as K.DeclarationKind);
+      if (n.DeclareClass.check(inner)) {
+        // TODO are there more cases that should go this way?
+        return b.declareExportDeclaration(
+          /* TODO: defaultParam */ false,
+          inner
+        );
+      } else {
+        return b.exportNamedDeclaration(inner as K.DeclarationKind);
+      }
     }
 
     return inner;
@@ -210,25 +218,26 @@ function convertClassDeclaration(node: ts.ClassDeclaration) {
 
   const typeParameters = convertTypeParameterDeclaration(node.typeParameters);
 
-  const superClass = !node.heritageClauses ? null : null; // TODO
-  const superTypeParameters: K.TypeParameterInstantiationKind | null = null; // TODO
+  const extends_: n.InterfaceExtends[] = []; // TODO
 
-  const implements_: K.ClassImplementsKind[] | null = null; // TODO
-
-  const members: (
-    | K.MethodDefinitionKind
-    | K.VariableDeclaratorKind
-    | K.ClassPropertyDefinitionKind
-    | K.ClassPropertyKind
-    | K.ClassPrivatePropertyKind
-    | K.ClassMethodKind
-    | K.ClassPrivateMethodKind
-  )[] = [];
+  const properties: (n.ObjectTypeProperty | n.ObjectTypeSpreadProperty)[] = [];
+  const indexers: n.ObjectTypeIndexer[] | undefined = []; // TODO
+  const callProperties: n.ObjectTypeCallProperty[] | undefined = []; // TODO
   node.members.forEach((member) => {
     switch (member.kind) {
+      case ts.SyntaxKind.Constructor:
+        properties.push(
+          // TODO: return type should be void, not any
+          b.objectTypeProperty(
+            b.identifier("constructor"),
+            convertFunctionType(member as ts.ConstructorDeclaration),
+            false
+          )
+        );
+        break;
+
       case ts.SyntaxKind.PropertyDeclaration:
       case ts.SyntaxKind.MethodDeclaration:
-      case ts.SyntaxKind.Constructor:
       case ts.SyntaxKind.SemicolonClassElement:
       case ts.SyntaxKind.GetAccessor:
       case ts.SyntaxKind.SetAccessor:
@@ -243,13 +252,11 @@ function convertClassDeclaration(node: ts.ClassDeclaration) {
     }
   });
 
-  return b.classDeclaration.from({
-    id: !node.name ? null : convertIdentifier(node.name),
+  return b.declareClass.from({
+    id: convertIdentifier(node.name),
     typeParameters,
-    superClass,
-    superTypeParameters,
-    ...(implements_ ? { ["implements"]: implements_ } : {}),
-    body: b.classBody(members),
+    extends: extends_,
+    body: b.objectTypeAnnotation(properties, indexers, callProperties),
   });
 }
 
@@ -407,7 +414,7 @@ function convertUnionType(node: ts.UnionTypeNode): K.FlowTypeKind {
 }
 
 function convertFunctionType(
-  node: ts.FunctionTypeNode | ts.FunctionDeclaration
+  node: ts.FunctionTypeNode | ts.FunctionDeclaration | ts.ConstructorDeclaration
 ): K.FlowTypeKind {
   const typeParams = convertTypeParameterDeclaration(node.typeParameters);
 
