@@ -1,11 +1,21 @@
 import ts from "typescript";
+import { builders as b, namedTypes as _n } from "ast-types";
+import K from "ast-types/gen/kinds";
 import { some } from "./util";
 
 export enum MapResultType {
   FixedName,
+  TypeReferenceMacro,
 }
 
-export type MapResult = { type: MapResultType.FixedName; name: string };
+export type MapResult =
+  | { type: MapResultType.FixedName; name: string }
+  | {
+      type: MapResultType.TypeReferenceMacro;
+      convert(
+        typeArguments: ts.NodeArray<ts.TypeNode> | undefined
+      ): K.FlowTypeKind;
+    };
 
 export interface Mapper {
   getSymbol(symbol: ts.Symbol): void | MapResult;
@@ -13,7 +23,51 @@ export interface Mapper {
 
 const defaultLibraryRewrites: Map<string, MapResult> = new Map([
   ["ReadonlyArray", { type: MapResultType.FixedName, name: "$ReadOnlyArray" }],
+  ["Omit", { type: MapResultType.TypeReferenceMacro, convert: convertOmit }],
 ]);
+
+function convertOmit(
+  typeArguments: ts.NodeArray<ts.TypeNode> | undefined
+): K.FlowTypeKind {
+  // TODO: This really needs to be able to call converter methods,
+  //   as several TODOs below attest.
+
+  if (typeArguments?.length !== 2) throw new Error("bad Omit"); // TODO(error)
+  const [objectType, omitKeysType] = typeArguments;
+
+  let subtrahend;
+  switch (omitKeysType.kind) {
+    case ts.SyntaxKind.LiteralType: {
+      const { literal } = omitKeysType as ts.LiteralTypeNode;
+      if (!ts.isStringLiteral(literal))
+        throw new Error("bad Omit: literal but non-string"); // TODO(error)
+      subtrahend = b.objectTypeAnnotation.from({
+        exact: true,
+        properties: [
+          b.objectTypeProperty(
+            b.identifier(literal.text),
+            b.mixedTypeAnnotation(),
+            false
+          ),
+        ],
+      });
+      break;
+    }
+
+    case ts.SyntaxKind.UnionType:
+    default:
+      throw new Error("bad Omit: unimplemented second type"); // TODO(error)
+  }
+
+  return b.genericTypeAnnotation(
+    b.identifier("$Diff"),
+    b.typeParameterInstantiation([
+      // TODO: convertType(objectType)
+      b.genericTypeAnnotation(b.identifier("$FlowFixMe"), null), // TODO(error)
+      subtrahend,
+    ])
+  );
+}
 
 export function createMapper(program: ts.Program, targetFilenames: string[]) {
   const targetSet = new Set(targetFilenames);

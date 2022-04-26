@@ -21,6 +21,7 @@ var o: {
   e: never;
   // f: <T>(x: T) => T[];  // TODO: recast.print produces invalid syntax
   g: { a: string }["a"];
+  h: Omit<{ a: string; b: number }, "a">;
 };
 
 declare function f<T>(x: T): { y: T };

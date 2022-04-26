@@ -412,6 +412,10 @@ export function convertSourceFile(
             ? null
             : b.typeParameterInstantiation(node.typeArguments.map(convertType))
         );
+
+      case MapResultType.TypeReferenceMacro:
+        return mapped.convert(node.typeArguments);
+
       // TODO: How to get TypeScript to check that this switch is exhaustive?
       //   case undefined:
       //     break;
