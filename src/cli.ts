@@ -20,7 +20,9 @@ class CliError extends Error {
 
 type FilenameOrPipe = string | { type: "pipe" };
 
-type CliCommand = { type: "file"; src: string; dest: FilenameOrPipe };
+type CliCommand =
+  | { type: "file"; src: string; dest: FilenameOrPipe }
+  | { type: "tree"; src: string; dest: string | null };
 
 main();
 
@@ -38,7 +40,20 @@ function main() {
       } else {
         fs.writeFileSync(dest, result);
       }
+      return;
     }
+
+    case "tree": {
+      // const { src, dest } = command;
+      process.stderr.write("tsflower: tree: subcommand unimplemented\n");
+      process.exit(1);
+      return;
+    }
+
+    default:
+      ((_: never) => {})(command);
+      // @ts-expect-error yes, the types say this is unreachable
+      throw new Error(`internal error: unexpected subcommand: ${command.type}`);
   }
 }
 
@@ -65,6 +80,8 @@ function parseCommandLine(argv: string[]): CliCommand {
       throw new CliError(getUsage(), 0);
     case "file":
       return parseFileCommandLine(argv.slice(1));
+    case "tree":
+      return parseTreeCommandLine(argv.slice(1));
     default:
       usageError(`invalid subcommand: ${argv[0]}`);
   }
@@ -83,6 +100,7 @@ corresponding Flow type definition files (\`.js.flow\`).
 
 Subcommands:
   file - Translate a single file.
+  tree - Translate a directory tree of files.
 
 For details on any subcommand, pass \`--help\` to the subcommand.
 `;
@@ -120,6 +138,43 @@ Consumes the TypeScript type definition (\`.d.ts\`) file INPUT,
 and generates a Flow type definition (\`.js.flow\`) file at OUTPUT.
 
 If OUTPUT is omitted, prints result to stdout.
+`;
+  }
+}
+
+function parseTreeCommandLine(argv: string[]): CliCommand {
+  if (argv.length < 1) {
+    usageError("input filename required");
+  }
+  if (argv[0] === "--help") {
+    throw new CliError(getUsage(), 0);
+  }
+  if (argv.length > 2) {
+    usageError(`too many arguments (got ${argv.length}, expected 2)`);
+  }
+
+  const [inputPath, outputPath] = argv;
+
+  return {
+    type: "tree",
+    src: inputPath,
+    dest: outputPath !== undefined ? outputPath : null,
+  };
+
+  function usageError(message: string): never {
+    throw new CliError(`tsflower tree: ${message}\n${getUsage()}`);
+  }
+
+  function getUsage() {
+    return `\
+Usage: tsflower tree INPUT [OUTPUT]
+
+Consumes all TypeScript type definition (\`.d.ts\`) files under the
+directory tree INPUT, and generates a corresponding tree of Flow type
+definition (\`.js.flow\`) files at OUTPUT.
+
+If OUTPUT is omitted, it defaults to the same as INPUT.  This has the effect
+that each \`foo/bar.d.ts\` produces a file \`foo/bar.js.flow\` next to it.
 `;
   }
 }
