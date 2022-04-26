@@ -53,7 +53,7 @@ export function convertSourceFile(
           console.error(
             `warning: statement has "export", but conversion not a declaration`
           );
-          // TODO better log this; note in output
+          // TODO(error) better log this; note in output
           return inner;
         }
 

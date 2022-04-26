@@ -41,13 +41,28 @@ to manually write any Flow type definitions for them.
 
 - Extend the driver and CLI layer:
 
+  - Expose as an NPM executable.
+
   - Output to files, rather than stdout.
+
+  - Track the number of unimplemented and/or error nodes; print counts to
+    stderr as warnings.  (Perhaps options to be more or less verbose?  Break
+    down by file, or give total across all files; break down by node kind,
+    or not; verbosely print actual text (perhaps first N chars of it, in
+    case it's a giant module or namespace or class etc.))
 
   - Transform a program of multiple files at once.
 
   - Take just an (installed) NPM package name; find the TS type definitions
     via its package.json, find the desired destination via convention and/or
     configuration, and go.
+
+- More consistently handle errors as nice and structured:
+
+  - See all `TODO(error)` comments.
+
+  - In general, always use structured helpers like `errorStatement` and its
+    friends; always leave a marker comment in the output.
 
 - Build more of a test framework:
 
