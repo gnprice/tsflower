@@ -36,27 +36,47 @@ function convertOmit(
   const [objectType, keysType] = typeArguments;
 
   let subtrahend;
-  switch (keysType.kind) {
-    case ts.SyntaxKind.LiteralType: {
-      const { literal } = keysType as ts.LiteralTypeNode;
-      if (!ts.isStringLiteral(literal)) return error("literal but non-string");
-      subtrahend = b.objectTypeAnnotation.from({
-        exact: true,
-        properties: [
-          b.objectTypeProperty(
-            b.identifier(literal.text),
-            b.mixedTypeAnnotation(),
-            false
+  if (ts.isLiteralTypeNode(keysType) && ts.isStringLiteral(keysType.literal)) {
+    subtrahend = b.objectTypeAnnotation.from({
+      exact: true,
+      properties: [
+        b.objectTypeProperty(
+          b.identifier(keysType.literal.text),
+          b.mixedTypeAnnotation(),
+          false
+        ),
+      ],
+    });
+  } else if (
+    ts.isUnionTypeNode(keysType) &&
+    keysType.types.every(
+      (t) => ts.isLiteralTypeNode(t) && ts.isStringLiteral(t.literal)
+    )
+  ) {
+    subtrahend = b.objectTypeAnnotation.from({
+      exact: true,
+      properties: keysType.types.map((t) =>
+        b.objectTypeProperty(
+          b.identifier(
+            ((t as ts.LiteralTypeNode).literal as ts.StringLiteral).text
           ),
-        ],
-      });
-      break;
-    }
-
-    case ts.SyntaxKind.UnionType: // TODO
-    default:
-      // TODO
-      return error(`unimplemented keys type: ${ts.SyntaxKind[keysType.kind]}`);
+          b.mixedTypeAnnotation(),
+          false
+        )
+      ),
+    });
+  } else {
+    subtrahend = b.objectTypeAnnotation.from({
+      exact: true,
+      properties: [],
+      indexers: [
+        b.objectTypeIndexer(
+          b.identifier("key"),
+          converter.convertType(keysType),
+          b.mixedTypeAnnotation()
+        ),
+      ],
+    });
   }
 
   return b.genericTypeAnnotation(
