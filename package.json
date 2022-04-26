@@ -11,7 +11,7 @@
   "homepage": "https://github.com/gnprice/tsflower",
   "dependencies": {
     "ast-types": "^0.14.2",
-    "recast": "^0.20.5",
+    "recast": "gnprice/recast#3cf24324c",
     "typescript": "^4.6.3"
   },
   "devDependencies": {
@@ -19,6 +19,7 @@
   },
   "main": "lib/index.js",
   "scripts": {
+    "postinstall": "cd node_modules/recast && npm install && npm run build || :",
     "prepublishOnly": "npm run build",
     "build": "tsc"
   }
