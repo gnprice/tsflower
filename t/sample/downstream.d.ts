@@ -29,6 +29,13 @@ declare function f<T>(x: T): { y: T };
 //   declare function f(x: boolean): (b: true) => { y: number };
 // Seems to be a bug in recast.print -- produces invalid syntax.
 
-declare const _default: upstream2.Num;
+export declare class C<T> {}
+export declare class D extends C<string> {
+  constructor();
+  f(cb: (s: string) => void): this;
+}
 
-export default _default;
+export default class {}
+
+declare const _default: upstream2.Num;
+// export default _default;  // collides with other default

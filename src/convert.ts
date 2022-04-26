@@ -64,6 +64,9 @@ function convertStatementExceptExport(node: ts.Statement): K.StatementKind {
     case ts.SyntaxKind.FunctionDeclaration:
       return convertFunctionDeclaration(node as ts.FunctionDeclaration);
 
+    case ts.SyntaxKind.ClassDeclaration:
+      return convertClassDeclaration(node as ts.ClassDeclaration);
+
     case ts.SyntaxKind.Block:
     case ts.SyntaxKind.EmptyStatement:
     case ts.SyntaxKind.ExpressionStatement:
@@ -84,7 +87,6 @@ function convertStatementExceptExport(node: ts.Statement): K.StatementKind {
     case ts.SyntaxKind.DebuggerStatement:
     case ts.SyntaxKind.VariableDeclaration:
     case ts.SyntaxKind.VariableDeclarationList:
-    case ts.SyntaxKind.ClassDeclaration:
     case ts.SyntaxKind.InterfaceDeclaration:
     case ts.SyntaxKind.EnumDeclaration:
     case ts.SyntaxKind.ModuleDeclaration:
@@ -201,6 +203,54 @@ function convertFunctionDeclaration(node: ts.FunctionDeclaration) {
   return b.declareFunction(
     convertIdentifier(node.name, convertFunctionType(node))
   );
+}
+
+function convertClassDeclaration(node: ts.ClassDeclaration) {
+  if (!node.name) throw 0; // TODO(error): really unimplemented `export default class`
+
+  const typeParameters = convertTypeParameterDeclaration(node.typeParameters);
+
+  const superClass = !node.heritageClauses ? null : null; // TODO
+  const superTypeParameters: K.TypeParameterInstantiationKind | null = null; // TODO
+
+  const implements_: K.ClassImplementsKind[] | null = null; // TODO
+
+  const members: (
+    | K.MethodDefinitionKind
+    | K.VariableDeclaratorKind
+    | K.ClassPropertyDefinitionKind
+    | K.ClassPropertyKind
+    | K.ClassPrivatePropertyKind
+    | K.ClassMethodKind
+    | K.ClassPrivateMethodKind
+  )[] = [];
+  node.members.forEach((member) => {
+    switch (member.kind) {
+      case ts.SyntaxKind.PropertyDeclaration:
+      case ts.SyntaxKind.MethodDeclaration:
+      case ts.SyntaxKind.Constructor:
+      case ts.SyntaxKind.SemicolonClassElement:
+      case ts.SyntaxKind.GetAccessor:
+      case ts.SyntaxKind.SetAccessor:
+      case ts.SyntaxKind.IndexSignature:
+      case ts.SyntaxKind.ClassStaticBlockDeclaration:
+        throw new Error(
+          `unimplemented ClassElement kind: ${ts.SyntaxKind[member.kind]}`
+        );
+
+      default:
+        throw 0; // TODO(error)
+    }
+  });
+
+  return b.classDeclaration.from({
+    id: !node.name ? null : convertIdentifier(node.name),
+    typeParameters,
+    superClass,
+    superTypeParameters,
+    ...(implements_ ? { ["implements"]: implements_ } : {}),
+    body: b.classBody(members),
+  });
 }
 
 function convertType(node: ts.TypeNode): K.FlowTypeKind {
