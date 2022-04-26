@@ -18,6 +18,6 @@ declare function f(x: boolean): { y: number };
 //   declare function f(x: boolean): (b: true) => { y: number };
 // Seems to be a bug in recast.print -- produces invalid syntax.
 
-export declare const _default: upstream2.Num;
+declare const _default: upstream2.Num;
 
 export default _default;

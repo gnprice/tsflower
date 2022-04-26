@@ -52,6 +52,9 @@ function convertStatementExceptExport(node: ts.Statement): K.StatementKind {
     case ts.SyntaxKind.ImportDeclaration:
       return convertImportDeclaration(node as ts.ImportDeclaration);
 
+    case ts.SyntaxKind.ExportAssignment:
+      return convertExportAssignment(node as ts.ExportAssignment);
+
     case ts.SyntaxKind.VariableStatement:
       return convertVariableStatement(node as ts.VariableStatement);
 
@@ -93,7 +96,6 @@ function convertStatementExceptExport(node: ts.Statement): K.StatementKind {
     case ts.SyntaxKind.NamespaceImport:
     case ts.SyntaxKind.NamedImports:
     case ts.SyntaxKind.ImportSpecifier:
-    case ts.SyntaxKind.ExportAssignment:
     case ts.SyntaxKind.ExportDeclaration:
     case ts.SyntaxKind.NamedExports:
     case ts.SyntaxKind.NamespaceExport:
@@ -149,6 +151,18 @@ function convertImportDeclaration(node: ts.ImportDeclaration): K.StatementKind {
   );
 
   return b.importDeclaration(specifiers, source);
+}
+
+function convertExportAssignment(node: ts.ExportAssignment): K.StatementKind {
+  if (node.isExportEquals)
+    // TODO(error): make this a proper "unimplemented"
+    return errorStatement(node, 'unimplemented: "export ="');
+
+  if (!ts.isIdentifier(node.expression))
+    // TODO(runtime): These don't appear in .d.ts files, but do in TS.
+    return errorStatement(node, `"export default" with non-identifier`);
+
+  return b.exportDefaultDeclaration(convertIdentifier(node.expression));
 }
 
 function convertVariableStatement(node: ts.VariableStatement): K.StatementKind {
