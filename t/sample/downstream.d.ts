@@ -1,7 +1,8 @@
 import * as upstream from "./upstream";
+import upstream2, { Num as Numm } from "./upstream";
 
 export declare type NumArray = Array<upstream.Num>;
-export declare type RONumArray = ReadonlyArray<upstream.Num>;
+export declare type RONumArray = ReadonlyArray<Numm>;
 
 declare type ArrayArray<T, S extends T> = [S, T[]][];
 
@@ -17,6 +18,6 @@ declare function f(x: boolean): { y: number };
 //   declare function f(x: boolean): (b: true) => { y: number };
 // Seems to be a bug in recast.print -- produces invalid syntax.
 
-export declare const _default: upstream.Num;
+export declare const _default: upstream2.Num;
 
 export default _default;

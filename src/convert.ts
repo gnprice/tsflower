@@ -49,6 +49,9 @@ function convertStatement(node: ts.Statement): K.StatementKind {
 
 function convertStatementExceptExport(node: ts.Statement): K.StatementKind {
   switch (node.kind) {
+    case ts.SyntaxKind.ImportDeclaration:
+      return convertImportDeclaration(node as ts.ImportDeclaration);
+
     case ts.SyntaxKind.VariableStatement:
       return convertVariableStatement(node as ts.VariableStatement);
 
@@ -86,7 +89,6 @@ function convertStatementExceptExport(node: ts.Statement): K.StatementKind {
     case ts.SyntaxKind.CaseBlock:
     case ts.SyntaxKind.NamespaceExportDeclaration:
     case ts.SyntaxKind.ImportEqualsDeclaration:
-    case ts.SyntaxKind.ImportDeclaration:
     case ts.SyntaxKind.ImportClause:
     case ts.SyntaxKind.NamespaceImport:
     case ts.SyntaxKind.NamedImports:
@@ -105,6 +107,48 @@ function convertStatementExceptExport(node: ts.Statement): K.StatementKind {
         `unexpected statement kind: ${ts.SyntaxKind[node.kind]}`
       );
   }
+}
+
+function convertImportDeclaration(node: ts.ImportDeclaration): K.StatementKind {
+  const { importClause } = node;
+  if (!importClause) throw new Error("unimplemented: no import clause");
+
+  const specifiers: (
+    | n.ImportSpecifier
+    | n.ImportNamespaceSpecifier
+    | n.ImportDefaultSpecifier
+  )[] = [];
+
+  if (importClause.name)
+    specifiers.push(
+      b.importDefaultSpecifier(convertIdentifier(importClause.name))
+    );
+
+  const { namedBindings } = importClause;
+  if (namedBindings) {
+    if (ts.isNamedImports(namedBindings)) {
+      for (const binding of namedBindings.elements) {
+        specifiers.push(
+          b.importSpecifier(
+            convertIdentifier(binding.propertyName ?? binding.name),
+            convertIdentifier(binding.name)
+          )
+        );
+      }
+    } else {
+      specifiers.push(
+        b.importNamespaceSpecifier(convertIdentifier(namedBindings.name))
+      );
+    }
+  }
+
+  const source = b.stringLiteral(
+    // JSDoc on ImportDeclaration#moduleSpecifier says:
+    //   > If this is not a StringLiteral it will be a grammar error.
+    (node.moduleSpecifier as ts.StringLiteral).text
+  );
+
+  return b.importDeclaration(specifiers, source);
 }
 
 function convertVariableStatement(node: ts.VariableStatement): K.StatementKind {
