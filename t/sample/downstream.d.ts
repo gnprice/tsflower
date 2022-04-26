@@ -19,7 +19,7 @@ var o: {
   c: unknown;
   d: any;
   e: never;
-  // f: <T>(x: T) => T[];  // TODO: recast.print produces invalid syntax
+  f: <T>(x: T) => T[];
   g: { a: string }["a"];
   h: Omit<{ a: string; b: number }, "a">;
   i: Omit<{ a: string; b: number }, "a" | "c">;
@@ -29,13 +29,11 @@ var o: {
 
 declare function f<T>(x: T): { y: T };
 
-// TODO Function returning a function type:
-//   declare function f(x: boolean): (b: true) => { y: number };
-// Seems to be a bug in recast.print -- produces invalid syntax.
+declare function f(x: boolean): (b: true) => { y: number };
 
 export declare class C<T> {}
 export declare class D extends C<string> {
-  // constructor();  // TODO: recast.print produces invalid syntax
+  constructor(); // TODO: should return void, not any
   // f(cb: (s: string) => void): this;  // TODO implement
 }
 
