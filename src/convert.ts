@@ -237,6 +237,16 @@ function convertType(node: ts.TypeNode): K.FlowTypeKind {
     case ts.SyntaxKind.UnionType:
       return convertUnionType(node as ts.UnionTypeNode);
 
+    case ts.SyntaxKind.IndexedAccessType:
+      return b.genericTypeAnnotation(
+        // TODO(flow-155): Switch to Flow indexed-access-type syntax.
+        b.identifier("$ElementType"),
+        b.typeParameterInstantiation([
+          convertType((node as ts.IndexedAccessTypeNode).objectType),
+          convertType((node as ts.IndexedAccessTypeNode).indexType),
+        ])
+      );
+
     case ts.SyntaxKind.ArrayType:
       return b.arrayTypeAnnotation(
         convertType((node as ts.ArrayTypeNode).elementType)
@@ -263,7 +273,6 @@ function convertType(node: ts.TypeNode): K.FlowTypeKind {
     case ts.SyntaxKind.InferType:
     case ts.SyntaxKind.ThisType:
     case ts.SyntaxKind.TypeOperator:
-    case ts.SyntaxKind.IndexedAccessType:
     case ts.SyntaxKind.MappedType:
     case ts.SyntaxKind.LiteralType:
     case ts.SyntaxKind.NamedTupleMember:

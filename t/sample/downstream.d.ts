@@ -20,6 +20,7 @@ var o: {
   d: any;
   e: never;
   // f: <T>(x: T) => T[];  // TODO: recast.print produces invalid syntax
+  g: { a: string }["a"];
 };
 
 declare function f<T>(x: T): { y: T };
