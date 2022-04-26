@@ -73,6 +73,14 @@ to manually write any Flow type definitions for them.
     don't want to read them in the history.  Well, start by leaving out and
     just asking if Flow passes.
 
+- Preserve JSDoc, like `tsc` does when generating `.d.ts` files.
+
+  - Better yet, preserve comments and formatting in general, where possible.
+    This might mean parsing with Recast in the first place, which would also
+    cut down on some of the boring parts of conversion... but OTOH would
+    require working something out for how to get TS type-checker / symbol
+    information, since that's naturally only available on TS's own AST.
+
 - Figure out more renaming and rewriting:
 
   - A possible intermediate category between `MapResultType.FixedName` and
