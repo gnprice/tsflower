@@ -16,10 +16,14 @@ to manually write any Flow type definitions for them.
   definitions, in order to have a sample for encountering the other
   challenges.
 
-- Figure out that issue where a function type on an object property,
-  class member, or function return value (and perhaps more things)
-  prints with an excess colon.  Seems like a `recast` bug, as it's
-  generating syntax that doesn't parse.
+- Figure out that issue where a function type on an object property, class
+  member, or function return value (and perhaps more things) prints with an
+  excess colon.  Seems like a `recast` bug, as it's generating syntax that
+  doesn't parse. ... Specifically, it looks like a version of this
+  patched-over bug: https://github.com/benjamn/recast/pull/688
+
+  That code looks pretty janky; probably it has a number of holes and needs
+  a deeper fix.
 
   This is mainly useful for the same reason as converting more nodes:
   without it, a lot of real-world type definitions don't get started.
