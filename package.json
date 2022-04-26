@@ -2,9 +2,13 @@
   "name": "tsflower",
   "description": "Convert TS type definitions to Flow",
   "version": "0.0.1",
-  "main": "lib/index.js",
   "author": "Greg Price <greg@zulip.com>",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gnprice/tsflower"
+  },
+  "homepage": "https://github.com/gnprice/tsflower",
   "dependencies": {
     "ast-types": "^0.14.2",
     "recast": "^0.20.5",
@@ -12,5 +16,6 @@
   },
   "devDependencies": {
     "@types/node": "^17.0.27"
-  }
+  },
+  "main": "lib/index.js"
 }
