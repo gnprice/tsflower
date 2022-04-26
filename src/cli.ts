@@ -10,12 +10,10 @@ import process from "process";
 import { convertFileToString } from "./index";
 
 class CliError extends Error {
-  readonly messages: string[];
   readonly exitCode: number;
 
-  constructor(messages: string[], exitCode?: number) {
-    super(messages[0]);
-    this.messages = messages;
+  constructor(message: string, exitCode?: number) {
+    super(message);
     this.exitCode = exitCode ?? 1;
   }
 }
@@ -49,10 +47,7 @@ function parseCommandLineOrExit(argv: string[]): CliCommand {
     return parseCommandLine(argv);
   } catch (e) {
     if (e instanceof CliError) {
-      for (const message of e.messages) {
-        process.stderr.write(`tsflower: ${message}\n`);
-      }
-      process.stderr.write(getUsage());
+      process.stderr.write(e.message);
       process.exit(e.exitCode);
     }
 
@@ -67,7 +62,7 @@ function parseCommandLine(argv: string[]): CliCommand {
 
   switch (argv[0]) {
     case "--help":
-      throw new CliError([], 0);
+      throw new CliError(getUsage(), 0);
     case "file":
       return parseFileCommandLine(argv.slice(1));
     default:
@@ -80,7 +75,7 @@ function parseFileCommandLine(argv: string[]): CliCommand {
     usageError("file: input filename required");
   }
   if (argv[0] === "--help") {
-    throw new CliError([], 0);
+    throw new CliError(getUsage(), 0);
   }
   if (argv.length > 2) {
     usageError(`file: too many arguments (got ${argv.length}, expected 2)`);
@@ -96,7 +91,7 @@ function parseFileCommandLine(argv: string[]): CliCommand {
 }
 
 function usageError(message: string): never {
-  throw new CliError([message]);
+  throw new CliError(`tsflower: ${message}\n${getUsage()}`);
 }
 
 function getUsage() {
