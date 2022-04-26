@@ -1,7 +1,7 @@
 /**
  * CLI for TsFlower.
  *
- * For CLI usage, see `getUsage` below, or run:
+ * For CLI usage, run:
  *
  *     $ tsflower --help
  */
@@ -68,17 +68,36 @@ function parseCommandLine(argv: string[]): CliCommand {
     default:
       usageError(`invalid subcommand: ${argv[0]}`);
   }
+
+  function usageError(message: string): never {
+    throw new CliError(`tsflower: ${message}\n${getUsage()}`);
+  }
+
+  function getUsage() {
+    return `\
+Usage: tsflower SUBCOMMAND [ARGS...]
+       tsflower SUBCOMMAND --help
+
+Consume TypeScript type definition files (\`.d.ts\`), and generate
+corresponding Flow type definition files (\`.js.flow\`).
+
+Subcommands:
+  file - Translate a single file.
+
+For details on any subcommand, pass \`--help\` to the subcommand.
+`;
+  }
 }
 
 function parseFileCommandLine(argv: string[]): CliCommand {
   if (argv.length < 1) {
-    usageError("file: input filename required");
+    usageError("input filename required");
   }
   if (argv[0] === "--help") {
     throw new CliError(getUsage(), 0);
   }
   if (argv.length > 2) {
-    usageError(`file: too many arguments (got ${argv.length}, expected 2)`);
+    usageError(`too many arguments (got ${argv.length}, expected 2)`);
   }
 
   const [inputFilename, outputFilename] = argv;
@@ -88,14 +107,13 @@ function parseFileCommandLine(argv: string[]): CliCommand {
     src: inputFilename,
     dest: outputFilename !== undefined ? outputFilename : { type: "pipe" },
   };
-}
 
-function usageError(message: string): never {
-  throw new CliError(`tsflower: ${message}\n${getUsage()}`);
-}
+  function usageError(message: string): never {
+    throw new CliError(`tsflower file: ${message}\n${getUsage()}`);
+  }
 
-function getUsage() {
-  return `\
+  function getUsage() {
+    return `\
 Usage: tsflower file INPUT [OUTPUT]
 
 Consumes the TypeScript type definition (\`.d.ts\`) file INPUT,
@@ -103,4 +121,5 @@ and generates a Flow type definition (\`.js.flow\`) file at OUTPUT.
 
 If OUTPUT is omitted, prints result to stdout.
 `;
+  }
 }
