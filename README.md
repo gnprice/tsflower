@@ -24,17 +24,53 @@ to manually write any Flow type definitions for them.
   This is mainly useful for the same reason as converting more nodes:
   without it, a lot of real-world type definitions don't get started.
 
-- Figure out renaming and rewriting:
+- Do more renaming and rewriting:
 
   - Type references to things like `ReadonlyArray` in the default lib, which
-    become a constant other identifier.
+    become a constant other identifier.  Use `defaultLibraryRewrites` with
+    `MapResultType.FixedName` in the mapper.
 
   - Type references to things like `Omit` in the default lib, which have to
     act more like a macro -- rewriting the type reference in place, using
-    its arguments.
+    its arguments.  Use `defaultLibraryRewrites` with
+    `MapResultType.TypeReferenceMacro` in the mapper.
 
-    An intermediate category is that some things could be defined as a
-    single (generic) type alias in the Flow type system, but just don't
+- Extend the driver and CLI layer:
+
+  - Output to files, rather than stdout.
+
+  - Transform a program of multiple files at once.
+
+  - Take just an (installed) NPM package name; find the TS type definitions
+    via its package.json, find the desired destination via convention and/or
+    configuration, and go.
+
+- Build more of a test framework:
+
+  - Have a test script (vs. just having `node . t/sample/downstream.d.ts` in
+    interactive shell history.)
+
+  - For the sample files, keep expected output in version control.  Update
+    and show diff, if any.
+
+  - Run Flow on sample-file output, and fail on error.
+
+  - Have React and React Native available to import from sample files.  Pull
+    in as dev dependencies, then?
+
+  - Act on some packages in integration directory, much the same as on
+    sample files.  ... Maybe don't keep expected output in version control;
+    seems big.  ... OTOH it does sound awfully nice to make a change and see
+    exactly what it does to the output on a wide sample.  ... Hmm, I think I
+    basically want to see those diffs in the development-iteration loop, but
+    don't want to read them in the history.  Well, start by leaving out and
+    just asking if Flow passes.
+
+- Figure out more renaming and rewriting:
+
+  - A possible intermediate category between `MapResultType.FixedName` and
+    `MapResultType.TypeReferenceMacro` is that some things could be defined
+    as a single (generic) type alias in the Flow type system, but just don't
     happen to be defined in the Flow stdlib.  For those, we may insert a
     definition at the top of the file.
 
@@ -47,7 +83,8 @@ to manually write any Flow type definitions for them.
     library.  That means we'll rewrite references to those symbols:
 
     - When the underlying module is imported as a whole, qualified names
-      referring to it will get rewritten, using the same import where possible.
+      referring to it will get rewritten, using the same import where
+      possible.
 
     - When the underlying module is imported as individual properties, we'll
       adjust the import.  Perhaps keep the original local name -- that will
