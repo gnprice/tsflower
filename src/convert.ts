@@ -593,7 +593,9 @@ export function convertSourceFile(sourceFile: ts.SourceFile): n.File {
 
   function crudeError(node: ts.Node): never {
     throw new Error(
-      `Error on ${ts.SyntaxKind[node.kind]} at ${node.pos}:${node.end}`
+      `Internal error on ${ts.SyntaxKind[node.kind]} at ${
+        sourceFile.fileName
+      }:${node.pos}:${node.end}:`
     );
   }
 }
