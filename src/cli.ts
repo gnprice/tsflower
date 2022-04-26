@@ -7,7 +7,7 @@
  */
 import fs from "fs";
 import process from "process";
-import { convertFileToString } from "./index";
+import { convertFileToString, convertFileTree } from "./index";
 
 class CliError extends Error {
   readonly exitCode: number;
@@ -44,9 +44,8 @@ function main() {
     }
 
     case "tree": {
-      // const { src, dest } = command;
-      process.stderr.write("tsflower: tree: subcommand unimplemented\n");
-      process.exit(1);
+      const { src, dest } = command;
+      convertFileTree(src, dest ?? src);
       return;
     }
 
