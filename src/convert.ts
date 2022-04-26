@@ -206,7 +206,7 @@ function convertTypeAliasDeclaration(
 }
 
 function convertFunctionDeclaration(node: ts.FunctionDeclaration) {
-  if (!node.name) throw 0; // TODO(error)
+  if (!node.name) crudeError(node); // TODO(error)
 
   return b.declareFunction(
     convertIdentifier(node.name, convertFunctionType(node))
@@ -214,7 +214,7 @@ function convertFunctionDeclaration(node: ts.FunctionDeclaration) {
 }
 
 function convertClassDeclaration(node: ts.ClassDeclaration) {
-  if (!node.name) throw 0; // TODO(error): really unimplemented `export default class`
+  if (!node.name) crudeError(node); // TODO(error): really unimplemented `export default class`
 
   const typeParameters = convertTypeParameterDeclaration(node.typeParameters);
 
@@ -248,7 +248,7 @@ function convertClassDeclaration(node: ts.ClassDeclaration) {
         );
 
       default:
-        throw 0; // TODO(error)
+        crudeError(node); // TODO(error)
     }
   });
 
@@ -361,7 +361,7 @@ function convertLiteralType(node: ts.LiteralTypeNode): K.FlowTypeKind {
         literal.operator !== ts.SyntaxKind.MinusToken ||
         !ts.isNumericLiteral(literal.operand)
       )
-        throw 0; // TODO(error)
+        crudeError(node); // TODO(error)
       const { text } = literal.operand;
       // TODO: is more conversion needed on these number literals?
       return b.numberLiteralTypeAnnotation(-Number(text), text);
@@ -485,7 +485,7 @@ function convertTypeLiteral(node: ts.TypeLiteralNode): K.FlowTypeKind {
         );
 
       default:
-        throw 0; // TODO(error)
+        crudeError(node); // TODO(error)
     }
   }
 
@@ -577,4 +577,10 @@ function quotedInlineNode(node: ts.Node): K.CommentKind {
   const sourceFile = node.getSourceFile();
   const text = sourceFile.text.slice(node.pos, node.end);
   return b.commentBlock(` ${text} `, false, true);
+}
+
+function crudeError(node: ts.Node): never {
+  throw new Error(
+    `Error on ${ts.SyntaxKind[node.kind]} at ${node.pos}:${node.end}`
+  );
 }
