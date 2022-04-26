@@ -2,6 +2,7 @@ import ts from "typescript";
 import { builders as b, namedTypes as _n } from "ast-types";
 import K from "ast-types/gen/kinds";
 import { some } from "./util";
+import { Converter } from "./convert";
 
 export enum MapResultType {
   FixedName,
@@ -12,9 +13,7 @@ export type MapResult =
   | { type: MapResultType.FixedName; name: string }
   | {
       type: MapResultType.TypeReferenceMacro;
-      convert(
-        typeArguments: ts.NodeArray<ts.TypeNode> | undefined
-      ): K.FlowTypeKind;
+      convert(converter: Converter, node: ts.TypeReferenceNode): K.FlowTypeKind;
     };
 
 export interface Mapper {
@@ -27,20 +26,20 @@ const defaultLibraryRewrites: Map<string, MapResult> = new Map([
 ]);
 
 function convertOmit(
-  typeArguments: ts.NodeArray<ts.TypeNode> | undefined
+  converter: Converter,
+  node: ts.TypeReferenceNode
 ): K.FlowTypeKind {
-  // TODO: This really needs to be able to call converter methods,
-  //   as several TODOs below attest.
-
-  if (typeArguments?.length !== 2) throw new Error("bad Omit"); // TODO(error)
-  const [objectType, omitKeysType] = typeArguments;
+  const { typeArguments } = node;
+  if (typeArguments?.length !== 2) {
+    return error(`${typeArguments?.length ?? 0} arguments (expected 2)`);
+  }
+  const [objectType, keysType] = typeArguments;
 
   let subtrahend;
-  switch (omitKeysType.kind) {
+  switch (keysType.kind) {
     case ts.SyntaxKind.LiteralType: {
-      const { literal } = omitKeysType as ts.LiteralTypeNode;
-      if (!ts.isStringLiteral(literal))
-        throw new Error("bad Omit: literal but non-string"); // TODO(error)
+      const { literal } = keysType as ts.LiteralTypeNode;
+      if (!ts.isStringLiteral(literal)) return error("literal but non-string");
       subtrahend = b.objectTypeAnnotation.from({
         exact: true,
         properties: [
@@ -54,19 +53,23 @@ function convertOmit(
       break;
     }
 
-    case ts.SyntaxKind.UnionType:
+    case ts.SyntaxKind.UnionType: // TODO
     default:
-      throw new Error("bad Omit: unimplemented second type"); // TODO(error)
+      // TODO
+      return error(`unimplemented keys type: ${ts.SyntaxKind[keysType.kind]}`);
   }
 
   return b.genericTypeAnnotation(
     b.identifier("$Diff"),
     b.typeParameterInstantiation([
-      // TODO: convertType(objectType)
-      b.genericTypeAnnotation(b.identifier("$FlowFixMe"), null), // TODO(error)
+      converter.convertType(objectType),
       subtrahend,
     ])
   );
+
+  function error(description: string) {
+    return converter.errorType(node, `bad Omit: ${description}`);
+  }
 }
 
 export function createMapper(program: ts.Program, targetFilenames: string[]) {
