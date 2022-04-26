@@ -1,8 +1,8 @@
-# TsFlow
+# TsFlower
 
 Convert TypeScript to Flow.
 
-Currently TsFlow aims only to support `.d.ts` TypeScript type definition
+Currently TsFlower aims only to support `.d.ts` TypeScript type definition
 files.  The goal is for a Flow codebase to be able to consume libraries
 written in TypeScript, or that have good TS type definitions, without having
 to manually write any Flow type definitions for them.

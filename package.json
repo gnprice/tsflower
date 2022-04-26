@@ -1,5 +1,5 @@
 {
-  "name": "ts-flow",
+  "name": "tsflower",
   "description": "Convert TS type definitions to Flow",
   "version": "0.0.1",
   "main": "lib/index.js",

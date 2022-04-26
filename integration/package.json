@@ -1,5 +1,5 @@
 {
-  "name": "tsflow-integration-tests",
+  "name": "tsflower-integration-tests",
   "description": "Collection of third-party type definitions to try converting",
   "version": "0.0.1",
   "main": "index.js",
