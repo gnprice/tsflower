@@ -112,7 +112,7 @@ function convertVariableStatement(node: ts.VariableStatement): K.StatementKind {
     node.declarationList.flags & (ts.NodeFlags.Const | ts.NodeFlags.Let);
   return b.variableDeclaration(
     flags === ts.NodeFlags.Const
-      ? "const"
+      ? "var" // TODO(runtime): For .js.flow files, we always declare `var`, not `const`.
       : flags === ts.NodeFlags.Let
       ? "let"
       : "var",
