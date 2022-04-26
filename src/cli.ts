@@ -1,10 +1,9 @@
 /**
- * Usage: tsflower path/to/some/file.d.ts
+ * CLI for TsFlower.
  *
- * Prints result to stdout.
+ * For CLI usage, see `printUsage` below, or run:
  *
- * Example:
- *   $ bin/tsflower integration/node_modules/react-native-gesture-handler/lib/typescript/index.d.ts
+ *     $ tsflower --help
  */
 import process from "process";
 import { convertFileToString } from "./index";
@@ -12,5 +11,31 @@ import { convertFileToString } from "./index";
 main();
 
 function main() {
-  process.stdout.write(convertFileToString(process.argv[2]));
+  const argv = process.argv.slice(2);
+
+  if (argv.length !== 1) {
+    usageError();
+  }
+
+  if (argv[0] === "--help") {
+    printUsage();
+    process.exit(0);
+  }
+
+  const [inputFilename] = argv;
+
+  process.stdout.write(convertFileToString(inputFilename));
+}
+
+function usageError(): never {
+  printUsage();
+  process.exit(1);
+}
+
+function printUsage() {
+  process.stderr.write(`\
+Usage: tsflower path/to/some/file.d.ts
+
+Prints result to stdout.
+`);
 }
