@@ -5,6 +5,7 @@
  *
  *     $ tsflower --help
  */
+import fs from "fs";
 import process from "process";
 import { convertFileToString } from "./index";
 
@@ -19,9 +20,9 @@ class CliError extends Error {
   }
 }
 
-interface CliCommand {
-  readonly inputFilename: string;
-}
+type FilenameOrPipe = string | { type: "pipe" };
+
+type CliCommand = { type: "file"; src: string; dest: FilenameOrPipe };
 
 main();
 
@@ -30,7 +31,17 @@ function main() {
 
   const command = parseCommandLineOrExit(argv);
 
-  process.stdout.write(convertFileToString(command.inputFilename));
+  switch (command.type) {
+    case "file": {
+      const { src, dest } = command;
+      const result = convertFileToString(src);
+      if (typeof dest === "object") {
+        process.stdout.write(result);
+      } else {
+        fs.writeFileSync(dest, result);
+      }
+    }
+  }
 }
 
 function parseCommandLineOrExit(argv: string[]): CliCommand {
@@ -50,18 +61,37 @@ function parseCommandLineOrExit(argv: string[]): CliCommand {
 }
 
 function parseCommandLine(argv: string[]): CliCommand {
-  if (argv.length !== 1) {
-    usageError("require 1 argument");
+  if (argv.length < 1) {
+    usageError("subcommand required");
   }
 
+  switch (argv[0]) {
+    case "--help":
+      throw new CliError([], 0);
+    case "file":
+      return parseFileCommandLine(argv.slice(1));
+    default:
+      usageError(`invalid subcommand: ${argv[0]}`);
+  }
+}
+
+function parseFileCommandLine(argv: string[]): CliCommand {
+  if (argv.length < 1) {
+    usageError("file: input filename required");
+  }
   if (argv[0] === "--help") {
     throw new CliError([], 0);
   }
+  if (argv.length > 2) {
+    usageError(`file: too many arguments (got ${argv.length}, expected 2)`);
+  }
 
-  const [inputFilename] = argv;
+  const [inputFilename, outputFilename] = argv;
 
   return {
-    inputFilename,
+    type: "file",
+    src: inputFilename,
+    dest: outputFilename !== undefined ? outputFilename : { type: "pipe" },
   };
 }
 
@@ -71,8 +101,11 @@ function usageError(message: string): never {
 
 function getUsage() {
   return `\
-Usage: tsflower path/to/some/file.d.ts
+Usage: tsflower file INPUT [OUTPUT]
 
-Prints result to stdout.
+Consumes the TypeScript type definition (\`.d.ts\`) file INPUT,
+and generates a Flow type definition (\`.js.flow\`) file at OUTPUT.
+
+If OUTPUT is omitted, prints result to stdout.
 `;
 }

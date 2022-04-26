@@ -10,11 +10,11 @@ to manually write any Flow type definitions for them.
 
 ## Usage
 
-`$ tsflower path/to/some/file.d.ts`
+Quick demo command:
+`$ tsflower file some/file.d.ts output/file.js.flow`
 
-Prints result to stdout.
-
-(CLI improvements in the future; see TODO section below.)
+For more, see:
+`$ tsflower --help`
 
 
 ## TODO
@@ -37,8 +37,6 @@ Prints result to stdout.
     `MapResultType.TypeReferenceMacro` in the mapper.
 
 - Extend the driver and CLI layer:
-
-  - Output to files, rather than stdout.
 
   - Track the number of unimplemented and/or error nodes; print counts to
     stderr as warnings.  (Perhaps options to be more or less verbose?  Break
