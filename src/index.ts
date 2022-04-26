@@ -25,10 +25,10 @@ function convertFileToString(file: string): string {
   });
   program.getTypeChecker(); // causes the binder to run, and set parent pointers
 
-  createMapper(program, [file]);
+  const mapper = createMapper(program, [file]);
 
   const sourceFile = program.getSourceFile(file);
   if (!sourceFile) throw 0;
-  const convertedFile = convertSourceFile(sourceFile);
+  const convertedFile = convertSourceFile(sourceFile, mapper, program);
   return recast.print(convertedFile).code + "\n";
 }

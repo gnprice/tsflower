@@ -1,11 +1,19 @@
 import ts from "typescript";
 import { some } from "./util";
 
-export type MapResult = true;
+export enum MapResultType {
+  FixedName,
+}
+
+export type MapResult = { type: MapResultType.FixedName; name: string };
 
 export interface Mapper {
   getSymbol(symbol: ts.Symbol): void | MapResult;
 }
+
+const defaultLibraryRewrites: Map<string, MapResult> = new Map([
+  ["ReadonlyArray", { type: MapResultType.FixedName, name: "$ReadOnlyArray" }],
+]);
 
 export function createMapper(program: ts.Program, targetFilenames: string[]) {
   const targetSet = new Set(targetFilenames);
@@ -19,6 +27,8 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
   };
 
   initMapper();
+
+  // console.log(mappedSymbols.size);
 
   seenSymbols.clear();
   targetSet.clear();
@@ -76,7 +86,9 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
 
         if (some(symbol.declarations, isDefaultLibraryTopLevelDeclaration)) {
           // console.log(symbol.name);
-          mappedSymbols.set(symbol, true);
+
+          const rewrite = defaultLibraryRewrites.get(symbol.name);
+          if (rewrite) mappedSymbols.set(symbol, rewrite);
         }
       }
 
