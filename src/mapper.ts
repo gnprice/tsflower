@@ -9,16 +9,19 @@ export interface Mapper {
 
 export function createMapper(program: ts.Program, targetFilenames: string[]) {
   const targetSet = new Set(targetFilenames);
-
   const checker = program.getTypeChecker();
+  const seenSymbols: Set<ts.Symbol> = new Set();
 
-  const symbols: Map<ts.Symbol, MapResult> = new Map();
+  const mappedSymbols: Map<ts.Symbol, MapResult> = new Map();
 
   const mapper: Mapper = {
-    getSymbol: (symbol) => symbols.get(symbol),
+    getSymbol: (symbol) => mappedSymbols.get(symbol),
   };
 
   initMapper();
+
+  seenSymbols.clear();
+  targetSet.clear();
 
   return mapper;
 
@@ -56,12 +59,24 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
       }
 
       function visitTypeReference(node: ts.TypeReferenceNode) {
-        const symbol = checker.getSymbolAtLocation(node.typeName);
+        let name = node.typeName;
+        visitSymbol(checker.getSymbolAtLocation(name));
+        while (ts.isQualifiedName(name)) {
+          visitSymbol(checker.getSymbolAtLocation(name.right));
+          name = name.left;
+          visitSymbol(checker.getSymbolAtLocation(name));
+        }
+      }
+
+      function visitSymbol(symbol: void | ts.Symbol) {
         if (!symbol) return;
+
+        if (seenSymbols.has(symbol)) return;
+        seenSymbols.add(symbol);
 
         if (some(symbol.declarations, isDefaultLibraryTopLevelDeclaration)) {
           // console.log(symbol.name);
-          symbols.set(symbol, true);
+          mappedSymbols.set(symbol, true);
         }
       }
 
