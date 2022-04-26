@@ -11,6 +11,7 @@ var f: null, g: true, h: false, i: 3, j: "x";
 var k: boolean[], l: "a" | 3;
 var m: (x: string, y, ...b: boolean[]) => number;
 var n: (a: string, b?: number) => void;
+var nn: <T>(x: T) => T[];
 var o: {
   // prettier-ignore
   a: (number);
@@ -18,9 +19,10 @@ var o: {
   c: unknown;
   d: any;
   e: never;
+  // f: <T>(x: T) => T[];  // TODO: recast.print produces invalid syntax
 };
 
-declare function f(x: boolean): { y: number };
+declare function f<T>(x: T): { y: T };
 
 // TODO Function returning a function type:
 //   declare function f(x: boolean): (b: true) => { y: number };

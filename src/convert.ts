@@ -190,20 +190,7 @@ function convertTypeAliasDeclaration(
 ): K.StatementKind {
   return b.typeAlias(
     convertIdentifier(node.name),
-    !node.typeParameters
-      ? null
-      : b.typeParameterDeclaration(
-          node.typeParameters.map((param) =>
-            b.typeParameter(
-              param.name.text,
-              null,
-              // TODO per param.constraint jsdoc: Consider calling `getEffectiveConstraintOfTypeParameter`
-              !param.constraint
-                ? null
-                : b.typeAnnotation(convertType(param.constraint))
-            )
-          )
-        ),
+    convertTypeParameterDeclaration(node.typeParameters),
     convertType(node.type)
   );
 }
@@ -363,7 +350,7 @@ function convertUnionType(node: ts.UnionTypeNode): K.FlowTypeKind {
 function convertFunctionType(
   node: ts.FunctionTypeNode | ts.FunctionDeclaration
 ): K.FlowTypeKind {
-  const typeParams = null; // TODO
+  const typeParams = convertTypeParameterDeclaration(node.typeParameters);
 
   const params: n.FunctionTypeParam[] = [];
   let restParam = null;
@@ -445,6 +432,25 @@ function convertTypeLiteral(node: ts.TypeLiteralNode): K.FlowTypeKind {
     exact,
     inexact: !exact,
   });
+}
+
+function convertTypeParameterDeclaration(
+  params: void | ts.NodeArray<ts.TypeParameterDeclaration>
+): null | n.TypeParameterDeclaration {
+  return !params
+    ? null
+    : b.typeParameterDeclaration(
+        params.map((param) =>
+          b.typeParameter(
+            param.name.text,
+            null,
+            // TODO per param.constraint jsdoc: Consider calling `getEffectiveConstraintOfTypeParameter`
+            !param.constraint
+              ? null
+              : b.typeAnnotation(convertType(param.constraint))
+          )
+        )
+      );
 }
 
 function convertIdentifier(
