@@ -1,0 +1,14 @@
+# Files in Git tree, for use at dev time:
+/integration/
+/t/
+tsconfig.json
+.gitattributes
+yarn.lock
+
+# Dependencies:
+node_modules/
+
+# TS sources, and TS dev-time output:
+*.ts
+!*.d.ts
+*.tsbuildinfo
