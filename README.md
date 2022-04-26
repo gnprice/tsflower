@@ -8,6 +8,15 @@ written in TypeScript, or that have good TS type definitions, without having
 to manually write any Flow type definitions for them.
 
 
+## Usage
+
+`$ tsflower path/to/some/file.d.ts`
+
+Prints result to stdout.
+
+(CLI improvements in the future; see TODO section below.)
+
+
 ## TODO
 
 - Convert a bunch more kinds of nodes.  There's a fair amount of this,
@@ -28,8 +37,6 @@ to manually write any Flow type definitions for them.
     `MapResultType.TypeReferenceMacro` in the mapper.
 
 - Extend the driver and CLI layer:
-
-  - Expose as an NPM executable.
 
   - Output to files, rather than stdout.
 

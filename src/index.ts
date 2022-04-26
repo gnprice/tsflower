@@ -1,24 +1,9 @@
-/**
- * Usage: node . path/to/some/file.d.ts
- *
- * Prints result to stdout.
- *
- * Example:
- *   $ node . integration/node_modules/react-native-gesture-handler/lib/typescript/index.d.ts
- */
 import ts from "typescript";
 import * as recast from "recast";
-import process from "process";
 import { convertSourceFile } from "./convert";
 import { createMapper } from "./mapper";
 
-main();
-
-function main() {
-  process.stdout.write(convertFileToString(process.argv[2]));
-}
-
-function convertFileToString(file: string): string {
+export function convertFileToString(file: string): string {
   const program = ts.createProgram({
     rootNames: [file],
     options: {},
