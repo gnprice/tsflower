@@ -24,6 +24,7 @@ var o: {
   h: Omit<{ a: string; b: number }, "a">;
   i: Omit<{ a: string; b: number }, "a" | "c">;
   j: Omit<{ a: string; b: number }, never>;
+  k: Omit<{ a: string; b: number }, "12" | "😀">;
 };
 
 declare function f<T>(x: T): { y: T };

@@ -41,7 +41,7 @@ function convertOmit(
       exact: true,
       properties: [
         b.objectTypeProperty(
-          b.identifier(keysType.literal.text),
+          b.stringLiteral(keysType.literal.text),
           b.mixedTypeAnnotation(),
           false
         ),
@@ -57,7 +57,7 @@ function convertOmit(
       exact: true,
       properties: keysType.types.map((t) =>
         b.objectTypeProperty(
-          b.identifier(
+          b.stringLiteral(
             ((t as ts.LiteralTypeNode).literal as ts.StringLiteral).text
           ),
           b.mixedTypeAnnotation(),
