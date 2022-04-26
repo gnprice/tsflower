@@ -11,6 +11,14 @@ var f: null, g: true, h: false, i: 3, j: "x";
 var k: boolean[], l: "a" | 3;
 var m: (x: string, y, ...b: boolean[]) => number;
 var n: (a: string, b?: number) => void;
+var o: {
+  // prettier-ignore
+  a: (number);
+  b: object;
+  c: unknown;
+  d: any;
+  e: never;
+};
 
 declare function f(x: boolean): { y: number };
 

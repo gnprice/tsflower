@@ -218,6 +218,13 @@ function convertFunctionDeclaration(node: ts.FunctionDeclaration) {
 
 function convertType(node: ts.TypeNode): K.FlowTypeKind {
   switch (node.kind) {
+    case ts.SyntaxKind.UnknownKeyword:
+      return b.mixedTypeAnnotation();
+    case ts.SyntaxKind.AnyKeyword:
+      return b.anyTypeAnnotation();
+    case ts.SyntaxKind.NeverKeyword:
+      return b.emptyTypeAnnotation();
+
     case ts.SyntaxKind.UndefinedKeyword:
     case ts.SyntaxKind.VoidKeyword:
       return b.voidTypeAnnotation();
@@ -227,6 +234,12 @@ function convertType(node: ts.TypeNode): K.FlowTypeKind {
       return b.numberTypeAnnotation();
     case ts.SyntaxKind.StringKeyword:
       return b.stringTypeAnnotation();
+    case ts.SyntaxKind.ObjectKeyword:
+      return b.objectTypeAnnotation.from({ properties: [], inexact: true });
+
+    case ts.SyntaxKind.ParenthesizedType:
+      // TODO: Am I missing something?
+      return convertType((node as ts.ParenthesizedTypeNode).type);
 
     case ts.SyntaxKind.LiteralType:
       return convertLiteralType(node as ts.LiteralTypeNode);
@@ -261,7 +274,6 @@ function convertType(node: ts.TypeNode): K.FlowTypeKind {
     case ts.SyntaxKind.IntersectionType:
     case ts.SyntaxKind.ConditionalType:
     case ts.SyntaxKind.InferType:
-    case ts.SyntaxKind.ParenthesizedType:
     case ts.SyntaxKind.ThisType:
     case ts.SyntaxKind.TypeOperator:
     case ts.SyntaxKind.IndexedAccessType:
