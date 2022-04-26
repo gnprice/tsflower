@@ -35,7 +35,7 @@ export declare class D extends C<string> {
   // f(cb: (s: string) => void): this;  // TODO implement
 }
 
-export default class {}
+// export default class {} // TODO implement
 
 declare const _default: upstream2.Num;
 // export default _default;  // collides with other default

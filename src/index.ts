@@ -10,6 +10,7 @@ import ts from "typescript";
 import * as recast from "recast";
 import process from "process";
 import { convertSourceFile } from "./convert";
+import { createMapper } from "./mapper";
 
 main();
 
@@ -23,6 +24,9 @@ function convertFileToString(file: string): string {
     options: {},
   });
   program.getTypeChecker(); // causes the binder to run, and set parent pointers
+
+  createMapper(program, [file]);
+
   const sourceFile = program.getSourceFile(file);
   if (!sourceFile) throw 0;
   const convertedFile = convertSourceFile(sourceFile);
