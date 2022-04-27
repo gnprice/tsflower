@@ -68,8 +68,8 @@ For more, see:
 
 - Extend the test framework:
 
-  - Have React and React Native available to import from sample files.  Pull
-    in as dev dependencies, then?
+  - Have React Native available to import from sample files, too (like we do
+    React.)
 
   - Give the driver an option (`--interlinear`, for "interlinear text"?) to
     include the original as a comment next to every statement, not only when
