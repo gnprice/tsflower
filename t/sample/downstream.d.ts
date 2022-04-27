@@ -42,4 +42,3 @@ export declare class D extends C<string> {
 // export default class {} // TODO implement
 
 // declare const _default: upstream2.Num; // TODO doesn't resolve in Flow, though `upstream.Num` does
-// export default _default;  // collides with other default
