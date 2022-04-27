@@ -147,6 +147,12 @@ export function convertSourceFile(
     const { importClause } = node;
     if (!importClause) throw new Error("unimplemented: no import clause");
 
+    if (importClause.modifiers)
+      return errorStatement(
+        node,
+        `unimplemented: ImportDeclaration with modifiers`
+      );
+
     const specifiers: (
       | n.ImportSpecifier
       | n.ImportNamespaceSpecifier
@@ -162,11 +168,25 @@ export function convertSourceFile(
     if (namedBindings) {
       if (ts.isNamedImports(namedBindings)) {
         for (const binding of namedBindings.elements) {
+          const localSymbol = checker.getSymbolAtLocation(binding.name);
+          const importedSymbol =
+            localSymbol && checker.getImmediateAliasedSymbol(localSymbol);
+          const isNonValue =
+            importedSymbol &&
+            !!(
+              importedSymbol.flags &
+              (ts.SymbolFlags.Interface |
+                ts.SymbolFlags.TypeLiteral |
+                ts.SymbolFlags.TypeAlias)
+            );
+
           specifiers.push(
-            b.importSpecifier(
-              convertIdentifier(binding.propertyName ?? binding.name),
-              convertIdentifier(binding.name)
-            )
+            b.importSpecifier.from({
+              imported: convertIdentifier(binding.propertyName ?? binding.name),
+              local: convertIdentifier(binding.name),
+              // TODO: use modifier on this ts.ImportSpecifier, if present.
+              importKind: isNonValue ? "type" : "value",
+            })
           );
         }
       } else {
