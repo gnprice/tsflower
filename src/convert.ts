@@ -93,7 +93,10 @@ export function convertSourceFile(
         return convertFunctionDeclaration(node as ts.FunctionDeclaration);
 
       case ts.SyntaxKind.ClassDeclaration:
-        return convertClassDeclaration(node as ts.ClassDeclaration);
+      case ts.SyntaxKind.InterfaceDeclaration:
+        return convertClassLikeDeclaration(
+          node as ts.ClassDeclaration | ts.InterfaceDeclaration
+        );
 
       case ts.SyntaxKind.Block:
       case ts.SyntaxKind.EmptyStatement:
@@ -115,7 +118,6 @@ export function convertSourceFile(
       case ts.SyntaxKind.DebuggerStatement:
       case ts.SyntaxKind.VariableDeclaration:
       case ts.SyntaxKind.VariableDeclarationList:
-      case ts.SyntaxKind.InterfaceDeclaration:
       case ts.SyntaxKind.EnumDeclaration:
       case ts.SyntaxKind.ModuleDeclaration:
       case ts.SyntaxKind.ModuleBlock:
@@ -257,7 +259,9 @@ export function convertSourceFile(
     );
   }
 
-  function convertClassDeclaration(node: ts.ClassDeclaration) {
+  function convertClassLikeDeclaration(
+    node: ts.ClassDeclaration | ts.InterfaceDeclaration
+  ) {
     if (!node.name) crudeError(node); // TODO(error): really unimplemented `export default class`
 
     const typeParameters = convertTypeParameterDeclaration(node.typeParameters);
@@ -299,12 +303,18 @@ export function convertSourceFile(
       }
     });
 
-    return b.declareClass.from({
+    const params = {
       id: convertIdentifier(node.name),
       typeParameters,
       extends: extends_,
       body: b.objectTypeAnnotation(properties, indexers, callProperties),
-    });
+    };
+
+    if (ts.isInterfaceDeclaration(node)) {
+      return b.declareInterface.from(params);
+    } else {
+      return b.declareClass.from(params);
+    }
   }
 
   function convertType(node: ts.TypeNode): K.FlowTypeKind {

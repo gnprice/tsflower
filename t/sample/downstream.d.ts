@@ -33,6 +33,8 @@ declare function ff<T>(x: T): { y: T };
 
 declare function ff(x: boolean): (b: true) => { y: number };
 
+declare interface I {}
+
 export declare class C<T> {}
 export declare class D extends C<string> {
   // constructor(); // TODO: fix implementation
