@@ -1,5 +1,7 @@
 import * as upstream from "./upstream";
-import upstream2 /* , { Num as Numm } // TODO emit `import type` for types */ from "./upstream";
+// import { Num as Numm } from './upstream' // TODO emit `import type` for types
+import { x as ux } from "./upstream";
+import upstream2 from "./upstream";
 
 export declare type NumArray = Array<upstream.Num>;
 export declare type RONumArray = ReadonlyArray<number>;
