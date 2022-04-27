@@ -113,6 +113,15 @@ export function convertSourceFile(
 
       case ts.SyntaxKind.Block:
       case ts.SyntaxKind.EmptyStatement:
+      case ts.SyntaxKind.EnumDeclaration:
+      case ts.SyntaxKind.ModuleDeclaration:
+      case ts.SyntaxKind.NamespaceExportDeclaration:
+      case ts.SyntaxKind.ImportEqualsDeclaration:
+      case ts.SyntaxKind.ExportDeclaration:
+      case ts.SyntaxKind.MissingDeclaration:
+        // These statements might actually appear in .d.ts files.
+        return unimplementedStatement(node);
+
       case ts.SyntaxKind.ExpressionStatement:
       case ts.SyntaxKind.IfStatement:
       case ts.SyntaxKind.DoStatement:
@@ -129,24 +138,27 @@ export function convertSourceFile(
       case ts.SyntaxKind.ThrowStatement:
       case ts.SyntaxKind.TryStatement:
       case ts.SyntaxKind.DebuggerStatement:
+      case ts.SyntaxKind.CaseBlock:
+        // These shouldn't appear in .d.ts files.  So they shouldn't come up
+        // unless we try to handle normal source files.
+        return unimplementedStatement(node);
+
       case ts.SyntaxKind.VariableDeclaration:
       case ts.SyntaxKind.VariableDeclarationList:
-      case ts.SyntaxKind.EnumDeclaration:
-      case ts.SyntaxKind.ModuleDeclaration:
       case ts.SyntaxKind.ModuleBlock:
-      case ts.SyntaxKind.CaseBlock:
-      case ts.SyntaxKind.NamespaceExportDeclaration:
-      case ts.SyntaxKind.ImportEqualsDeclaration:
       case ts.SyntaxKind.ImportClause:
       case ts.SyntaxKind.NamespaceImport:
       case ts.SyntaxKind.NamedImports:
       case ts.SyntaxKind.ImportSpecifier:
-      case ts.SyntaxKind.ExportDeclaration:
       case ts.SyntaxKind.NamedExports:
       case ts.SyntaxKind.NamespaceExport:
       case ts.SyntaxKind.ExportSpecifier:
-      case ts.SyntaxKind.MissingDeclaration:
-        return unimplementedStatement(node);
+        // Not actually statements -- pieces of statements.  We'll handle
+        // these below, as part of handling the statements they appear in.
+        return errorStatement(
+          node,
+          `unexpected statement kind: ${ts.SyntaxKind[node.kind]}`
+        );
 
       default:
         return errorStatement(
@@ -431,11 +443,17 @@ export function convertSourceFile(
       case ts.SyntaxKind.TypeOperator:
       case ts.SyntaxKind.MappedType:
       case ts.SyntaxKind.LiteralType:
-      case ts.SyntaxKind.NamedTupleMember:
       case ts.SyntaxKind.TemplateLiteralType:
       case ts.SyntaxKind.TemplateLiteralTypeSpan:
       case ts.SyntaxKind.ImportType:
         return unimplementedType(node);
+
+      case ts.SyntaxKind.NamedTupleMember:
+        // Not actually types -- pieces of types.
+        return errorType(
+          node,
+          `unexpected type kind: ${ts.SyntaxKind[node.kind]}`
+        );
 
       default:
         return errorType(
