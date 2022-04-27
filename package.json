@@ -1,7 +1,7 @@
 {
   "name": "tsflower",
   "description": "Convert TS type definitions to Flow",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "Greg Price <greg@zulip.com>",
   "license": "Apache-2.0",
   "repository": {
