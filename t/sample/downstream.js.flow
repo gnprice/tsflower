@@ -49,5 +49,5 @@ var o: {|
 
 declare function ff<T>(x: T): {| y: T |};
 declare function ff(x: boolean): (b: true) => {| y: number |};
-declare export class C {};
+declare export class C<T> {};
 declare export class D {};

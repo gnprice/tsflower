@@ -10,8 +10,8 @@
   },
   "homepage": "https://github.com/gnprice/tsflower",
   "dependencies": {
-    "ast-types": "gnprice/ast-types#24ac46577",
-    "recast": "gnprice/recast#3cf24324c",
+    "ast-types": "gnprice/ast-types#7018a996a",
+    "recast": "gnprice/recast#6c121d42e",
     "typescript": "^4.6.3"
   },
   "devDependencies": {
