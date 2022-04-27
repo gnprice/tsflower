@@ -16,7 +16,7 @@ var n: (a: string, b?: number) => void;
 var nn: <T>(x: T) => T[];
 var o: {
   // prettier-ignore
-  a: (number);
+  a: (number); // With parens -- the TS parser has a node for them.
   b: object;
   c: unknown;
   d: any;
