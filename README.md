@@ -25,6 +25,17 @@ For more, see:
   definitions, in order to have a sample for encountering the other
   challenges.
 
+  - Sometimes this requires fixes to Recast and/or `ast-types`, because
+    their support for Flow is incomplete.  E.g. Recast PRs #1089 and #1090,
+    and `ast-types` PRs #745 and #746.  These are a nice pair of libraries
+    with a good design, but it seems like perhaps nobody has been seriously
+    using them with Flow code for some time.
+
+    Is there another AST data structure and emitter that we could be using
+    that would be better?  In particular, the folks at Facebook/Meta do love
+    their codemods, and they're all in on Flow -- so surely whatever tool
+    they're using does have solid Flow support.
+
 - Do more renaming and rewriting:
 
   - Type references to things like `ReadonlyArray` in the default lib, which
@@ -59,6 +70,11 @@ For more, see:
 
   - Have React and React Native available to import from sample files.  Pull
     in as dev dependencies, then?
+
+  - Give the driver an option (`--interlinear`, for "interlinear text"?) to
+    include the original as a comment next to every statement, not only when
+    there's an error.  Then use that when running on sample files, so that
+    they're self-contained to read to look for discrepancies.
 
   - Act on some packages in integration directory, much the same as on
     sample files.  ... Maybe don't keep expected output in version control;
