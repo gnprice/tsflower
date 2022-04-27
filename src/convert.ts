@@ -1,7 +1,7 @@
 import ts from "typescript";
 import { builders as b, namedTypes as n } from "ast-types";
 import K from "ast-types/gen/kinds";
-import { map, some } from "./util";
+import { forEach, map, some } from "./util";
 import { Mapper, MapResultType } from "./mapper";
 
 export interface Converter {
@@ -266,7 +266,38 @@ export function convertSourceFile(
 
     const typeParameters = convertTypeParameterDeclaration(node.typeParameters);
 
-    const extends_: n.InterfaceExtends[] = []; // TODO
+    const extends_: n.InterfaceExtends[] = [];
+    forEach(node.heritageClauses, (heritageClause) => {
+      const { token, types } = heritageClause;
+      if (token === ts.SyntaxKind.ExtendsKeyword) {
+        for (const base of types) {
+          const { expression, typeArguments } = base;
+          if (!ts.isEntityName(expression)) {
+            return errorStatement(
+              node,
+              `unexpected 'extends' base kind: ${
+                ts.SyntaxKind[expression.kind]
+              }`
+            );
+          }
+          if (!ts.isIdentifier(expression)) {
+            return errorStatement(
+              node, // TODO
+              `unimplemented: qualified name in 'extends'`
+            );
+          }
+          extends_.push(
+            b.interfaceExtends.from({
+              id: convertIdentifier(expression),
+              typeParameters: convertTypeArguments(typeArguments),
+            })
+          );
+        }
+      } else {
+        // TODO
+        return errorStatement(node, `unimplemented: class 'implements'`);
+      }
+    });
 
     const properties: (
       | n.ObjectTypeProperty
@@ -600,6 +631,14 @@ export function convertSourceFile(
             )
           )
         );
+  }
+
+  function convertTypeArguments(
+    typeArguments: void | ts.NodeArray<ts.TypeNode>
+  ): null | n.TypeParameterInstantiation {
+    return !typeArguments
+      ? null
+      : b.typeParameterInstantiation(typeArguments.map(convertType));
   }
 
   function convertIdentifier(

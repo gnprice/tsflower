@@ -12,6 +12,15 @@
  * implement equivalent functions here.  They're small and self-contained.
  */
 
+/** Like `Array#forEach`, but `undefined` behaves like an empty array. */
+export function forEach<T>(
+  array: readonly T[] | void,
+  f: (x: T, i: number) => void
+): void {
+  if (!array) return;
+  return array.forEach(f);
+}
+
 /** Like `Array#some`, but `undefined` behaves like an empty array. */
 export function some<T>(
   array: readonly T[] | void,
