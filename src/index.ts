@@ -21,7 +21,9 @@ export function convertFileToString(file: string): string {
 }
 
 export function convertFileTree(src: string, dest: string) {
+  // TODO: nicer error output if src doesn't exist (or other I/O error?)
   const { inputs, outputs } = collectInputsFromTree(src, dest);
+
   const program = ts.createProgram({
     rootNames: inputs,
     options: {},
@@ -39,7 +41,7 @@ export function convertFileTree(src: string, dest: string) {
     const convertedFile = convertSourceFile(sourceFile, mapper, program);
     const convertedText = recast.print(convertedFile).code + "\n";
 
-    fs.mkdirSync(path.dirname(output));
+    fs.mkdirSync(path.dirname(output), { recursive: true });
     fs.writeFileSync(output, convertedText);
   }
 }
@@ -48,6 +50,29 @@ function collectInputsFromTree(
   src: string,
   dest: string
 ): { inputs: string[]; outputs: string[] } {
-  // TODO implement
-  throw new Error("tsflower tree: collectInputsFromTree unimplemented");
+  const inputs: string[] = [];
+  const outputs: string[] = [];
+
+  walk(fs.opendirSync(src), "");
+
+  return { inputs, outputs };
+
+  function walk(dir: fs.Dir, dirName: string) {
+    let dirent;
+    while ((dirent = dir.readSync())) {
+      if (dirent.isFile()) {
+        if (dirent.name.endsWith(".d.ts")) {
+          const outputName = dirent.name.replace(/\.d\.ts$/, ".js.flow");
+          inputs.push(path.join(src, dirName, dirent.name));
+          outputs.push(path.join(dest, dirName, outputName));
+        }
+        // else it's some other file; ignore
+      } else if (dirent.isDirectory()) {
+        const subdirName = path.join(dirName, dirent.name);
+        walk(fs.opendirSync(path.join(src, subdirName)), subdirName);
+      } else {
+        // Ignore symlinks.  Ignore fifos, sockets, and devices.
+      }
+    }
+  }
 }

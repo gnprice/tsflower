@@ -44,8 +44,6 @@ For more, see:
     or not; verbosely print actual text (perhaps first N chars of it, in
     case it's a giant module or namespace or class etc.))
 
-  - Transform a program of multiple files at once.
-
   - Take just an (installed) NPM package name; find the TS type definitions
     via its package.json, find the desired destination via convention and/or
     configuration, and go.
