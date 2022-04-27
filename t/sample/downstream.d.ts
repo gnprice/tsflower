@@ -1,8 +1,8 @@
 import * as upstream from "./upstream";
-import upstream2, { Num as Numm } from "./upstream";
+import upstream2 /* , { Num as Numm } // TODO emit `import type` for types */ from "./upstream";
 
 export declare type NumArray = Array<upstream.Num>;
-export declare type RONumArray = ReadonlyArray<Numm>;
+export declare type RONumArray = ReadonlyArray<number>;
 
 declare type ArrayArray<T, S extends T> = [S, T[]][];
 
@@ -27,17 +27,17 @@ var o: {
   k: Omit<{ a: string; b: number }, "12" | "😀">;
 };
 
-declare function f<T>(x: T): { y: T };
+declare function ff<T>(x: T): { y: T };
 
-declare function f(x: boolean): (b: true) => { y: number };
+declare function ff(x: boolean): (b: true) => { y: number };
 
 export declare class C<T> {}
 export declare class D extends C<string> {
-  constructor(); // TODO: should return void, not any
+  // constructor(); // TODO: fix implementation
   // f(cb: (s: string) => void): this;  // TODO implement
 }
 
 // export default class {} // TODO implement
 
-declare const _default: upstream2.Num;
+// declare const _default: upstream2.Num; // TODO doesn't resolve in Flow, though `upstream.Num` does
 // export default _default;  // collides with other default

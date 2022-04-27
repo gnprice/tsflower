@@ -55,15 +55,7 @@ For more, see:
   - In general, always use structured helpers like `errorStatement` and its
     friends; always leave a marker comment in the output.
 
-- Build more of a test framework:
-
-  - Have a test script (vs. just having `node . t/sample/downstream.d.ts` in
-    interactive shell history.)
-
-  - For the sample files, keep expected output in version control.  Update
-    and show diff, if any.
-
-  - Run Flow on sample-file output, and fail on error.
+- Extend the test framework:
 
   - Have React and React Native available to import from sample files.  Pull
     in as dev dependencies, then?

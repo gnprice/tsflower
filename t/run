@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -eu -o pipefail
+
+failed=0
+
+bin/tsflower tree t/sample/
+
+if ! git diff --exit-code -- ':/t/sample/*.js.flow'; then
+  # The output changed (relative to what's in the Git index.)
+  failed=1;
+  echo;
+fi
+
+node_modules/.bin/flow status t/sample/
+
+exit "${failed}"
