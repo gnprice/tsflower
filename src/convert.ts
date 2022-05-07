@@ -382,7 +382,7 @@ export function convertSourceFile(
     )[] = [];
     const indexers: n.ObjectTypeIndexer[] | undefined = []; // TODO
     const callProperties: n.ObjectTypeCallProperty[] | undefined = []; // TODO
-    node.members.forEach((member) => {
+    for (const member of node.members) {
       switch (member.kind) {
         case ts.SyntaxKind.Constructor:
           properties.push(
@@ -404,7 +404,7 @@ export function convertSourceFile(
           } = member as ts.PropertyDeclaration;
 
           const key = convertName(name);
-          if (!key) return; // i.e., continue
+          if (!key) continue;
 
           properties.push(
             b.objectTypeProperty(
@@ -421,7 +421,7 @@ export function convertSourceFile(
           const { name, questionToken } = member as ts.MethodDeclaration;
 
           const key = convertName(name);
-          if (!key) return; // i.e., continue
+          if (!key) continue;
 
           properties.push(
             b.objectTypeProperty(
@@ -440,38 +440,22 @@ export function convertSourceFile(
         case ts.SyntaxKind.SetAccessor:
         case ts.SyntaxKind.IndexSignature:
         case ts.SyntaxKind.ClassStaticBlockDeclaration:
-          throw new Error(
+          return errorStatement(
+            node,
             `unimplemented ClassElement|TypeElement kind: ${
               ts.SyntaxKind[member.kind]
             }`
           );
 
         default:
-          throw new Error(
+          return errorStatement(
+            node,
             `unexpected ClassElement|TypeElement kind: ${
               ts.SyntaxKind[member.kind]
             }`
           );
       }
-
-      function convertName(
-        node: ts.PropertyName
-      ): null | K.IdentifierKind | K.LiteralKind {
-        if (ts.isIdentifier(node)) {
-          return convertIdentifier(node);
-        } else if (ts.isPrivateIdentifier(node)) {
-          // A private property in `declare class` is useless, because it
-          // can't be referred to by anything using the declaration.
-          // (Private properties can only be referred to within the class
-          // definition.)  TS allows them, but Flow doesn't; just drop it
-          // from the output.
-          // TODO(runtime): Handle private properties.
-          return null;
-        } else {
-          crudeError(node); // TODO
-        }
-      }
-    });
+    }
 
     const params = {
       id: convertIdentifier(node.name),
@@ -484,6 +468,24 @@ export function convertSourceFile(
       return b.declareInterface.from(params);
     } else {
       return b.declareClass.from(params);
+    }
+
+    function convertName(
+      node: ts.PropertyName
+    ): null | K.IdentifierKind | K.LiteralKind {
+      if (ts.isIdentifier(node)) {
+        return convertIdentifier(node);
+      } else if (ts.isPrivateIdentifier(node)) {
+        // A private property in `declare class` is useless, because it
+        // can't be referred to by anything using the declaration.
+        // (Private properties can only be referred to within the class
+        // definition.)  TS allows them, but Flow doesn't; just drop it
+        // from the output.
+        // TODO(runtime): Handle private properties.
+        return null;
+      } else {
+        crudeError(node); // TODO
+      }
     }
   }
 
