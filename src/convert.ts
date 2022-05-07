@@ -59,19 +59,6 @@ export function convertSourceFile(
     inner: K.StatementKind,
     node: ts.Statement
   ): K.StatementKind {
-    if (!n.Declaration.check(inner)) {
-      if (n.EmptyStatement.check(inner)) {
-        // Presumably an error or unimplemented.  Nothing further to log.
-        return inner;
-      }
-
-      return warningStatement(
-        inner,
-        node,
-        `statement has "export", but conversion not a declaration`
-      );
-    }
-
     if (n.DeclareClass.check(inner)) {
       // TODO are there more cases that should go this way?
       return b.declareExportDeclaration(/* TODO: defaultParam */ false, inner);
@@ -87,8 +74,18 @@ export function convertSourceFile(
           body: inner.body,
         })
       );
-    } else {
+    } else if (n.Declaration.check(inner)) {
+      // The generic case.
       return b.exportNamedDeclaration(inner as K.DeclarationKind);
+    } else if (n.EmptyStatement.check(inner)) {
+      // Presumably an error or unimplemented.  Nothing further to log.
+      return inner;
+    } else {
+      return warningStatement(
+        inner,
+        node,
+        `statement has "export", but conversion not a declaration`
+      );
     }
   }
 
