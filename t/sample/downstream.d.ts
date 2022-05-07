@@ -34,6 +34,7 @@ var o: {
   i: Omit<{ a: string; b: number }, "a" | "c">;
   j: Omit<{ a: string; b: number }, never>;
   k: Omit<{ a: string; b: number }, "12" | "😀">;
+  l: ({ x }: { x: number }) => number;
 };
 var oo: typeof o;
 var oa: typeof o.a;

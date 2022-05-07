@@ -50,6 +50,7 @@ var o: {|
         "12": mixed,
         "😀": mixed,
     |}>,
+    l: {| x: number |} => number,
 |};
 
 var oo: typeof o;

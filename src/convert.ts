@@ -716,12 +716,16 @@ export function convertSourceFile(
     for (let i = 0; i < node.parameters.length; i++) {
       const param = node.parameters[i];
 
-      if (!ts.isIdentifier(param.name))
-        return errorType(
-          node,
-          `unimplemented: function type with BindingPattern parameter`
-        );
-      const name = convertIdentifier(param.name);
+      // TS requires a name for each parameter in a function type; you can
+      // get out of it by using a binding-pattern instead.  Flow doesn't
+      // require a name -- you can just write the type -- so if you don't
+      // want a name, just omit it.
+      //
+      // We give up a bit of documentation value by discarding the pattern,
+      // but that's all.
+      const name = !ts.isIdentifier(param.name)
+        ? null
+        : convertIdentifier(param.name);
 
       if (param.dotDotDotToken) {
         // This is a rest parameter, so (if valid TS) must be the last one.
