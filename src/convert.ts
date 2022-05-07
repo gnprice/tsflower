@@ -1,7 +1,7 @@
 import ts from "typescript";
 import { builders as b, namedTypes as n } from "ast-types";
 import K from "ast-types/gen/kinds";
-import { forEach, map, some } from "./util";
+import { map, some } from "./util";
 import { Mapper, MapResultType } from "./mapper";
 
 export interface Converter {
@@ -278,7 +278,7 @@ export function convertSourceFile(
     const typeParameters = convertTypeParameterDeclaration(node.typeParameters);
 
     const extends_: n.InterfaceExtends[] = [];
-    forEach(node.heritageClauses, (heritageClause) => {
+    for (const heritageClause of node.heritageClauses ?? []) {
       const { token, types } = heritageClause;
       if (token === ts.SyntaxKind.ExtendsKeyword) {
         for (const base of types) {
@@ -308,7 +308,7 @@ export function convertSourceFile(
         // TODO
         return errorStatement(node, `unimplemented: class 'implements'`);
       }
-    });
+    }
 
     const properties: (
       | n.ObjectTypeProperty
