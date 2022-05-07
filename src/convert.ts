@@ -8,7 +8,7 @@ import { Mapper, MapResultType } from "./mapper";
 export interface Converter {
   convertType(node: ts.TypeNode): K.FlowTypeKind;
   errorType(node: ts.TypeNode, description: string): K.FlowTypeKind;
-  unimplementedType(node: ts.TypeNode): K.FlowTypeKind;
+  unimplementedType(node: ts.TypeNode, description: string): K.FlowTypeKind;
   crudeError(node: ts.Node): never;
 }
 
@@ -123,7 +123,7 @@ export function convertSourceFile(
       case ts.SyntaxKind.ImportEqualsDeclaration:
       case ts.SyntaxKind.MissingDeclaration:
         // These statements might actually appear in .d.ts files.
-        return unimplementedStatement(node);
+        return unimplementedStatement(node, ts.SyntaxKind[node.kind]);
 
       case ts.SyntaxKind.ExpressionStatement:
       case ts.SyntaxKind.IfStatement:
@@ -144,7 +144,7 @@ export function convertSourceFile(
       case ts.SyntaxKind.CaseBlock:
         // These shouldn't appear in .d.ts files.  So they shouldn't come up
         // unless we try to handle normal source files.
-        return unimplementedStatement(node);
+        return unimplementedStatement(node, ts.SyntaxKind[node.kind]);
 
       case ts.SyntaxKind.VariableDeclaration:
       case ts.SyntaxKind.VariableDeclarationList:
@@ -578,7 +578,7 @@ export function convertSourceFile(
       case ts.SyntaxKind.TemplateLiteralType:
       case ts.SyntaxKind.TemplateLiteralTypeSpan:
       case ts.SyntaxKind.ImportType:
-        return unimplementedType(node);
+        return unimplementedType(node, ts.SyntaxKind[node.kind]);
 
       case ts.SyntaxKind.NamedTupleMember:
         // Not actually types -- pieces of types.
@@ -853,8 +853,11 @@ export function convertSourceFile(
         });
   }
 
-  function unimplementedStatement(node: ts.Statement): K.StatementKind {
-    const msg = ` tsflower-unimplemented: ${ts.SyntaxKind[node.kind]} `;
+  function unimplementedStatement(
+    node: ts.Statement,
+    description: string
+  ): K.StatementKind {
+    const msg = ` tsflower-unimplemented: ${description} `;
     return b.emptyStatement.from({
       comments: [b.commentBlock(msg, true, false), quotedStatement(node)],
     });
@@ -870,8 +873,11 @@ export function convertSourceFile(
     });
   }
 
-  function unimplementedType(node: ts.TypeNode): K.FlowTypeKind {
-    const msg = ` tsflower-unimplemented: ${ts.SyntaxKind[node.kind]} `;
+  function unimplementedType(
+    node: ts.TypeNode,
+    description: string
+  ): K.FlowTypeKind {
+    const msg = ` tsflower-unimplemented: ${description} `;
     return b.genericTypeAnnotation.from({
       id: b.identifier("$FlowFixMe"),
       typeParameters: null,
