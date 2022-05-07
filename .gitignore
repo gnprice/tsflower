@@ -4,5 +4,9 @@
 # For a `.gitignore` format and style primer, see:
 #   https://github.com/zulip/zulip/blob/main/.gitignore
 
+# Dependencies and build outputs.
 node_modules/
 /lib/
+
+# Integration-test outputs.  (Generated manually.)
+/integration/types/
