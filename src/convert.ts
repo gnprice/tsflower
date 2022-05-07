@@ -358,7 +358,10 @@ export function convertSourceFile(
       if (token === ts.SyntaxKind.ExtendsKeyword) {
         for (const base of types) {
           const { expression, typeArguments } = base;
-          if (!ts.isEntityName(expression)) {
+          if (
+            !ts.isIdentifier(expression) &&
+            !ts.isPropertyAccessExpression(expression)
+          ) {
             return errorStatement(
               node,
               `unexpected 'extends' base kind: ${
@@ -366,12 +369,11 @@ export function convertSourceFile(
               }`
             );
           }
-          if (!ts.isIdentifier(expression)) {
-            return unimplementedStatement(node, `qualified name in 'extends'`);
-          }
           extends_.push(
             b.interfaceExtends.from({
-              id: convertIdentifier(expression),
+              id: convertPropertyAccessExpressionAsQualifiedTypeIdentifier(
+                expression
+              ),
               typeParameters: convertTypeArguments(typeArguments),
             })
           );
@@ -853,6 +855,24 @@ export function convertSourceFile(
     return !typeArguments
       ? null
       : b.typeParameterInstantiation(typeArguments.map(convertType));
+  }
+
+  function convertPropertyAccessExpressionAsQualifiedTypeIdentifier(
+    node: ts.Identifier | ts.PropertyAccessExpression
+  ): K.IdentifierKind | K.QualifiedTypeIdentifierKind {
+    if (ts.isIdentifier(node)) return convertIdentifier(node);
+
+    const { expression, name } = node;
+    if (ts.isPrivateIdentifier(name)) crudeError(node);
+    if (
+      !ts.isIdentifier(expression) &&
+      !ts.isPropertyAccessExpression(expression)
+    )
+      crudeError(node);
+    return b.qualifiedTypeIdentifier(
+      convertPropertyAccessExpressionAsQualifiedTypeIdentifier(expression),
+      convertIdentifier(name)
+    );
   }
 
   function convertIdentifier(

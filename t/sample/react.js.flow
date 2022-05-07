@@ -9,3 +9,4 @@ type AProps = {|
 |};
 
 declare class A extends Component<AProps> {}
+declare class AA extends React.Component<AProps> {}
