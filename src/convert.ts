@@ -1,7 +1,7 @@
 import ts from "typescript";
 import { builders as b, namedTypes as n } from "ast-types";
 import K from "ast-types/gen/kinds";
-import { map } from "./util";
+import { map, some } from "./util";
 import { Mapper, MapResultType } from "./mapper";
 import { hasModifier } from "./tsutil";
 
@@ -408,7 +408,7 @@ export function convertSourceFile(
               id: convertPropertyAccessExpressionAsQualifiedTypeIdentifier(
                 expression
               ),
-              typeParameters: convertTypeArguments(typeArguments),
+              typeParameters: convertTypeArguments(expression, typeArguments),
             })
           );
         }
@@ -719,7 +719,7 @@ export function convertSourceFile(
       case MapResultType.FixedName:
         return b.genericTypeAnnotation(
           b.identifier(mapped.name),
-          convertTypeArguments(node.typeArguments)
+          convertTypeArguments(node.typeName, node.typeArguments)
         );
 
       case MapResultType.TypeReferenceMacro:
@@ -732,7 +732,7 @@ export function convertSourceFile(
 
     return b.genericTypeAnnotation(
       convertEntityNameAsType(node.typeName),
-      convertTypeArguments(node.typeArguments)
+      convertTypeArguments(node.typeName, node.typeArguments)
     );
   }
 
@@ -881,11 +881,25 @@ export function convertSourceFile(
   }
 
   function convertTypeArguments(
+    // TODO Really this just wants the symbol there; take the symbol instead?
+    //   The caller probably needs to be looking it up anyway.
+    typeName: ts.Node,
     typeArguments: void | ts.NodeArray<ts.TypeNode>
   ): null | n.TypeParameterInstantiation {
-    return !typeArguments
-      ? null
-      : b.typeParameterInstantiation(typeArguments.map(convertType));
+    if (typeArguments)
+      return b.typeParameterInstantiation(typeArguments.map(convertType));
+
+    // If in TS there was no list of type arguments, that can be either
+    // because the type takes no parameters, or because it has defaults for
+    // all parameters and this reference is using the defaults.  In the
+    // latter case, while TS requires it to be spelled with no list, Flow
+    // requires it to be spelled with an empty list.
+    const symbol = checker.getSymbolAtLocation(typeName);
+    // @ts-expect-error TODO(tsutil) express "does decl have type parameters"
+    if (some(symbol?.declarations, (decl) => !!decl.typeParameters))
+      return b.typeParameterInstantiation([]);
+
+    return null;
   }
 
   function convertPropertyAccessExpressionAsQualifiedTypeIdentifier(
