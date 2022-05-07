@@ -1,3 +1,5 @@
+export interface I {}
+
 export declare type Num = number;
 export declare var x: Num;
 var _default: { y: Num };

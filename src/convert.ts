@@ -71,6 +71,18 @@ export function convertSourceFile(
     if (n.DeclareClass.check(inner)) {
       // TODO are there more cases that should go this way?
       return b.declareExportDeclaration(/* TODO: defaultParam */ false, inner);
+    } else if (n.DeclareInterface.check(inner)) {
+      // Awkwardly convert a DeclareInterface to an InterfaceDeclaration.
+      // This causes recast to correctly emit `export interface`
+      // instead of `export declare interface`, which Flow rejects.
+      return b.exportNamedDeclaration(
+        b.interfaceDeclaration.from({
+          id: inner.id,
+          typeParameters: inner.typeParameters,
+          extends: inner.extends,
+          body: inner.body,
+        })
+      );
     } else {
       return b.exportNamedDeclaration(inner as K.DeclarationKind);
     }
