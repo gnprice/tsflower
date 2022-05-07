@@ -58,6 +58,7 @@ declare interface I {}
 declare export class C<T> {};
 
 declare export class D extends C<string> {
+    f: (cb: (s: string) => void) => void,
     x: any,
     y: string,
     z?: any,

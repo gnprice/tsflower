@@ -402,20 +402,8 @@ export function convertSourceFile(
             type,
           } = member as ts.PropertyDeclaration;
 
-          let key: K.IdentifierKind | K.LiteralKind;
-          if (ts.isIdentifier(name)) {
-            key = convertIdentifier(name);
-          } else if (ts.isPrivateIdentifier(name)) {
-            // A private property in `declare class` is useless, because it
-            // can't be referred to by anything using the declaration.
-            // (Private properties can only be referred to within the class
-            // definition.)  TS allows them, but Flow doesn't; just drop it
-            // from the output.
-            // TODO(runtime): Handle private properties.
-            return; // i.e., continue
-          } else {
-            crudeError(node); // TODO
-          }
+          const key = convertName(name);
+          if (!key) return; // i.e., continue
 
           properties.push(
             b.objectTypeProperty(
@@ -427,7 +415,22 @@ export function convertSourceFile(
           break;
         }
 
-        case ts.SyntaxKind.MethodDeclaration:
+        case ts.SyntaxKind.MethodDeclaration: {
+          const { name, questionToken } = member as ts.MethodDeclaration;
+
+          const key = convertName(name);
+          if (!key) return; // i.e., continue
+
+          properties.push(
+            b.objectTypeProperty(
+              key,
+              convertFunctionType(member as ts.MethodDeclaration),
+              !!questionToken
+            )
+          );
+          break;
+        }
+
         case ts.SyntaxKind.SemicolonClassElement:
         case ts.SyntaxKind.GetAccessor:
         case ts.SyntaxKind.SetAccessor:
@@ -439,6 +442,24 @@ export function convertSourceFile(
 
         default:
           crudeError(node); // TODO(error)
+      }
+
+      function convertName(
+        node: ts.PropertyName
+      ): null | K.IdentifierKind | K.LiteralKind {
+        if (ts.isIdentifier(node)) {
+          return convertIdentifier(node);
+        } else if (ts.isPrivateIdentifier(node)) {
+          // A private property in `declare class` is useless, because it
+          // can't be referred to by anything using the declaration.
+          // (Private properties can only be referred to within the class
+          // definition.)  TS allows them, but Flow doesn't; just drop it
+          // from the output.
+          // TODO(runtime): Handle private properties.
+          return null;
+        } else {
+          crudeError(node); // TODO
+        }
       }
     });
 
@@ -638,6 +659,7 @@ export function convertSourceFile(
       | ts.FunctionTypeNode
       | ts.FunctionDeclaration
       | ts.ConstructorDeclaration
+      | ts.MethodDeclaration
   ): K.FlowTypeKind {
     const typeParams = convertTypeParameterDeclaration(node.typeParameters);
 

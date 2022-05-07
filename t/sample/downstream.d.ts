@@ -45,7 +45,10 @@ declare interface I {}
 export declare class C<T> {}
 export declare class D extends C<string> {
   // constructor(); // TODO: fix implementation
-  // f(cb: (s: string) => void): this;  // TODO implement
+
+  f(cb: (s: string) => void): void;
+  // 'import'(cb: (s: string) => void): this;  // TS supports this, but Flow has no equivalent.
+
   x;
   y: string;
   z?;
