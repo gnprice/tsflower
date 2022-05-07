@@ -31,9 +31,10 @@
   resolved "https://registry.yarnpkg.com/@yarnpkg/lockfile/-/lockfile-1.1.0.tgz#e77a97fbd345b76d83245edcd17d393b1b41fb31"
   integrity sha512-GpSwvyXOcOOlV70vbnzjj4fW5xW/FdUF6nQEt1ENy7m4ZCczi1+/buVUPAqmGfqznsORNFzUMjctTIp8a9tuCQ==
 
-ast-types@0.15.2, ast-types@gnprice/ast-types#7018a996a:
-  version "0.15.2"
-  resolved "https://codeload.github.com/gnprice/ast-types/tar.gz/7018a996a27b2b7c88eca196f4b7d83b0b94a025"
+ast-types@0.15.2, "ast-types@npm:@gregprice/ast-types@^0.15.3-0.tsflower.1":
+  version "0.15.3-0.tsflower.1"
+  resolved "https://registry.yarnpkg.com/@gregprice/ast-types/-/ast-types-0.15.3-0.tsflower.1.tgz#12171a4cf474b67c2ddc72f98e5a381548803a0d"
+  integrity sha512-kzlM/gzR9xqwBifiHElSH1tkh66QOf68FwUqujMf7bXlUL55acL7308uoI9nb9oVAobbVBH+5Hd4JNi9SJR3OQ==
   dependencies:
     tslib "^2.0.1"
 

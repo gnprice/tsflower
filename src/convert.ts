@@ -1,6 +1,5 @@
 import ts from "typescript";
 import { builders as b, namedTypes as n } from "ast-types";
-// @ts-expect-error TODO get correct types for ast-types
 import K from "ast-types/gen/kinds";
 import { map, some } from "./util";
 import { Mapper, MapResultType } from "./mapper";
@@ -214,7 +213,6 @@ export function convertSourceFile(
               imported: convertIdentifier(binding.propertyName ?? binding.name),
               local: convertIdentifier(binding.name),
               // TODO: use modifier on this ts.ImportSpecifier, if present.
-              // @ts-expect-error TODO get correct types for ast-types
               importKind: isTypeOnly ? "type" : "value",
             })
           );

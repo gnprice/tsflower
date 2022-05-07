@@ -10,7 +10,7 @@
   },
   "homepage": "https://github.com/gnprice/tsflower",
   "dependencies": {
-    "ast-types": "gnprice/ast-types#7018a996a",
+    "ast-types": "npm:@gregprice/ast-types@^0.15.3-0.tsflower.1",
     "recast": "gnprice/recast#6c121d42e",
     "typescript": "^4.6.3"
   },
@@ -21,12 +21,15 @@
     "react": "^18.1.0",
     "yarn-deduplicate": "^5.0.0"
   },
+  "resolutions": {
+    "ast-types": "npm:@gregprice/ast-types@^0.15.3-0.tsflower.1"
+  },
   "main": "lib/index.js",
   "bin": {
     "tsflower": "bin/tsflower"
   },
   "scripts": {
-    "postinstall": "( cd node_modules/recast && npm install && npm run build || : ) && ( cd node_modules/ast-types && npm install )",
+    "postinstall": "( cd node_modules/recast && npm install && npm run build || : )",
     "prepublishOnly": "npm run build",
     "test": "t/run",
     "build": "tsc"

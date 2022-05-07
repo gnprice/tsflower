@@ -1,6 +1,5 @@
 import ts from "typescript";
 import { builders as b, namedTypes as _n } from "ast-types";
-// @ts-expect-error TODO get correct types for ast-types
 import K from "ast-types/gen/kinds";
 import { some } from "./util";
 import { Converter } from "./convert";
