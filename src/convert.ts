@@ -44,34 +44,35 @@ export function convertSourceFile(
       if (
         some(node.modifiers, (mod) => mod.kind === ts.SyntaxKind.ExportKeyword)
       ) {
-        if (!n.Declaration.check(inner)) {
-          if (n.EmptyStatement.check(inner)) {
-            // Presumably an error or unimplemented.  Nothing further to log.
-            return inner;
-          }
-
-          console.error(
-            `warning: statement has "export", but conversion not a declaration`
-          );
-          // TODO(error) better log this; note in output
-          return inner;
-        }
-
-        if (n.DeclareClass.check(inner)) {
-          // TODO are there more cases that should go this way?
-          return b.declareExportDeclaration(
-            /* TODO: defaultParam */ false,
-            inner
-          );
-        } else {
-          return b.exportNamedDeclaration(inner as K.DeclarationKind);
-        }
+        return modifyStatementAsExport(inner);
       }
 
       return inner;
     } catch (err) {
       console.error(err);
       return errorStatement(node, `internal error: ${(err as Error).message}`);
+    }
+  }
+
+  function modifyStatementAsExport(inner: K.StatementKind): K.StatementKind {
+    if (!n.Declaration.check(inner)) {
+      if (n.EmptyStatement.check(inner)) {
+        // Presumably an error or unimplemented.  Nothing further to log.
+        return inner;
+      }
+
+      console.error(
+        `warning: statement has "export", but conversion not a declaration`
+      );
+      // TODO(error) better log this; note in output
+      return inner;
+    }
+
+    if (n.DeclareClass.check(inner)) {
+      // TODO are there more cases that should go this way?
+      return b.declareExportDeclaration(/* TODO: defaultParam */ false, inner);
+    } else {
+      return b.exportNamedDeclaration(inner as K.DeclarationKind);
     }
   }
 
