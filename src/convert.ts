@@ -711,10 +711,19 @@ export function convertSourceFile(
   }
 
   function crudeError(node: ts.Node): never {
+    // TODO(error): Better than node.pos would be a whitespace-trimmed version.
+    //   (As is, when something is the first thing on its line `pos` can be
+    //   the end of the last non-whitespace line.)
+    const start = ts.getLineAndCharacterOfPosition(sourceFile, node.pos);
+    const end = ts.getLineAndCharacterOfPosition(sourceFile, node.end);
+    const loc =
+      start.line === end.line
+        ? `${1 + start.line}:${start.character}-${end.character}`
+        : `${1 + start.line}-${1 + end.line}`;
     throw new Error(
       `Internal error on ${ts.SyntaxKind[node.kind]} at ${
         sourceFile.fileName
-      }:${node.pos}:${node.end}:`
+      }:${loc}`
     );
   }
 }
