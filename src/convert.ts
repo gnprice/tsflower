@@ -237,8 +237,7 @@ export function convertSourceFile(
     const { isTypeOnly, exportClause, moduleSpecifier, assertClause } = node;
 
     if (assertClause) {
-      // TODO unimplemented: `export … from 'foo' assert { … }`
-      crudeError(node);
+      return unimplementedStatement(node, "`export … from 'foo' assert { … }`");
     }
 
     const source = !moduleSpecifier
@@ -247,7 +246,8 @@ export function convertSourceFile(
         b.stringLiteral((moduleSpecifier as ts.StringLiteral).text);
 
     if (!exportClause) {
-      if (!source) crudeError(node);
+      if (!source)
+        return errorStatement(node, "expected `export *` to have `from`");
       return b.exportAllDeclaration(source, null);
     } else if (ts.isNamespaceExport(exportClause)) {
       return b.exportNamedDeclaration(
@@ -329,7 +329,8 @@ export function convertSourceFile(
   }
 
   function convertFunctionDeclaration(node: ts.FunctionDeclaration) {
-    if (!node.name) crudeError(node); // TODO(error)
+    if (!node.name)
+      return errorStatement(node, "expected name on FunctionDeclaration");
 
     return b.declareFunction(
       convertIdentifier(node.name, convertFunctionType(node))
@@ -339,7 +340,8 @@ export function convertSourceFile(
   function convertClassLikeDeclaration(
     node: ts.ClassDeclaration | ts.InterfaceDeclaration
   ) {
-    if (!node.name) crudeError(node); // TODO(error): really unimplemented `export default class`
+    if (!node.name)
+      return unimplementedStatement(node, "`export default class`");
 
     const typeParameters = convertTypeParameterDeclaration(node.typeParameters);
 
@@ -478,7 +480,10 @@ export function convertSourceFile(
         // TODO(runtime): Handle private properties.
         return null;
       } else {
-        crudeError(node); // TODO
+        // TODO
+        throw new Error(
+          `unimplemented: PropertyName kind ${ts.SyntaxKind[node.kind]}`
+        );
       }
     }
   }
@@ -600,11 +605,20 @@ export function convertSourceFile(
 
       case ts.SyntaxKind.PrefixUnaryExpression: {
         const literal = node.literal as ts.PrefixUnaryExpression;
-        if (
-          literal.operator !== ts.SyntaxKind.MinusToken ||
-          !ts.isNumericLiteral(literal.operand)
-        )
-          crudeError(node); // TODO(error)
+        if (literal.operator !== ts.SyntaxKind.MinusToken)
+          return errorType(
+            node,
+            `LiteralTypeNode with PrefixUnaryExpression operator ${
+              ts.SyntaxKind[literal.operator]
+            }; expected MinusToken`
+          );
+        if (!ts.isNumericLiteral(literal.operand))
+          return errorType(
+            node,
+            `LiteralTypeNode with unary-minus of ${
+              ts.SyntaxKind[literal.operand.kind]
+            }; expected NumericLiteral`
+          );
         const { text } = literal.operand;
         // TODO: is more conversion needed on these number literals?
         return b.numberLiteralTypeAnnotation(-Number(text), text);
