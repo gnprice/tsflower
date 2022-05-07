@@ -719,9 +719,7 @@ export function convertSourceFile(
       case MapResultType.FixedName:
         return b.genericTypeAnnotation(
           b.identifier(mapped.name),
-          !node.typeArguments
-            ? null
-            : b.typeParameterInstantiation(node.typeArguments.map(convertType))
+          convertTypeArguments(node.typeArguments)
         );
 
       case MapResultType.TypeReferenceMacro:
@@ -734,9 +732,7 @@ export function convertSourceFile(
 
     return b.genericTypeAnnotation(
       convertEntityNameAsType(node.typeName),
-      !node.typeArguments
-        ? null
-        : b.typeParameterInstantiation(node.typeArguments.map(convertType))
+      convertTypeArguments(node.typeArguments)
     );
   }
 
