@@ -716,7 +716,12 @@ export function convertSourceFile(
     for (let i = 0; i < node.parameters.length; i++) {
       const param = node.parameters[i];
 
-      const name = convertIdentifier(param.name /* TODO */ as ts.Identifier);
+      if (!ts.isIdentifier(param.name))
+        return errorType(
+          node,
+          `unimplemented: function type with BindingPattern parameter`
+        );
+      const name = convertIdentifier(param.name);
 
       if (param.dotDotDotToken) {
         // This is a rest parameter, so (if valid TS) must be the last one.
@@ -864,7 +869,7 @@ export function convertSourceFile(
     });
   }
 
-  function errorType(node: ts.TypeNode, description: string): K.FlowTypeKind {
+  function errorType(node: ts.Node, description: string): K.FlowTypeKind {
     const msg = ` tsflower-error: ${description} `;
     return b.genericTypeAnnotation.from({
       id: b.identifier("$FlowFixMe"),
