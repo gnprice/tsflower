@@ -338,8 +338,24 @@ export function convertSourceFile(
   }
 
   function convertFunctionDeclaration(node: ts.FunctionDeclaration) {
-    if (!node.name)
+    if (!node.name) {
+      if (
+        hasModifier(node, ts.SyntaxKind.ExportKeyword) &&
+        hasModifier(node, ts.SyntaxKind.DefaultKeyword)
+      ) {
+        // TS accepts this, and then puts it in `.d.ts` files.  But there
+        // doesn't seem to be a Flow equivalent if you say `declare`; and if
+        // you don't, then implementations are required.  Probably the
+        // solution is we should generate a fresh name.
+        return unimplementedStatement(
+          node,
+          "`export default function` with no name"
+        );
+      }
+
+      // I believe this is not valid TS.
       return errorStatement(node, "expected name on FunctionDeclaration");
+    }
 
     return b.declareFunction(
       convertIdentifier(node.name, convertFunctionType(node))
@@ -349,8 +365,24 @@ export function convertSourceFile(
   function convertClassLikeDeclaration(
     node: ts.ClassDeclaration | ts.InterfaceDeclaration
   ) {
-    if (!node.name)
-      return unimplementedStatement(node, "`export default class`");
+    if (!node.name) {
+      if (
+        hasModifier(node, ts.SyntaxKind.ExportKeyword) &&
+        hasModifier(node, ts.SyntaxKind.DefaultKeyword)
+      ) {
+        // TS accepts this, and then puts it in `.d.ts` files.  But there
+        // doesn't seem to be a Flow equivalent if you say `declare`; and if
+        // you don't, then implementations are required.  Probably the
+        // solution is we should generate a fresh name.
+        return unimplementedStatement(
+          node,
+          "`export default class` with no name"
+        );
+      }
+
+      // I believe this is not valid TS.
+      return errorStatement(node, "anonymous class not in `export default`");
+    }
 
     const typeParameters = convertTypeParameterDeclaration(node.typeParameters);
 
