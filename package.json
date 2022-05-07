@@ -11,7 +11,7 @@
   "homepage": "https://github.com/gnprice/tsflower",
   "dependencies": {
     "ast-types": "npm:@gregprice/ast-types@^0.15.3-0.tsflower.1",
-    "recast": "gnprice/recast#6c121d42e",
+    "recast": "npm:@gregprice/recast@^0.21.2-0.tsflower.1",
     "typescript": "^4.6.3"
   },
   "devDependencies": {
@@ -29,7 +29,6 @@
     "tsflower": "bin/tsflower"
   },
   "scripts": {
-    "postinstall": "( cd node_modules/recast && npm install && npm run build || : )",
     "prepublishOnly": "npm run build",
     "test": "t/run",
     "build": "tsc"
