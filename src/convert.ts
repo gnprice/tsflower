@@ -787,12 +787,16 @@ export function convertSourceFile(
         case ts.SyntaxKind.GetAccessor:
         case ts.SyntaxKind.SetAccessor:
         case ts.SyntaxKind.IndexSignature:
-          throw new Error(
+          return errorType(
+            node,
             `unimplemented TypeElement kind: ${ts.SyntaxKind[member.kind]}`
           );
 
         default:
-          crudeError(node); // TODO(error)
+          return errorType(
+            node,
+            `unexpected TypeElement kind: ${ts.SyntaxKind[member.kind]}`
+          );
       }
     }
 
