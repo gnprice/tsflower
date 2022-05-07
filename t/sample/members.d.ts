@@ -2,9 +2,8 @@
 
 export declare var value: {
   property: string;
-  // TODO implement
-  // method1(): void;
-  // method2(x: number): string;
+  method1(): void;
+  method2(x: number): string;
   functionProperty: (x: number) => string;
 };
 

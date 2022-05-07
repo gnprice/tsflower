@@ -828,48 +828,20 @@ export function convertSourceFile(
   }
 
   function convertTypeLiteral(node: ts.TypeLiteralNode): K.FlowTypeKind {
-    const properties: (n.ObjectTypeProperty | n.ObjectTypeSpreadProperty)[] =
-      [];
-    for (let i = 0; i < node.members.length; i++) {
-      const member = node.members[i];
-      switch (member.kind) {
-        case ts.SyntaxKind.PropertySignature: {
-          const { name, questionToken, type } = member as ts.PropertySignature;
-          properties.push(
-            b.objectTypeProperty(
-              convertIdentifier(name /* TODO */ as ts.Identifier),
-              type ? convertType(type) : b.anyTypeAnnotation(),
-              !!questionToken,
-            ),
-          );
-          break;
-        }
-
-        case ts.SyntaxKind.CallSignature:
-        case ts.SyntaxKind.ConstructSignature:
-        case ts.SyntaxKind.MethodSignature:
-        case ts.SyntaxKind.GetAccessor:
-        case ts.SyntaxKind.SetAccessor:
-        case ts.SyntaxKind.IndexSignature:
-          return unimplementedType(
-            node,
-            `TypeElement kind: ${ts.SyntaxKind[member.kind]}`,
-          );
-
-        default:
-          return errorType(
-            node,
-            `unexpected TypeElement kind: ${ts.SyntaxKind[member.kind]}`,
-          );
-      }
+    const members = convertMembers(node);
+    if (!Array.isArray(members)) {
+      if (members.kind === "unimplemented")
+        return unimplementedType(node, members.description);
+      else return errorType(node, members.description);
     }
+    const [properties, indexers, callProperties] = members;
 
-    //   const indexers = undefined; // TODO
-    //   const callProperties = undefined; // TODO
     const exact = true; // TODO
 
     return b.objectTypeAnnotation.from({
       properties,
+      indexers,
+      callProperties,
       exact,
       inexact: !exact,
     });

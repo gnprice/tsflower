@@ -3,6 +3,8 @@
  */
 export var value: {|
     property: string,
+    method1(): void,
+    method2(x: number): string,
     functionProperty: (x: number) => string,
 |};
 
