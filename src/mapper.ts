@@ -3,7 +3,10 @@ import { builders as b, namedTypes as n } from "ast-types";
 import K from "ast-types/gen/kinds";
 import { some } from "./util";
 import { Converter, ErrorOr, mkError, mkSuccess } from "./convert";
-import { isEntityNameOrEntityNameExpression } from "./tsutil";
+import {
+  getModuleSpecifier,
+  isEntityNameOrEntityNameExpression,
+} from "./tsutil";
 
 export enum MapResultType {
   FixedName,
@@ -35,6 +38,21 @@ const defaultLibraryRewrites: Map<string, MapResult> = new Map([
   ["Readonly", { type: MapResultType.FixedName, name: "$ReadOnly" }],
   ["ReadonlyArray", { type: MapResultType.FixedName, name: "$ReadOnlyArray" }],
   ["Omit", { type: MapResultType.TypeReferenceMacro, convert: convertOmit }],
+]);
+
+const libraryRewrites: Map<string, Map<string, MapResult>> = new Map([
+  [
+    "react",
+    new Map([
+      [
+        "Component",
+        {
+          type: MapResultType.TypeReferenceMacro,
+          convert: convertReactComponent,
+        },
+      ],
+    ]),
+  ],
 ]);
 
 function convertOmit(
@@ -103,6 +121,36 @@ function convertOmit(
       converter.convertType(objectType),
       subtrahend,
     ]),
+  });
+}
+
+function convertReactComponent(
+  converter: Converter,
+  typeName: ts.EntityNameOrEntityNameExpression,
+  typeArguments: ts.NodeArray<ts.TypeNode> | void
+): ErrorOr<{
+  id: K.IdentifierKind | n.QualifiedTypeIdentifier;
+  typeParameters: n.TypeParameterInstantiation | null;
+}> {
+  if ((typeArguments?.length ?? 0) > 2) {
+    return mkError(
+      `bad React.Component: ${
+        typeArguments?.length ?? 0
+      } arguments (expected 0-2)`
+    );
+  }
+  const [propsType, stateType] = typeArguments ?? [];
+
+  const args = [
+    propsType
+      ? converter.convertType(propsType)
+      : b.objectTypeAnnotation.from({ properties: [], inexact: true }),
+    ...(stateType ? [converter.convertType(stateType)] : []),
+  ];
+
+  return mkSuccess({
+    id: converter.convertEntityNameAsType(typeName),
+    typeParameters: b.typeParameterInstantiation(args),
   });
 }
 
@@ -186,7 +234,20 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
         if (some(symbol.declarations, isDefaultLibraryTopLevelDeclaration)) {
           const rewrite = defaultLibraryRewrites.get(symbol.name);
           if (rewrite) mappedSymbols.set(symbol, rewrite);
+          return;
         }
+
+        for (const decl of symbol.declarations ?? []) {
+          if (ts.isImportSpecifier(decl)) {
+            const module = getModuleSpecifier(decl.parent.parent.parent);
+            const name = (decl.propertyName ?? decl.name).text;
+            const rewrite = libraryRewrites.get(module)?.get(name);
+            if (rewrite) mappedSymbols.set(symbol, rewrite);
+            return;
+          }
+        }
+
+        // TODO React.ReactFoo, i.e. symbol.parent.declarations has ImportClause
       }
 
       function isDefaultLibraryTopLevelDeclaration(

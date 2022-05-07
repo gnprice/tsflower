@@ -33,6 +33,9 @@ export const mkSuccess = <T>(result: T): ErrorOr<T> => ({
 
 export interface Converter {
   convertType(node: ts.TypeNode): K.FlowTypeKind;
+  convertEntityNameAsType(
+    node: ts.EntityNameOrEntityNameExpression
+  ): K.IdentifierKind | K.QualifiedTypeIdentifierKind;
   errorType(node: ts.TypeNode, description: string): K.FlowTypeKind;
   unimplementedType(node: ts.TypeNode, description: string): K.FlowTypeKind;
   crudeError(node: ts.Node): never;
@@ -51,6 +54,7 @@ export function convertSourceFile(
 
   const converter: Converter = {
     convertType,
+    convertEntityNameAsType,
     errorType,
     unimplementedType,
     crudeError,
