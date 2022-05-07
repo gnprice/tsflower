@@ -178,10 +178,7 @@ export function convertSourceFile(
     if (!importClause) throw new Error("unimplemented: no import clause");
 
     if (importClause.modifiers)
-      return errorStatement(
-        node,
-        `unimplemented: ImportDeclaration with modifiers`
-      );
+      return unimplementedStatement(node, `ImportDeclaration with modifiers`);
 
     const specifiers: (
       | n.ImportSpecifier
@@ -285,13 +282,16 @@ export function convertSourceFile(
   }
 
   function convertExportAssignment(node: ts.ExportAssignment): K.StatementKind {
-    if (node.isExportEquals)
-      // TODO(error): make this a proper "unimplemented"
-      return errorStatement(node, 'unimplemented: "export ="');
+    if (node.isExportEquals) {
+      return unimplementedStatement(node, '"export ="');
+    }
 
     if (!ts.isIdentifier(node.expression))
       // TODO(runtime): These don't appear in .d.ts files, but do in TS.
-      return errorStatement(node, `"export default" with non-identifier`);
+      return unimplementedStatement(
+        node,
+        `"export default" with non-identifier`
+      );
 
     return b.exportDefaultDeclaration(convertIdentifier(node.expression));
   }
@@ -358,10 +358,7 @@ export function convertSourceFile(
             );
           }
           if (!ts.isIdentifier(expression)) {
-            return errorStatement(
-              node, // TODO
-              `unimplemented: qualified name in 'extends'`
-            );
+            return unimplementedStatement(node, `qualified name in 'extends'`);
           }
           extends_.push(
             b.interfaceExtends.from({
@@ -371,8 +368,7 @@ export function convertSourceFile(
           );
         }
       } else {
-        // TODO
-        return errorStatement(node, `unimplemented: class 'implements'`);
+        return unimplementedStatement(node, `class 'implements'`);
       }
     }
 
@@ -440,11 +436,9 @@ export function convertSourceFile(
         case ts.SyntaxKind.SetAccessor:
         case ts.SyntaxKind.IndexSignature:
         case ts.SyntaxKind.ClassStaticBlockDeclaration:
-          return errorStatement(
+          return unimplementedStatement(
             node,
-            `unimplemented ClassElement|TypeElement kind: ${
-              ts.SyntaxKind[member.kind]
-            }`
+            `ClassElement|TypeElement kind: ${ts.SyntaxKind[member.kind]}`
           );
 
         default:
@@ -648,9 +642,9 @@ export function convertSourceFile(
 
       case ts.SyntaxKind.UniqueKeyword:
       case ts.SyntaxKind.ReadonlyKeyword:
-        return errorType(
+        return unimplementedType(
           node,
-          `unimplemented type operator: ${ts.SyntaxKind[operator]}`
+          `type operator: ${ts.SyntaxKind[operator]}`
         );
 
       default:
@@ -789,9 +783,9 @@ export function convertSourceFile(
         case ts.SyntaxKind.GetAccessor:
         case ts.SyntaxKind.SetAccessor:
         case ts.SyntaxKind.IndexSignature:
-          return errorType(
+          return unimplementedType(
             node,
-            `unimplemented TypeElement kind: ${ts.SyntaxKind[member.kind]}`
+            `TypeElement kind: ${ts.SyntaxKind[member.kind]}`
           );
 
         default:
