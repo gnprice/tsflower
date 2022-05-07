@@ -57,7 +57,6 @@ var oa: typeof o.a;
 var ok: $Keys<typeof o>;
 declare function ff<T>(x: T): {| y: T |};
 declare function ff(x: boolean): (b: true) => {| y: number |};
-declare interface I {}
 declare export class C<T> {};
 
 declare export class D extends C<string> {
@@ -68,6 +67,13 @@ declare export class D extends C<string> {
     z?: any,
     w?: number,
 };
+
+declare interface I {
+    f: (cb: (s: string) => void) => void,
+    x: any,
+    z?: any,
+    w?: number,
+}
 
 export {};
 export { ff as fff, C as CC };

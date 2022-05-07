@@ -395,6 +395,7 @@ export function convertSourceFile(
           );
           break;
 
+        case ts.SyntaxKind.PropertySignature:
         case ts.SyntaxKind.PropertyDeclaration: {
           const {
             name,
@@ -415,6 +416,7 @@ export function convertSourceFile(
           break;
         }
 
+        case ts.SyntaxKind.MethodSignature:
         case ts.SyntaxKind.MethodDeclaration: {
           const { name, questionToken } = member as ts.MethodDeclaration;
 
@@ -431,17 +433,25 @@ export function convertSourceFile(
           break;
         }
 
+        case ts.SyntaxKind.CallSignature:
+        case ts.SyntaxKind.ConstructSignature:
         case ts.SyntaxKind.SemicolonClassElement:
         case ts.SyntaxKind.GetAccessor:
         case ts.SyntaxKind.SetAccessor:
         case ts.SyntaxKind.IndexSignature:
         case ts.SyntaxKind.ClassStaticBlockDeclaration:
           throw new Error(
-            `unimplemented ClassElement kind: ${ts.SyntaxKind[member.kind]}`
+            `unimplemented ClassElement|TypeElement kind: ${
+              ts.SyntaxKind[member.kind]
+            }`
           );
 
         default:
-          crudeError(node); // TODO(error)
+          throw new Error(
+            `unexpected ClassElement|TypeElement kind: ${
+              ts.SyntaxKind[member.kind]
+            }`
+          );
       }
 
       function convertName(
