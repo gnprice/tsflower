@@ -186,21 +186,19 @@ export function convertSourceFile(
           const localSymbol = checker.getSymbolAtLocation(binding.name);
           const importedSymbol =
             localSymbol && checker.getImmediateAliasedSymbol(localSymbol);
-          const isNonValue =
-            importedSymbol &&
-            !!(
-              importedSymbol.flags &
-              (ts.SymbolFlags.Interface |
-                ts.SymbolFlags.TypeLiteral |
-                ts.SymbolFlags.TypeAlias)
-            );
+          // If the symbol is declared only as a type, not a value, then in
+          // Flow we need to say "type" on the import.  (It might have both:
+          // for example, both an interface and class declaration, like
+          // React.Component does.)
+          const isTypeOnly =
+            importedSymbol && !(importedSymbol.flags & ts.SymbolFlags.Value);
 
           specifiers.push(
             b.importSpecifier.from({
               imported: convertIdentifier(binding.propertyName ?? binding.name),
               local: convertIdentifier(binding.name),
               // TODO: use modifier on this ts.ImportSpecifier, if present.
-              importKind: isNonValue ? "type" : "value",
+              importKind: isTypeOnly ? "type" : "value",
             })
           );
         }

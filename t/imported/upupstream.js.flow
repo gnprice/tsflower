@@ -1,0 +1,5 @@
+/* @flow
+ * This is *not* generated.  See this directory's README.
+ */
+
+declare export class Component<P, S> {}
