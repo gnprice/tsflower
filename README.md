@@ -61,7 +61,8 @@ For more, see:
 
 - More consistently handle errors as nice and structured:
 
-  - See all `TODO(error)` comments.
+  - See remaining `TODO(error)` comments, and remaining `throw` statements.
+    (Some of the latter are doing something structured, but some aren't.)
 
   - In general, always use structured helpers like `errorStatement` and its
     friends; always leave a marker comment in the output.
