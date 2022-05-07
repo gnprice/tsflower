@@ -46,6 +46,15 @@ export declare class C<T> {}
 export declare class D extends C<string> {
   // constructor(); // TODO: fix implementation
   // f(cb: (s: string) => void): this;  // TODO implement
+  x;
+  y: string;
+  z?;
+  w?: number;
+  // TODO implement
+  // 3: string;
+  // 'extends': string;
+  // [3]: string;
+  // ['extends']: string;
 }
 
 // export default class {} // TODO implement
