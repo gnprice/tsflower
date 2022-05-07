@@ -37,6 +37,7 @@ var o: {
 };
 var oo: typeof o;
 var oa: typeof o.a;
+var ok: keyof typeof o;
 
 declare function ff<T>(x: T): { y: T };
 

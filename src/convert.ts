@@ -515,6 +515,9 @@ export function convertSourceFile(
         );
       }
 
+      case ts.SyntaxKind.TypeOperator:
+        return convertTypeOperator(node as ts.TypeOperatorNode);
+
       case ts.SyntaxKind.TypeReference:
         return convertTypeReference(node as ts.TypeReferenceNode);
 
@@ -558,7 +561,6 @@ export function convertSourceFile(
       case ts.SyntaxKind.RestType:
       case ts.SyntaxKind.ConditionalType:
       case ts.SyntaxKind.InferType:
-      case ts.SyntaxKind.TypeOperator:
       case ts.SyntaxKind.MappedType:
       case ts.SyntaxKind.LiteralType:
       case ts.SyntaxKind.TemplateLiteralType:
@@ -619,6 +621,30 @@ export function convertSourceFile(
         return errorType(
           node,
           `unexpected literal-type kind: ${ts.SyntaxKind[node.literal.kind]}`
+        );
+    }
+  }
+
+  function convertTypeOperator(node: ts.TypeOperatorNode): K.FlowTypeKind {
+    const { operator, type } = node;
+    switch (operator) {
+      case ts.SyntaxKind.KeyOfKeyword:
+        return b.genericTypeAnnotation(
+          b.identifier("$Keys"),
+          b.typeParameterInstantiation([convertType(type)])
+        );
+
+      case ts.SyntaxKind.UniqueKeyword:
+      case ts.SyntaxKind.ReadonlyKeyword:
+        return errorType(
+          node,
+          `unimplemented type operator: ${ts.SyntaxKind[operator]}`
+        );
+
+      default:
+        return errorType(
+          node,
+          `unexpected type operator: ${ts.SyntaxKind[operator]}`
         );
     }
   }
