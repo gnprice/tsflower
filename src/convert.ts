@@ -175,7 +175,11 @@ export function convertSourceFile(
     node: ts.ImportDeclaration
   ): K.StatementKind {
     const { importClause } = node;
-    if (!importClause) throw new Error("unimplemented: no import clause");
+    if (!importClause)
+      return unimplementedStatement(
+        node,
+        "ImportDeclaration with no import clause"
+      );
 
     if (importClause.modifiers)
       return unimplementedStatement(node, `ImportDeclaration with modifiers`);
