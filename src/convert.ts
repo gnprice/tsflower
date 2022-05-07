@@ -277,7 +277,12 @@ export function convertSourceFile(
         exportKind: isTypeOnly ? "type" : "value",
       });
     } else {
-      // TODO(error): assert unreachable
+      ((_: never) => {})(exportClause);
+      return errorStatement(
+        node,
+        // @ts-expect-error yes, the types say this is unreachable
+        `unexpected export clause: ${ts.SyntaxKind[exportClause.kind]}`
+      );
     }
   }
 
