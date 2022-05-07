@@ -498,6 +498,9 @@ export function convertSourceFile(
       case ts.SyntaxKind.ObjectKeyword:
         return b.objectTypeAnnotation.from({ properties: [], inexact: true });
 
+      case ts.SyntaxKind.ThisType:
+        return b.thisTypeAnnotation();
+
       case ts.SyntaxKind.ParenthesizedType:
         // TODO: Am I missing something?
         return convertType((node as ts.ParenthesizedTypeNode).type);
@@ -551,7 +554,6 @@ export function convertSourceFile(
       case ts.SyntaxKind.IntersectionType:
       case ts.SyntaxKind.ConditionalType:
       case ts.SyntaxKind.InferType:
-      case ts.SyntaxKind.ThisType:
       case ts.SyntaxKind.TypeOperator:
       case ts.SyntaxKind.MappedType:
       case ts.SyntaxKind.LiteralType:

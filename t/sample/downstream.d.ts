@@ -49,10 +49,11 @@ export declare class D extends C<string> {
   // constructor(); // TODO: fix implementation
 
   f(cb: (s: string) => void): void;
+  g(other: this): this;
   // 'import'(cb: (s: string) => void): this;  // TS supports this, but Flow has no equivalent.
 
   x;
-  y: string;
+  y: this;
   z?;
   w?: number;
   // TODO implement
