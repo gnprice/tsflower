@@ -51,6 +51,7 @@ var o: {|
         "😀": mixed,
     |}>,
     l: {| x: number |} => number,
+    m: $ReadOnly<{| a: string |}>,
 |};
 
 var oo: typeof o;

@@ -21,6 +21,7 @@ export interface Mapper {
 }
 
 const defaultLibraryRewrites: Map<string, MapResult> = new Map([
+  ["Readonly", { type: MapResultType.FixedName, name: "$ReadOnly" }],
   ["ReadonlyArray", { type: MapResultType.FixedName, name: "$ReadOnlyArray" }],
   ["Omit", { type: MapResultType.TypeReferenceMacro, convert: convertOmit }],
 ]);
