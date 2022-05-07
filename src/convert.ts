@@ -877,7 +877,8 @@ export function convertSourceFile(
               // TODO per param.constraint jsdoc: Consider calling `getEffectiveConstraintOfTypeParameter`
               !param.constraint
                 ? null
-                : b.typeAnnotation(convertType(param.constraint))
+                : b.typeAnnotation(convertType(param.constraint)),
+              !param.default ? null : convertType(param.default)
             )
           )
         );
