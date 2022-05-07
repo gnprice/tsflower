@@ -506,81 +506,13 @@ export function convertSourceFile(
       }
     }
 
-    const properties: (n.ObjectTypeProperty | n.ObjectTypeSpreadProperty)[] =
-      [];
-    const indexers: n.ObjectTypeIndexer[] | undefined = []; // TODO
-    const callProperties: n.ObjectTypeCallProperty[] | undefined = []; // TODO
-    for (const member of node.members) {
-      switch (member.kind) {
-        case ts.SyntaxKind.Constructor:
-          properties.push(
-            b.objectTypeProperty.from({
-              key: b.identifier("constructor"),
-              // TODO: return type should be void, not any
-              value: convertFunctionType(member as ts.ConstructorDeclaration),
-              optional: false,
-              method: true,
-            }),
-          );
-          break;
-
-        case ts.SyntaxKind.PropertySignature:
-        case ts.SyntaxKind.PropertyDeclaration: {
-          const { name, questionToken, type } =
-            member as ts.PropertyDeclaration;
-
-          const key = convertName(name);
-          if (!key) continue;
-
-          properties.push(
-            b.objectTypeProperty(
-              key,
-              type ? convertType(type) : b.anyTypeAnnotation(),
-              !!questionToken,
-            ),
-          );
-          break;
-        }
-
-        case ts.SyntaxKind.MethodSignature:
-        case ts.SyntaxKind.MethodDeclaration: {
-          const { name, questionToken } = member as ts.MethodDeclaration;
-
-          const key = convertName(name);
-          if (!key) continue;
-
-          properties.push(
-            b.objectTypeProperty.from({
-              key,
-              value: convertFunctionType(member as ts.MethodDeclaration),
-              optional: !!questionToken,
-              method: true,
-            }),
-          );
-          break;
-        }
-
-        case ts.SyntaxKind.CallSignature:
-        case ts.SyntaxKind.ConstructSignature:
-        case ts.SyntaxKind.SemicolonClassElement:
-        case ts.SyntaxKind.GetAccessor:
-        case ts.SyntaxKind.SetAccessor:
-        case ts.SyntaxKind.IndexSignature:
-        case ts.SyntaxKind.ClassStaticBlockDeclaration:
-          return unimplementedStatement(
-            node,
-            `ClassElement|TypeElement kind: ${ts.SyntaxKind[member.kind]}`,
-          );
-
-        default:
-          return errorStatement(
-            node,
-            `unexpected ClassElement|TypeElement kind: ${
-              ts.SyntaxKind[member.kind]
-            }`,
-          );
-      }
+    const members = convertMembers(node);
+    if (!Array.isArray(members)) {
+      if (members.kind === "unimplemented")
+        return unimplementedStatement(node, members.description);
+      else return errorStatement(node, members.description);
     }
+    const [properties, indexers, callProperties] = members;
 
     const params = {
       id: convertIdentifier(node.name),
@@ -593,27 +525,6 @@ export function convertSourceFile(
       return b.declareInterface.from(params);
     } else {
       return b.declareClass.from(params);
-    }
-
-    function convertName(
-      node: ts.PropertyName,
-    ): null | K.IdentifierKind | K.LiteralKind {
-      if (ts.isIdentifier(node)) {
-        return convertIdentifier(node);
-      } else if (ts.isPrivateIdentifier(node)) {
-        // A private property in `declare class` is useless, because it
-        // can't be referred to by anything using the declaration.
-        // (Private properties can only be referred to within the class
-        // definition.)  TS allows them, but Flow doesn't; just drop it
-        // from the output.
-        // TODO(runtime): Handle private properties.
-        return null;
-      } else {
-        // TODO
-        throw new Error(
-          `unimplemented: PropertyName kind ${ts.SyntaxKind[node.kind]}`,
-        );
-      }
     }
   }
 
@@ -962,6 +873,113 @@ export function convertSourceFile(
       exact,
       inexact: !exact,
     });
+  }
+
+  function convertMembers(
+    node: ts.ClassDeclaration | ts.InterfaceDeclaration | ts.TypeLiteralNode,
+  ):
+    | ErrorDescription
+    | [
+        (n.ObjectTypeProperty | n.ObjectTypeSpreadProperty)[],
+        n.ObjectTypeIndexer[] | undefined,
+        n.ObjectTypeCallProperty[] | undefined,
+      ] {
+    const properties: (n.ObjectTypeProperty | n.ObjectTypeSpreadProperty)[] =
+      [];
+    const indexers: n.ObjectTypeIndexer[] | undefined = []; // TODO
+    const callProperties: n.ObjectTypeCallProperty[] | undefined = []; // TODO
+    for (const member of node.members) {
+      switch (member.kind) {
+        case ts.SyntaxKind.Constructor:
+          properties.push(
+            b.objectTypeProperty.from({
+              key: b.identifier("constructor"),
+              // TODO: return type should be void, not any
+              value: convertFunctionType(member as ts.ConstructorDeclaration),
+              optional: false,
+              method: true,
+            }),
+          );
+          break;
+
+        case ts.SyntaxKind.PropertySignature:
+        case ts.SyntaxKind.PropertyDeclaration: {
+          const { name, questionToken, type } =
+            member as ts.PropertyDeclaration;
+
+          const key = convertName(name);
+          if (!key) continue;
+
+          properties.push(
+            b.objectTypeProperty(
+              key,
+              type ? convertType(type) : b.anyTypeAnnotation(),
+              !!questionToken,
+            ),
+          );
+          break;
+        }
+
+        case ts.SyntaxKind.MethodSignature:
+        case ts.SyntaxKind.MethodDeclaration: {
+          const { name, questionToken } = member as ts.MethodDeclaration;
+
+          const key = convertName(name);
+          if (!key) continue;
+
+          properties.push(
+            b.objectTypeProperty.from({
+              key,
+              value: convertFunctionType(member as ts.MethodDeclaration),
+              optional: !!questionToken,
+              method: true,
+            }),
+          );
+          break;
+        }
+
+        case ts.SyntaxKind.CallSignature:
+        case ts.SyntaxKind.ConstructSignature:
+        case ts.SyntaxKind.SemicolonClassElement:
+        case ts.SyntaxKind.GetAccessor:
+        case ts.SyntaxKind.SetAccessor:
+        case ts.SyntaxKind.IndexSignature:
+        case ts.SyntaxKind.ClassStaticBlockDeclaration:
+          return mkUnimplemented(
+            `ClassElement|TypeElement kind: ${ts.SyntaxKind[member.kind]}`,
+          );
+
+        default:
+          return mkError(
+            `unexpected ClassElement|TypeElement kind: ${
+              ts.SyntaxKind[member.kind]
+            }`,
+          );
+      }
+    }
+
+    return [properties, indexers, callProperties];
+
+    function convertName(
+      node: ts.PropertyName,
+    ): null | K.IdentifierKind | K.LiteralKind {
+      if (ts.isIdentifier(node)) {
+        return convertIdentifier(node);
+      } else if (ts.isPrivateIdentifier(node)) {
+        // A private property in `declare class` is useless, because it
+        // can't be referred to by anything using the declaration.
+        // (Private properties can only be referred to within the class
+        // definition.)  TS allows them, but Flow doesn't; just drop it
+        // from the output.
+        // TODO(runtime): Handle private properties.
+        return null;
+      } else {
+        // TODO
+        throw new Error(
+          `unimplemented: PropertyName kind ${ts.SyntaxKind[node.kind]}`,
+        );
+      }
+    }
   }
 
   function convertTypeParameterDeclaration(
