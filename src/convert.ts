@@ -59,7 +59,10 @@ export function convertSourceFile(
   ): K.StatementKind {
     if (n.DeclareFunction.check(inner) || n.DeclareClass.check(inner)) {
       // TODO are there more cases that should go this way?
-      return b.declareExportDeclaration(/* TODO: defaultParam */ false, inner);
+      return b.declareExportDeclaration(
+        hasModifier(node, ts.SyntaxKind.DefaultKeyword),
+        inner
+      );
     } else if (n.DeclareInterface.check(inner)) {
       // Awkwardly convert a DeclareInterface to an InterfaceDeclaration.
       // This causes recast to correctly emit `export interface`
