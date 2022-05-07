@@ -52,6 +52,8 @@ var o: {|
     |}>,
 |};
 
+var oo: typeof o;
+var oa: typeof o.a;
 declare function ff<T>(x: T): {| y: T |};
 declare function ff(x: boolean): (b: true) => {| y: number |};
 declare interface I {}

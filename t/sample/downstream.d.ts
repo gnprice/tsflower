@@ -35,6 +35,8 @@ var o: {
   j: Omit<{ a: string; b: number }, never>;
   k: Omit<{ a: string; b: number }, "12" | "😀">;
 };
+var oo: typeof o;
+var oa: typeof o.a;
 
 declare function ff<T>(x: T): { y: T };
 

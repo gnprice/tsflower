@@ -505,6 +505,13 @@ export function convertSourceFile(
       case ts.SyntaxKind.LiteralType:
         return convertLiteralType(node as ts.LiteralTypeNode);
 
+      case ts.SyntaxKind.TypeQuery: {
+        const { exprName } = node as ts.TypeQueryNode;
+        return b.typeofTypeAnnotation(
+          b.genericTypeAnnotation(convertEntityNameAsType(exprName), null)
+        );
+      }
+
       case ts.SyntaxKind.TypeReference:
         return convertTypeReference(node as ts.TypeReferenceNode);
 
@@ -539,7 +546,6 @@ export function convertSourceFile(
 
       case ts.SyntaxKind.TypePredicate:
       case ts.SyntaxKind.ConstructorType:
-      case ts.SyntaxKind.TypeQuery:
       case ts.SyntaxKind.OptionalType:
       case ts.SyntaxKind.RestType:
       case ts.SyntaxKind.IntersectionType:
