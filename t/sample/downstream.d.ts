@@ -17,7 +17,7 @@ declare type ArrayArray<T, S extends T> = [S, T[]][];
 
 declare var a: undefined, b: void, c: boolean, d: number, e: string;
 var f: null, g: true, h: false, i: 3, j: "x";
-var k: boolean[], l: "a" | 3;
+var k: boolean[], l: "a" | 3, ll: { a: "a" | "b" } & { a: "b" | "c" };
 var m: (x: string, y, ...b: boolean[]) => number;
 var n: (a: string, b?: number) => void;
 var nn: <T>(x: T) => T[];

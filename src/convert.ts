@@ -521,6 +521,11 @@ export function convertSourceFile(
       case ts.SyntaxKind.UnionType:
         return convertUnionType(node as ts.UnionTypeNode);
 
+      case ts.SyntaxKind.IntersectionType: {
+        const { types } = node as ts.IntersectionTypeNode;
+        return b.intersectionTypeAnnotation(types.map(convertType));
+      }
+
       case ts.SyntaxKind.IndexedAccessType:
         return b.genericTypeAnnotation(
           // TODO(flow-155): Switch to Flow indexed-access-type syntax.
@@ -551,7 +556,6 @@ export function convertSourceFile(
       case ts.SyntaxKind.ConstructorType:
       case ts.SyntaxKind.OptionalType:
       case ts.SyntaxKind.RestType:
-      case ts.SyntaxKind.IntersectionType:
       case ts.SyntaxKind.ConditionalType:
       case ts.SyntaxKind.InferType:
       case ts.SyntaxKind.TypeOperator:
