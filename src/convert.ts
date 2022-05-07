@@ -1,8 +1,9 @@
 import ts from "typescript";
 import { builders as b, namedTypes as n } from "ast-types";
 import K from "ast-types/gen/kinds";
-import { map, some } from "./util";
+import { map } from "./util";
 import { Mapper, MapResultType } from "./mapper";
+import { hasModifier } from "./tsutil";
 
 export interface Converter {
   convertType(node: ts.TypeNode): K.FlowTypeKind;
@@ -41,9 +42,7 @@ export function convertSourceFile(
     try {
       const inner = convertStatementExceptExport(node);
 
-      if (
-        some(node.modifiers, (mod) => mod.kind === ts.SyntaxKind.ExportKeyword)
-      ) {
+      if (hasModifier(node, ts.SyntaxKind.ExportKeyword)) {
         return modifyStatementAsExport(inner, node);
       }
 
