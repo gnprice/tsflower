@@ -59,7 +59,7 @@ export function convertSourceFile(
     inner: K.StatementKind,
     node: ts.Statement
   ): K.StatementKind {
-    if (n.DeclareClass.check(inner)) {
+    if (n.DeclareFunction.check(inner) || n.DeclareClass.check(inner)) {
       // TODO are there more cases that should go this way?
       return b.declareExportDeclaration(/* TODO: defaultParam */ false, inner);
     } else if (n.DeclareInterface.check(inner)) {

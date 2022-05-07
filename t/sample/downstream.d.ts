@@ -43,6 +43,7 @@ var ok: keyof typeof o;
 declare function ff<T>(x: T): { y: T };
 
 declare function ff(x: boolean): (b: true) => { y: number };
+export declare function ff(x: boolean): (b: true) => { y: number };
 
 export declare class C<T> {}
 export declare class D extends C<string> {
