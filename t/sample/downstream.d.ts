@@ -4,6 +4,12 @@ import { x as ux } from "./upstream";
 import upstream2 from "./upstream";
 import { Component } from "../imported/upupstream";
 
+export { x, x as uux } from "./upstream";
+export { type Num } from './upstream';  // TODO wrong results: need exportKind
+export type { Num as Nummm } from "./upstream";  // TODO wrong results: need exportKind
+// export * as up from "./upstream";  // TODO
+export * from "./upstream";
+
 export declare type NumArray = Array<upstream.Num>;
 export declare type RONumArray = ReadonlyArray<Numm>;
 
@@ -43,5 +49,8 @@ export declare class D extends C<string> {
 }
 
 // export default class {} // TODO implement
+
+export { };
+export { ff as fff, C as CC };
 
 // declare const _default: upstream2.Num; // TODO doesn't resolve in Flow, though `upstream.Num` does

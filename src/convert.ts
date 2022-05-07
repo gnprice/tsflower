@@ -93,6 +93,9 @@ export function convertSourceFile(
       case ts.SyntaxKind.ImportDeclaration:
         return convertImportDeclaration(node as ts.ImportDeclaration);
 
+      case ts.SyntaxKind.ExportDeclaration:
+        return convertExportDeclaration(node as ts.ExportDeclaration);
+
       case ts.SyntaxKind.ExportAssignment:
         return convertExportAssignment(node as ts.ExportAssignment);
 
@@ -117,7 +120,6 @@ export function convertSourceFile(
       case ts.SyntaxKind.ModuleDeclaration:
       case ts.SyntaxKind.NamespaceExportDeclaration:
       case ts.SyntaxKind.ImportEqualsDeclaration:
-      case ts.SyntaxKind.ExportDeclaration:
       case ts.SyntaxKind.MissingDeclaration:
         // These statements might actually appear in .d.ts files.
         return unimplementedStatement(node);
@@ -228,6 +230,56 @@ export function convertSourceFile(
     );
 
     return b.importDeclaration(specifiers, source);
+  }
+
+  function convertExportDeclaration(
+    node: ts.ExportDeclaration
+  ): K.StatementKind {
+    const { isTypeOnly, exportClause, moduleSpecifier, assertClause } = node;
+
+    if (assertClause) {
+      // TODO unimplemented: `export … from 'foo' assert { … }`
+      crudeError(node);
+    }
+
+    const source = !moduleSpecifier
+      ? null
+      : // Quoth ExportDeclaration jsdoc: "If this is not a StringLiteral it will be a grammar error."
+        b.stringLiteral((moduleSpecifier as ts.StringLiteral).text);
+
+    if (!exportClause) {
+      if (!source) crudeError(node);
+      return b.exportAllDeclaration(source, null);
+    } else if (ts.isNamespaceExport(exportClause)) {
+      return b.exportNamedDeclaration(
+        null,
+        // @ts-expect-error TODO get ast-types and recast to handle this
+        [b.exportNamespaceSpecifier(convertIdentifier(exportClause.name))],
+        source
+      );
+    } else if (ts.isNamedExports(exportClause)) {
+      const specifiers = [];
+      for (const spec of exportClause.elements) {
+        const { isTypeOnly: specIsTypeOnly, propertyName, name } = spec;
+        specifiers.push(
+          b.exportSpecifier.from({
+            local: convertIdentifier(propertyName ?? name),
+            exported: convertIdentifier(name),
+            // @ts-expect-error TODO(wrong) get ast-types and recast to handle this
+            exportKind: specIsTypeOnly ? "type" : "value",
+          })
+        );
+      }
+      return b.exportNamedDeclaration.from({
+        declaration: null,
+        specifiers,
+        source,
+        // @ts-expect-error TODO(wrong) get ast-types and recast to handle this
+        exportKind: isTypeOnly ? "type" : "value",
+      });
+    } else {
+      // TODO(error): assert unreachable
+    }
   }
 
   function convertExportAssignment(node: ts.ExportAssignment): K.StatementKind {

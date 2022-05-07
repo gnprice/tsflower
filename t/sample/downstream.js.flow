@@ -6,6 +6,10 @@ import { type Num as Numm } from "./upstream";
 import { x as ux } from "./upstream";
 import upstream2 from "./upstream";
 import { Component } from "../imported/upupstream";
+export { x, x as uux } from "./upstream";
+export { Num } from "./upstream";
+export { Num as Nummm } from "./upstream";
+export * from "./upstream";
 export type NumArray = Array<upstream.Num>;
 export type RONumArray = $ReadOnlyArray<Numm>;
 type ArrayArray<T, S: T> = [S, T[]][];
@@ -53,3 +57,5 @@ declare function ff(x: boolean): (b: true) => {| y: number |};
 declare interface I {}
 declare export class C<T> {};
 declare export class D extends C<string> {};
+export {};
+export { ff as fff, C as CC };
