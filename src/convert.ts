@@ -45,7 +45,7 @@ export function convertSourceFile(
       if (
         some(node.modifiers, (mod) => mod.kind === ts.SyntaxKind.ExportKeyword)
       ) {
-        return modifyStatementAsExport(inner);
+        return modifyStatementAsExport(inner, node);
       }
 
       return inner;
@@ -55,18 +55,21 @@ export function convertSourceFile(
     }
   }
 
-  function modifyStatementAsExport(inner: K.StatementKind): K.StatementKind {
+  function modifyStatementAsExport(
+    inner: K.StatementKind,
+    node: ts.Statement
+  ): K.StatementKind {
     if (!n.Declaration.check(inner)) {
       if (n.EmptyStatement.check(inner)) {
         // Presumably an error or unimplemented.  Nothing further to log.
         return inner;
       }
 
-      console.error(
-        `warning: statement has "export", but conversion not a declaration`
+      return warningStatement(
+        inner,
+        node,
+        `statement has "export", but conversion not a declaration`
       );
-      // TODO(error) better log this; note in output
-      return inner;
     }
 
     if (n.DeclareClass.check(inner)) {
@@ -859,6 +862,20 @@ export function convertSourceFile(
           name: node.text,
           typeAnnotation: b.typeAnnotation(type),
         });
+  }
+
+  function warningStatement(
+    outNode: K.StatementKind,
+    node: ts.Statement,
+    description: string
+  ): K.StatementKind {
+    const msg = ` tsflower-warning: ${description} `;
+    return {
+      ...outNode,
+      // TODO(error): Get the quoted original before the output, to be next
+      //   to the warning description
+      comments: [b.commentBlock(msg, true, false), quotedStatement(node)],
+    };
   }
 
   function unimplementedStatement(
