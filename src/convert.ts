@@ -5,6 +5,28 @@ import { map, some } from "./util";
 import { Mapper, MapResultType } from "./mapper";
 import { hasModifier } from "./tsutil";
 
+export type ErrorDescription = {
+  kind: "unimplemented" | "error";
+  description: string;
+};
+
+export const mkError = (description: string): ErrorDescription => ({
+  kind: "error",
+  description,
+});
+
+export const mkUnimplemented = (description: string): ErrorDescription => ({
+  kind: "unimplemented",
+  description,
+});
+
+export type ErrorOr<T> = { kind: "success"; result: T } | ErrorDescription;
+
+export const mkSuccess = <T>(result: T): ErrorOr<T> => ({
+  kind: "success",
+  result,
+});
+
 export interface Converter {
   convertType(node: ts.TypeNode): K.FlowTypeKind;
   errorType(node: ts.TypeNode, description: string): K.FlowTypeKind;
@@ -722,9 +744,14 @@ export function convertSourceFile(
           convertTypeArguments(node.typeName, node.typeArguments)
         );
 
-      case MapResultType.TypeReferenceMacro:
-        return mapped.convert(converter, node);
-
+      case MapResultType.TypeReferenceMacro: {
+        const result = mapped.convert(converter, node);
+        if (result.kind !== "success")
+          return result.kind === "error"
+            ? errorType(node, result.description)
+            : unimplementedType(node, result.description);
+        return b.genericTypeAnnotation.from(result.result);
+      }
       // TODO: How to get TypeScript to check that this switch is exhaustive?
       //   case undefined:
       //     break;

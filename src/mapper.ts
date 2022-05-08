@@ -1,8 +1,8 @@
 import ts from "typescript";
-import { builders as b, namedTypes as _n } from "ast-types";
+import { builders as b, namedTypes as n } from "ast-types";
 import K from "ast-types/gen/kinds";
 import { some } from "./util";
-import { Converter } from "./convert";
+import { Converter, ErrorOr, mkError, mkSuccess } from "./convert";
 
 export enum MapResultType {
   FixedName,
@@ -13,7 +13,13 @@ export type MapResult =
   | { type: MapResultType.FixedName; name: string }
   | {
       type: MapResultType.TypeReferenceMacro;
-      convert(converter: Converter, node: ts.TypeReferenceNode): K.FlowTypeKind;
+      convert(
+        converter: Converter,
+        node: ts.TypeReferenceNode
+      ): ErrorOr<{
+        id: K.IdentifierKind | n.QualifiedTypeIdentifier;
+        typeParameters: n.TypeParameterInstantiation | null;
+      }>;
     };
 
 export interface Mapper {
@@ -29,10 +35,15 @@ const defaultLibraryRewrites: Map<string, MapResult> = new Map([
 function convertOmit(
   converter: Converter,
   node: ts.TypeReferenceNode
-): K.FlowTypeKind {
+): ErrorOr<{
+  id: K.IdentifierKind | n.QualifiedTypeIdentifier;
+  typeParameters: n.TypeParameterInstantiation | null;
+}> {
   const { typeArguments } = node;
   if (typeArguments?.length !== 2) {
-    return error(`${typeArguments?.length ?? 0} arguments (expected 2)`);
+    return mkError(
+      `bad Omit: ${typeArguments?.length ?? 0} arguments (expected 2)`
+    );
   }
   const [objectType, keysType] = typeArguments;
 
@@ -80,17 +91,13 @@ function convertOmit(
     });
   }
 
-  return b.genericTypeAnnotation(
-    b.identifier("$Diff"),
-    b.typeParameterInstantiation([
+  return mkSuccess({
+    id: b.identifier("$Diff"),
+    typeParameters: b.typeParameterInstantiation([
       converter.convertType(objectType),
       subtrahend,
-    ])
-  );
-
-  function error(description: string) {
-    return converter.errorType(node, `bad Omit: ${description}`);
-  }
+    ]),
+  });
 }
 
 export function createMapper(program: ts.Program, targetFilenames: string[]) {
