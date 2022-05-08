@@ -30,3 +30,9 @@ export function isEntityNameOrEntityNameExpression(
     );
   return false;
 }
+
+export function getModuleSpecifier(node: ts.ImportDeclaration): string {
+  // JSDoc on ImportDeclaration#moduleSpecifier says:
+  //   > If this is not a StringLiteral it will be a grammar error.
+  return (node.moduleSpecifier as ts.StringLiteral).text;
+}

@@ -3,7 +3,11 @@ import { builders as b, namedTypes as n } from "ast-types";
 import K from "ast-types/gen/kinds";
 import { map, some } from "./util";
 import { Mapper, MapResultType } from "./mapper";
-import { hasModifier, isEntityNameOrEntityNameExpression } from "./tsutil";
+import {
+  getModuleSpecifier,
+  hasModifier,
+  isEntityNameOrEntityNameExpression,
+} from "./tsutil";
 
 export type ErrorDescription = {
   kind: "unimplemented" | "error";
@@ -248,11 +252,7 @@ export function convertSourceFile(
       }
     }
 
-    const source = b.stringLiteral(
-      // JSDoc on ImportDeclaration#moduleSpecifier says:
-      //   > If this is not a StringLiteral it will be a grammar error.
-      (node.moduleSpecifier as ts.StringLiteral).text
-    );
+    const source = b.stringLiteral(getModuleSpecifier(node));
 
     return b.importDeclaration(specifiers, source);
   }
