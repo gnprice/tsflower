@@ -506,10 +506,8 @@ export function convertSourceFile(
       }
     }
 
-    const properties: (
-      | n.ObjectTypeProperty
-      | n.ObjectTypeSpreadProperty
-    )[] = [];
+    const properties: (n.ObjectTypeProperty | n.ObjectTypeSpreadProperty)[] =
+      [];
     const indexers: n.ObjectTypeIndexer[] | undefined = []; // TODO
     const callProperties: n.ObjectTypeCallProperty[] | undefined = []; // TODO
     for (const member of node.members) {
@@ -528,11 +526,8 @@ export function convertSourceFile(
 
         case ts.SyntaxKind.PropertySignature:
         case ts.SyntaxKind.PropertyDeclaration: {
-          const {
-            name,
-            questionToken,
-            type,
-          } = member as ts.PropertyDeclaration;
+          const { name, questionToken, type } =
+            member as ts.PropertyDeclaration;
 
           const key = convertName(name);
           if (!key) continue;
@@ -922,10 +917,8 @@ export function convertSourceFile(
   }
 
   function convertTypeLiteral(node: ts.TypeLiteralNode): K.FlowTypeKind {
-    const properties: (
-      | n.ObjectTypeProperty
-      | n.ObjectTypeSpreadProperty
-    )[] = [];
+    const properties: (n.ObjectTypeProperty | n.ObjectTypeSpreadProperty)[] =
+      [];
     for (let i = 0; i < node.members.length; i++) {
       const member = node.members[i];
       switch (member.kind) {
