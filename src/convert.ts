@@ -454,12 +454,13 @@ export function convertSourceFile(
       switch (member.kind) {
         case ts.SyntaxKind.Constructor:
           properties.push(
-            // TODO: return type should be void, not any
-            b.objectTypeProperty(
-              b.identifier("constructor"),
-              convertFunctionType(member as ts.ConstructorDeclaration),
-              false
-            )
+            b.objectTypeProperty.from({
+              key: b.identifier("constructor"),
+              // TODO: return type should be void, not any
+              value: convertFunctionType(member as ts.ConstructorDeclaration),
+              optional: false,
+              method: true,
+            })
           );
           break;
 
@@ -492,11 +493,12 @@ export function convertSourceFile(
           if (!key) continue;
 
           properties.push(
-            b.objectTypeProperty(
+            b.objectTypeProperty.from({
               key,
-              convertFunctionType(member as ts.MethodDeclaration),
-              !!questionToken
-            )
+              value: convertFunctionType(member as ts.MethodDeclaration),
+              optional: !!questionToken,
+              method: true,
+            })
           );
           break;
         }

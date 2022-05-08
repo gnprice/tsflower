@@ -42,7 +42,7 @@ export declare function ff(x: boolean): (b: true) => { y: number };
 
 export declare class C<T> {}
 export declare class D extends C<string> {
-  // constructor(); // TODO: fix implementation
+  constructor(); // TODO: should return void, not any
 
   f(cb: (s: string) => void): void;
   g(other: this): this;
