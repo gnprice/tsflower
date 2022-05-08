@@ -974,8 +974,9 @@ export function convertSourceFile(
         // TODO(runtime): Handle private properties.
         return null;
       } else {
-        // TODO
-        throw new Error(
+        // TODO(error)
+        crudeError(
+          node,
           `unimplemented: PropertyName kind ${ts.SyntaxKind[node.kind]}`,
         );
       }
