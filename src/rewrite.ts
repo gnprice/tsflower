@@ -36,14 +36,14 @@ function convertOmit(
   converter: Converter,
   // @ts-expect-error yes, this is unused
   typeName: ts.EntityNameOrEntityNameExpression,
-  typeArguments: ts.NodeArray<ts.TypeNode> | void
+  typeArguments: ts.NodeArray<ts.TypeNode> | void,
 ): ErrorOr<{
   id: K.IdentifierKind | n.QualifiedTypeIdentifier;
   typeParameters: n.TypeParameterInstantiation | null;
 }> {
   if (typeArguments?.length !== 2) {
     return mkError(
-      `bad Omit: ${typeArguments?.length ?? 0} arguments (expected 2)`
+      `bad Omit: ${typeArguments?.length ?? 0} arguments (expected 2)`,
     );
   }
   const [objectType, keysType] = typeArguments;
@@ -56,14 +56,14 @@ function convertOmit(
         b.objectTypeProperty(
           b.stringLiteral(keysType.literal.text),
           b.mixedTypeAnnotation(),
-          false
+          false,
         ),
       ],
     });
   } else if (
     ts.isUnionTypeNode(keysType) &&
     keysType.types.every(
-      (t) => ts.isLiteralTypeNode(t) && ts.isStringLiteral(t.literal)
+      (t) => ts.isLiteralTypeNode(t) && ts.isStringLiteral(t.literal),
     )
   ) {
     subtrahend = b.objectTypeAnnotation.from({
@@ -71,11 +71,11 @@ function convertOmit(
       properties: keysType.types.map((t) =>
         b.objectTypeProperty(
           b.stringLiteral(
-            ((t as ts.LiteralTypeNode).literal as ts.StringLiteral).text
+            ((t as ts.LiteralTypeNode).literal as ts.StringLiteral).text,
           ),
           b.mixedTypeAnnotation(),
-          false
-        )
+          false,
+        ),
       ),
     });
   } else {
@@ -86,7 +86,7 @@ function convertOmit(
         b.objectTypeIndexer(
           b.identifier("key"),
           converter.convertType(keysType),
-          b.mixedTypeAnnotation()
+          b.mixedTypeAnnotation(),
         ),
       ],
     });
@@ -104,7 +104,7 @@ function convertOmit(
 function convertReactComponent(
   converter: Converter,
   typeName: ts.EntityNameOrEntityNameExpression,
-  typeArguments: ts.NodeArray<ts.TypeNode> | void
+  typeArguments: ts.NodeArray<ts.TypeNode> | void,
 ): ErrorOr<{
   id: K.IdentifierKind | n.QualifiedTypeIdentifier;
   typeParameters: n.TypeParameterInstantiation | null;
@@ -113,7 +113,7 @@ function convertReactComponent(
     return mkError(
       `bad React.Component: ${
         typeArguments?.length ?? 0
-      } arguments (expected 0-2)`
+      } arguments (expected 0-2)`,
     );
   }
   const [propsType, stateType] = typeArguments ?? [];
@@ -135,7 +135,7 @@ function convertReactElement(
   converter: Converter,
   // @ts-expect-error yes, this is unused
   typeName: ts.EntityNameOrEntityNameExpression,
-  typeArguments: ts.NodeArray<ts.TypeNode> | void
+  typeArguments: ts.NodeArray<ts.TypeNode> | void,
 ) {
   // TODO: If ReactElement is imported individually, we also need to rewrite
   //   that import.
@@ -144,7 +144,7 @@ function convertReactElement(
     return mkError(
       `bad React.Element: ${
         typeArguments?.length ?? 0
-      } arguments (expected 0-2)`
+      } arguments (expected 0-2)`,
     );
   }
   const [propsType, typeType] = typeArguments ?? [];
@@ -156,7 +156,7 @@ function convertReactElement(
     args = [
       b.genericTypeAnnotation(
         b.identifier("React$ComponentType"),
-        b.typeParameterInstantiation([converter.convertType(propsType)])
+        b.typeParameterInstantiation([converter.convertType(propsType)]),
       ),
     ];
   } else {

@@ -15,7 +15,7 @@
 /** Like `Array#forEach`, but `undefined` behaves like an empty array. */
 export function forEach<T>(
   array: readonly T[] | void,
-  f: (x: T, i: number) => void
+  f: (x: T, i: number) => void,
 ): void {
   if (!array) return;
   return array.forEach(f);
@@ -24,7 +24,7 @@ export function forEach<T>(
 /** Like `Array#some`, but `undefined` behaves like an empty array. */
 export function some<T>(
   array: readonly T[] | void,
-  predicate: (value: T) => boolean
+  predicate: (value: T) => boolean,
 ): boolean {
   if (!array) return false;
   for (let i = 0; i < array.length; i++) {
@@ -37,7 +37,7 @@ export function some<T>(
 export function map<T, U>(array: readonly T[], f: (x: T, i: number) => U): U[];
 export function map<T, U>(
   array: readonly T[] | void,
-  f: (x: T, i: number) => U
+  f: (x: T, i: number) => U,
 ): U[] | void {
   if (!array) return undefined;
   return array.map(f);

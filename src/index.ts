@@ -48,7 +48,7 @@ export function convertFileTree(src: string, dest: string) {
 
 function collectInputsFromTree(
   src: string,
-  dest: string
+  dest: string,
 ): { inputs: string[]; outputs: string[] } {
   const inputs: string[] = [];
   const outputs: string[] = [];

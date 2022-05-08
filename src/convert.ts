@@ -35,7 +35,7 @@ export const mkSuccess = <T>(result: T): ErrorOr<T> => ({
 export interface Converter {
   convertType(node: ts.TypeNode): K.FlowTypeKind;
   convertEntityNameAsType(
-    node: ts.EntityNameOrEntityNameExpression
+    node: ts.EntityNameOrEntityNameExpression,
   ): K.IdentifierKind | K.QualifiedTypeIdentifierKind;
   errorType(node: ts.TypeNode, description: string): K.FlowTypeKind;
   unimplementedType(node: ts.TypeNode, description: string): K.FlowTypeKind;
@@ -49,7 +49,7 @@ const headerComment = ` ${"@"}flow
 export function convertSourceFile(
   sourceFile: ts.SourceFile,
   mapper: Mapper,
-  program: ts.Program
+  program: ts.Program,
 ): n.File {
   const checker = program.getTypeChecker();
 
@@ -66,7 +66,7 @@ export function convertSourceFile(
       comments: [b.commentBlock(headerComment)],
       body: sourceFile.statements.map(convertStatement),
     }),
-    sourceFile.fileName
+    sourceFile.fileName,
   );
 
   function convertStatement(node: ts.Statement): K.StatementKind {
@@ -86,13 +86,13 @@ export function convertSourceFile(
 
   function modifyStatementAsExport(
     inner: K.StatementKind,
-    node: ts.Statement
+    node: ts.Statement,
   ): K.StatementKind {
     if (n.DeclareFunction.check(inner) || n.DeclareClass.check(inner)) {
       // TODO are there more cases that should go this way?
       return b.declareExportDeclaration(
         hasModifier(node, ts.SyntaxKind.DefaultKeyword),
-        inner
+        inner,
       );
     } else if (n.DeclareInterface.check(inner)) {
       // Awkwardly convert a DeclareInterface to an InterfaceDeclaration.
@@ -104,7 +104,7 @@ export function convertSourceFile(
           typeParameters: inner.typeParameters,
           extends: inner.extends,
           body: inner.body,
-        })
+        }),
       );
     } else if (n.Declaration.check(inner)) {
       // The generic case.
@@ -116,7 +116,7 @@ export function convertSourceFile(
       return warningStatement(
         inner,
         node,
-        `statement has "export", but conversion not a declaration`
+        `statement has "export", but conversion not a declaration`,
       );
     }
   }
@@ -144,7 +144,7 @@ export function convertSourceFile(
       case ts.SyntaxKind.ClassDeclaration:
       case ts.SyntaxKind.InterfaceDeclaration:
         return convertClassLikeDeclaration(
-          node as ts.ClassDeclaration | ts.InterfaceDeclaration
+          node as ts.ClassDeclaration | ts.InterfaceDeclaration,
         );
 
       case ts.SyntaxKind.Block:
@@ -192,25 +192,25 @@ export function convertSourceFile(
         // these below, as part of handling the statements they appear in.
         return errorStatement(
           node,
-          `unexpected statement kind: ${ts.SyntaxKind[node.kind]}`
+          `unexpected statement kind: ${ts.SyntaxKind[node.kind]}`,
         );
 
       default:
         return errorStatement(
           node,
-          `unexpected statement kind: ${ts.SyntaxKind[node.kind]}`
+          `unexpected statement kind: ${ts.SyntaxKind[node.kind]}`,
         );
     }
   }
 
   function convertImportDeclaration(
-    node: ts.ImportDeclaration
+    node: ts.ImportDeclaration,
   ): K.StatementKind {
     const { importClause } = node;
     if (!importClause)
       return unimplementedStatement(
         node,
-        "ImportDeclaration with no import clause"
+        "ImportDeclaration with no import clause",
       );
 
     if (importClause.modifiers)
@@ -224,7 +224,7 @@ export function convertSourceFile(
 
     if (importClause.name)
       specifiers.push(
-        b.importDefaultSpecifier(convertIdentifier(importClause.name))
+        b.importDefaultSpecifier(convertIdentifier(importClause.name)),
       );
 
     const { namedBindings } = importClause;
@@ -244,7 +244,7 @@ export function convertSourceFile(
               // TODO(error): localize this to the one ts.ImportSpecifier
               return errorStatement(
                 node,
-                `internal error: renamed the imported type \`${propertyName.text}\`, but not its local binding`
+                `internal error: renamed the imported type \`${propertyName.text}\`, but not its local binding`,
               );
             }
 
@@ -275,7 +275,7 @@ export function convertSourceFile(
           function add(
             importKind: "value" | "type" | "typeof",
             importedText: string,
-            localText: string
+            localText: string,
           ): void {
             const imported = b.identifier(importedText);
             const local = b.identifier(localText);
@@ -286,14 +286,14 @@ export function convertSourceFile(
           function buildImportSpecifier(
             imported: K.IdentifierKind,
             local?: K.IdentifierKind | null | undefined,
-            importKind?: "value" | "type" | "typeof" | undefined
+            importKind?: "value" | "type" | "typeof" | undefined,
           ): n.ImportSpecifier {
             return b.importSpecifier.from({ imported, local, importKind });
           }
         }
       } else {
         specifiers.push(
-          b.importNamespaceSpecifier(convertIdentifier(namedBindings.name))
+          b.importNamespaceSpecifier(convertIdentifier(namedBindings.name)),
         );
       }
     }
@@ -303,12 +303,12 @@ export function convertSourceFile(
     return b.importDeclaration(
       specifiers,
       source,
-      importClause.isTypeOnly ? "type" : "value"
+      importClause.isTypeOnly ? "type" : "value",
     );
   }
 
   function convertExportDeclaration(
-    node: ts.ExportDeclaration
+    node: ts.ExportDeclaration,
   ): K.StatementKind {
     const { isTypeOnly, exportClause, moduleSpecifier, assertClause } = node;
 
@@ -330,7 +330,7 @@ export function convertSourceFile(
         null,
         // @ts-expect-error TODO get ast-types and recast to handle this
         [b.exportNamespaceSpecifier(convertIdentifier(exportClause.name))],
-        source
+        source,
       );
     } else if (ts.isNamedExports(exportClause)) {
       const specifiers = [];
@@ -342,7 +342,7 @@ export function convertSourceFile(
             exported: convertIdentifier(name),
             // @ts-expect-error TODO(wrong) get ast-types and recast to handle this
             exportKind: specIsTypeOnly ? "type" : "value",
-          })
+          }),
         );
       }
       return b.exportNamedDeclaration.from({
@@ -357,7 +357,7 @@ export function convertSourceFile(
       return errorStatement(
         node,
         // @ts-expect-error yes, the types say this is unreachable
-        `unexpected export clause: ${ts.SyntaxKind[exportClause.kind]}`
+        `unexpected export clause: ${ts.SyntaxKind[exportClause.kind]}`,
       );
     }
   }
@@ -371,14 +371,14 @@ export function convertSourceFile(
       // TODO(runtime): These don't appear in .d.ts files, but do in TS.
       return unimplementedStatement(
         node,
-        `"export default" with non-identifier`
+        `"export default" with non-identifier`,
       );
 
     return b.exportDefaultDeclaration(convertIdentifier(node.expression));
   }
 
   function convertVariableStatement(
-    node: ts.VariableStatement
+    node: ts.VariableStatement,
   ): K.StatementKind {
     const flags =
       node.declarationList.flags & (ts.NodeFlags.Const | ts.NodeFlags.Let);
@@ -392,15 +392,15 @@ export function convertSourceFile(
         return b.variableDeclarator(
           convertIdentifier(
             node.name /* TODO */ as ts.Identifier,
-            node.type && convertType(node.type)
-          )
+            node.type && convertType(node.type),
+          ),
         );
-      })
+      }),
     );
   }
 
   function convertTypeAliasDeclaration(
-    node: ts.TypeAliasDeclaration
+    node: ts.TypeAliasDeclaration,
   ): K.StatementKind {
     const symbol = checker.getSymbolAtLocation(node.name);
     const mapped = symbol && mapper.getSymbol(symbol);
@@ -421,7 +421,7 @@ export function convertSourceFile(
     return b.typeAlias(
       b.identifier(name),
       convertTypeParameterDeclaration(node.typeParameters),
-      convertType(node.type)
+      convertType(node.type),
     );
   }
 
@@ -437,7 +437,7 @@ export function convertSourceFile(
         // solution is we should generate a fresh name.
         return unimplementedStatement(
           node,
-          "`export default function` with no name"
+          "`export default function` with no name",
         );
       }
 
@@ -446,12 +446,12 @@ export function convertSourceFile(
     }
 
     return b.declareFunction(
-      convertIdentifier(node.name, convertFunctionType(node))
+      convertIdentifier(node.name, convertFunctionType(node)),
     );
   }
 
   function convertClassLikeDeclaration(
-    node: ts.ClassDeclaration | ts.InterfaceDeclaration
+    node: ts.ClassDeclaration | ts.InterfaceDeclaration,
   ) {
     if (!node.name) {
       if (
@@ -464,7 +464,7 @@ export function convertSourceFile(
         // solution is we should generate a fresh name.
         return unimplementedStatement(
           node,
-          "`export default class` with no name"
+          "`export default class` with no name",
         );
       }
 
@@ -488,7 +488,7 @@ export function convertSourceFile(
               node,
               `unexpected 'extends' base kind: ${
                 ts.SyntaxKind[expression.kind]
-              }`
+              }`,
             );
           }
           if (!isEntityNameOrEntityNameExpression(expression))
@@ -520,7 +520,7 @@ export function convertSourceFile(
               value: convertFunctionType(member as ts.ConstructorDeclaration),
               optional: false,
               method: true,
-            })
+            }),
           );
           break;
 
@@ -536,8 +536,8 @@ export function convertSourceFile(
             b.objectTypeProperty(
               key,
               type ? convertType(type) : b.anyTypeAnnotation(),
-              !!questionToken
-            )
+              !!questionToken,
+            ),
           );
           break;
         }
@@ -555,7 +555,7 @@ export function convertSourceFile(
               value: convertFunctionType(member as ts.MethodDeclaration),
               optional: !!questionToken,
               method: true,
-            })
+            }),
           );
           break;
         }
@@ -569,7 +569,7 @@ export function convertSourceFile(
         case ts.SyntaxKind.ClassStaticBlockDeclaration:
           return unimplementedStatement(
             node,
-            `ClassElement|TypeElement kind: ${ts.SyntaxKind[member.kind]}`
+            `ClassElement|TypeElement kind: ${ts.SyntaxKind[member.kind]}`,
           );
 
         default:
@@ -577,7 +577,7 @@ export function convertSourceFile(
             node,
             `unexpected ClassElement|TypeElement kind: ${
               ts.SyntaxKind[member.kind]
-            }`
+            }`,
           );
       }
     }
@@ -596,7 +596,7 @@ export function convertSourceFile(
     }
 
     function convertName(
-      node: ts.PropertyName
+      node: ts.PropertyName,
     ): null | K.IdentifierKind | K.LiteralKind {
       if (ts.isIdentifier(node)) {
         return convertIdentifier(node);
@@ -611,7 +611,7 @@ export function convertSourceFile(
       } else {
         // TODO
         throw new Error(
-          `unimplemented: PropertyName kind ${ts.SyntaxKind[node.kind]}`
+          `unimplemented: PropertyName kind ${ts.SyntaxKind[node.kind]}`,
         );
       }
     }
@@ -651,7 +651,7 @@ export function convertSourceFile(
       case ts.SyntaxKind.TypeQuery: {
         const { exprName } = node as ts.TypeQueryNode;
         return b.typeofTypeAnnotation(
-          b.genericTypeAnnotation(convertEntityNameAsType(exprName), null)
+          b.genericTypeAnnotation(convertEntityNameAsType(exprName), null),
         );
       }
 
@@ -676,17 +676,17 @@ export function convertSourceFile(
           b.typeParameterInstantiation([
             convertType((node as ts.IndexedAccessTypeNode).objectType),
             convertType((node as ts.IndexedAccessTypeNode).indexType),
-          ])
+          ]),
         );
 
       case ts.SyntaxKind.ArrayType:
         return b.arrayTypeAnnotation(
-          convertType((node as ts.ArrayTypeNode).elementType)
+          convertType((node as ts.ArrayTypeNode).elementType),
         );
 
       case ts.SyntaxKind.TupleType:
         return b.tupleTypeAnnotation(
-          (node as ts.TupleTypeNode).elements.map(convertType)
+          (node as ts.TupleTypeNode).elements.map(convertType),
         );
 
       case ts.SyntaxKind.FunctionType:
@@ -712,13 +712,13 @@ export function convertSourceFile(
         // Not actually types -- pieces of types.
         return errorType(
           node,
-          `unexpected type kind: ${ts.SyntaxKind[node.kind]}`
+          `unexpected type kind: ${ts.SyntaxKind[node.kind]}`,
         );
 
       default:
         return errorType(
           node,
-          `unexpected type kind: ${ts.SyntaxKind[node.kind]}`
+          `unexpected type kind: ${ts.SyntaxKind[node.kind]}`,
         );
     }
   }
@@ -739,14 +739,14 @@ export function convertSourceFile(
             node,
             `LiteralTypeNode with PrefixUnaryExpression operator ${
               ts.SyntaxKind[literal.operator]
-            }; expected MinusToken`
+            }; expected MinusToken`,
           );
         if (!ts.isNumericLiteral(literal.operand))
           return errorType(
             node,
             `LiteralTypeNode with unary-minus of ${
               ts.SyntaxKind[literal.operand.kind]
-            }; expected NumericLiteral`
+            }; expected NumericLiteral`,
           );
         const { text } = literal.operand;
         // TODO: is more conversion needed on these number literals?
@@ -769,7 +769,7 @@ export function convertSourceFile(
       default:
         return errorType(
           node,
-          `unexpected literal-type kind: ${ts.SyntaxKind[node.literal.kind]}`
+          `unexpected literal-type kind: ${ts.SyntaxKind[node.literal.kind]}`,
         );
     }
   }
@@ -780,20 +780,20 @@ export function convertSourceFile(
       case ts.SyntaxKind.KeyOfKeyword:
         return b.genericTypeAnnotation(
           b.identifier("$Keys"),
-          b.typeParameterInstantiation([convertType(type)])
+          b.typeParameterInstantiation([convertType(type)]),
         );
 
       case ts.SyntaxKind.UniqueKeyword:
       case ts.SyntaxKind.ReadonlyKeyword:
         return unimplementedType(
           node,
-          `type operator: ${ts.SyntaxKind[operator]}`
+          `type operator: ${ts.SyntaxKind[operator]}`,
         );
 
       default:
         return errorType(
           node,
-          `unexpected type operator: ${ts.SyntaxKind[operator]}`
+          `unexpected type operator: ${ts.SyntaxKind[operator]}`,
         );
     }
   }
@@ -811,7 +811,7 @@ export function convertSourceFile(
    * a corresponding case in the visitor in `createMapper`.) */
   function convertTypeReferenceLike(
     typeName: ts.EntityNameOrEntityNameExpression,
-    typeArguments: ts.NodeArray<ts.TypeNode> | void
+    typeArguments: ts.NodeArray<ts.TypeNode> | void,
   ): ErrorOr<{
     id: K.IdentifierKind | n.QualifiedTypeIdentifier;
     typeParameters: n.TypeParameterInstantiation | null;
@@ -839,17 +839,17 @@ export function convertSourceFile(
   }
 
   function convertEntityNameAsType(
-    node: ts.EntityNameOrEntityNameExpression
+    node: ts.EntityNameOrEntityNameExpression,
   ): K.IdentifierKind | K.QualifiedTypeIdentifierKind {
     if (ts.isIdentifier(node)) return convertIdentifier(node);
     if (ts.isQualifiedName(node))
       return b.qualifiedTypeIdentifier(
         convertEntityNameAsType(node.left),
-        convertIdentifier(node.right)
+        convertIdentifier(node.right),
       );
     return b.qualifiedTypeIdentifier(
       convertEntityNameAsType(node.expression),
-      convertIdentifier(node.name)
+      convertIdentifier(node.name),
     );
   }
 
@@ -862,7 +862,7 @@ export function convertSourceFile(
       | ts.FunctionTypeNode
       | ts.FunctionDeclaration
       | ts.ConstructorDeclaration
-      | ts.MethodDeclaration
+      | ts.MethodDeclaration,
   ): K.FlowTypeKind {
     const typeParams = convertTypeParameterDeclaration(node.typeParameters);
 
@@ -891,7 +891,7 @@ export function convertSourceFile(
           param.type
             ? convertType(param.type)
             : b.arrayTypeAnnotation(b.anyTypeAnnotation()),
-          false
+          false,
         );
         break;
       }
@@ -902,8 +902,8 @@ export function convertSourceFile(
           // TS function parameter types must have names, but can lack types.
           // When missing, the type is implicitly `any`.
           param.type ? convertType(param.type) : b.anyTypeAnnotation(),
-          !!param.questionToken
-        )
+          !!param.questionToken,
+        ),
       );
     }
 
@@ -928,8 +928,8 @@ export function convertSourceFile(
             b.objectTypeProperty(
               convertIdentifier(name /* TODO */ as ts.Identifier),
               type ? convertType(type) : b.anyTypeAnnotation(),
-              !!questionToken
-            )
+              !!questionToken,
+            ),
           );
           break;
         }
@@ -942,13 +942,13 @@ export function convertSourceFile(
         case ts.SyntaxKind.IndexSignature:
           return unimplementedType(
             node,
-            `TypeElement kind: ${ts.SyntaxKind[member.kind]}`
+            `TypeElement kind: ${ts.SyntaxKind[member.kind]}`,
           );
 
         default:
           return errorType(
             node,
-            `unexpected TypeElement kind: ${ts.SyntaxKind[member.kind]}`
+            `unexpected TypeElement kind: ${ts.SyntaxKind[member.kind]}`,
           );
       }
     }
@@ -965,7 +965,7 @@ export function convertSourceFile(
   }
 
   function convertTypeParameterDeclaration(
-    params: void | ts.NodeArray<ts.TypeParameterDeclaration>
+    params: void | ts.NodeArray<ts.TypeParameterDeclaration>,
   ): null | n.TypeParameterDeclaration {
     return !params
       ? null
@@ -978,9 +978,9 @@ export function convertSourceFile(
               !param.constraint
                 ? null
                 : b.typeAnnotation(convertType(param.constraint)),
-              !param.default ? null : convertType(param.default)
-            )
-          )
+              !param.default ? null : convertType(param.default),
+            ),
+          ),
         );
   }
 
@@ -988,7 +988,7 @@ export function convertSourceFile(
     // TODO Really this just wants the symbol there; take the symbol instead?
     //   The caller probably needs to be looking it up anyway.
     typeName: ts.Node,
-    typeArguments: void | ts.NodeArray<ts.TypeNode>
+    typeArguments: void | ts.NodeArray<ts.TypeNode>,
   ): null | n.TypeParameterInstantiation {
     if (typeArguments)
       return b.typeParameterInstantiation(typeArguments.map(convertType));
@@ -1008,7 +1008,7 @@ export function convertSourceFile(
 
   function convertIdentifier(
     node: ts.Identifier,
-    type?: K.FlowTypeKind
+    type?: K.FlowTypeKind,
   ): K.IdentifierKind {
     // TODO(rename): audit this function's callers
     return !type
@@ -1022,7 +1022,7 @@ export function convertSourceFile(
   function warningStatement(
     outNode: K.StatementKind,
     node: ts.Statement,
-    description: string
+    description: string,
   ): K.StatementKind {
     const msg = ` tsflower-warning: ${description} `;
     return {
@@ -1035,7 +1035,7 @@ export function convertSourceFile(
 
   function unimplementedStatement(
     node: ts.Statement,
-    description: string
+    description: string,
   ): K.StatementKind {
     const msg = ` tsflower-unimplemented: ${description} `;
     return b.emptyStatement.from({
@@ -1045,7 +1045,7 @@ export function convertSourceFile(
 
   function errorStatement(
     node: ts.Statement,
-    description: string
+    description: string,
   ): K.StatementKind {
     const msg = ` tsflower-error: ${description} `;
     return b.emptyStatement.from({
@@ -1055,7 +1055,7 @@ export function convertSourceFile(
 
   function unimplementedType(
     node: ts.TypeNode,
-    description: string
+    description: string,
   ): K.FlowTypeKind {
     const msg = ` tsflower-unimplemented: ${description} `;
     return b.genericTypeAnnotation.from({
@@ -1099,7 +1099,7 @@ export function convertSourceFile(
     throw new Error(
       `Internal error on ${ts.SyntaxKind[node.kind]} at ${
         sourceFile.fileName
-      }:${loc}`
+      }:${loc}`,
     );
   }
 }

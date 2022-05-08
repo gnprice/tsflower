@@ -11,14 +11,14 @@ import { some } from "./util";
 
 export function hasModifier(
   node: ts.Node,
-  modifier: ts.ModifierSyntaxKind
+  modifier: ts.ModifierSyntaxKind,
 ): boolean {
   return some(node.modifiers, (mod) => mod.kind === modifier);
 }
 
 // Inspired by TS's isEntityNameExpression in src/compiler/utilities.ts.
 export function isEntityNameOrEntityNameExpression(
-  node: ts.Node
+  node: ts.Node,
 ): node is ts.EntityNameOrEntityNameExpression {
   if (ts.isIdentifier(node)) return true;
   if (ts.isQualifiedName(node))
@@ -33,7 +33,7 @@ export function isEntityNameOrEntityNameExpression(
 
 // Based on TS's isNamedDeclaration in src/compiler/utilitiesPublic.ts.
 export function isNamedDeclaration(
-  node: ts.Node
+  node: ts.Node,
 ): node is ts.NamedDeclaration & { name: ts.DeclarationName } {
   // A comment in TS's own isNamedDeclaration says:
   //   > A 'name' property should always be a DeclarationName.

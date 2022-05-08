@@ -33,7 +33,7 @@ export type MapResult =
       convert(
         converter: Converter,
         typeName: ts.EntityNameOrEntityNameExpression,
-        typeArguments: ts.NodeArray<ts.TypeNode> | void
+        typeArguments: ts.NodeArray<ts.TypeNode> | void,
       ): ErrorOr<{
         id: K.IdentifierKind | n.QualifiedTypeIdentifier;
         typeParameters: n.TypeParameterInstantiation | null;
@@ -48,7 +48,7 @@ export interface Mapper {
 
   getQualifiedSymbol(
     qualifierSymbol: ts.Symbol,
-    name: string
+    name: string,
   ): void | MapResult;
 
   getTypeName(typeName: ts.EntityNameOrEntityNameExpression): void | MapResult;
@@ -92,7 +92,7 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
   function initMapper() {
     const sourceFiles = program.getSourceFiles();
     const targetFiles = sourceFiles.filter((sourceFile) =>
-      targetSet.has(path.resolve(sourceFile.fileName))
+      targetSet.has(path.resolve(sourceFile.fileName)),
     );
 
     targetFiles.forEach(findRewrites);
@@ -199,7 +199,7 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
       }
 
       function isDefaultLibraryTopLevelDeclaration(
-        node: ts.Declaration
+        node: ts.Declaration,
       ): boolean {
         const { parent } = node;
         return (
