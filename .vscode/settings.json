@@ -1,9 +1,14 @@
 {
+  // Formatting options.
   "editor.tabSize": 2,
-  "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  "files.insertFinalNewline": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
   },
-  "[javascript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  //
+  // What file is what type.
+  "files.associations": {
+    ".prettierrc": "yaml",
   },
 }
