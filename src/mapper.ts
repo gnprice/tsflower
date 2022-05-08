@@ -1,4 +1,4 @@
-import ts, { isIdentifier } from "typescript";
+import ts from "typescript";
 import { builders as _b, namedTypes as n } from "ast-types";
 import K from "ast-types/gen/kinds";
 import { some } from "./util";
@@ -59,7 +59,7 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
       const mapped = symbol && mapper.getSymbol(symbol);
       if (mapped) return mapped;
 
-      if (isIdentifier(node)) return undefined;
+      if (ts.isIdentifier(node)) return undefined;
       const qualifier = ts.isQualifiedName(node) ? node.left : node.expression;
       const name = ts.isQualifiedName(node) ? node.right.text : node.name.text;
       const qualifierSymbol = checker.getSymbolAtLocation(qualifier);
