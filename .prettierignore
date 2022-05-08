@@ -1,0 +1,18 @@
+# Copied from .gitignore.
+node_modules/
+lib/
+/integration/types/
+
+# Generated files.
+t/sample/**/*.js.flow
+
+# Prettier's behavior on prose is annoying and unhelpful.
+*.md
+
+# This has its own formatting from the template.
+/tsconfig.json
+
+# This isn't real JSON, but a human-maintainable-JSON-for-config which
+# allows comments and trailing commas.  There doesn't seem to be a way to
+# communicate that to Prettier.
+/.vscode/settings.json
