@@ -1021,14 +1021,14 @@ export function convertSourceFile(
 
   function quotedStatement(node: ts.Statement): K.CommentKind {
     const text = sourceFile.text.slice(node.pos, node.end);
-    // TODO(error): Escape any nested close-comment markers `*/`.
-    return b.commentBlock(` ${text} `, false, true);
+    // Defang any nested close-comment markers `*/`.
+    return b.commentBlock(` ${text.replaceAll("*/", "* /")} `, false, true);
   }
 
   function quotedInlineNode(node: ts.Node): K.CommentKind {
     const text = sourceFile.text.slice(node.pos, node.end);
-    // TODO(error): Escape any nested close-comment markers `*/`.
-    return b.commentBlock(` ${text} `, false, true);
+    // Defang any nested close-comment markers `*/`.
+    return b.commentBlock(` ${text.replaceAll("*/", "* /")} `, false, true);
   }
 
   function crudeError(node: ts.Node): never {
