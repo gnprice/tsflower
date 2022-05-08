@@ -757,8 +757,7 @@ export function convertSourceFile(
     id: K.IdentifierKind | n.QualifiedTypeIdentifier;
     typeParameters: n.TypeParameterInstantiation | null;
   }> {
-    const symbol = checker.getSymbolAtLocation(typeName);
-    const mapped = symbol && mapper.getSymbol(symbol);
+    const mapped = mapper.getTypeName(typeName);
     switch (mapped?.type) {
       case MapResultType.FixedName:
         return mkSuccess({

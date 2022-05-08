@@ -1,4 +1,4 @@
-import ts from "typescript";
+import ts, { isIdentifier } from "typescript";
 import { builders as b, namedTypes as n } from "ast-types";
 import K from "ast-types/gen/kinds";
 import { some } from "./util";
@@ -32,6 +32,13 @@ export interface Mapper {
    * in the visitor in `createMapper`, to ensure that we find and
    * investigate that symbol.) */
   getSymbol(symbol: ts.Symbol): void | MapResult;
+
+  getQualifiedSymbol(
+    qualifierSymbol: ts.Symbol,
+    name: string
+  ): void | MapResult;
+
+  getTypeName(typeName: ts.EntityNameOrEntityNameExpression): void | MapResult;
 }
 
 const defaultLibraryRewrites: Map<string, MapResult> = new Map([
@@ -160,9 +167,25 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
   const seenSymbols: Set<ts.Symbol> = new Set();
 
   const mappedSymbols: Map<ts.Symbol, MapResult> = new Map();
+  const mappedModuleSymbols: Map<ts.Symbol, Map<string, MapResult>> = new Map();
 
   const mapper: Mapper = {
     getSymbol: (symbol) => mappedSymbols.get(symbol),
+    getQualifiedSymbol: (qualifierSymbol, name) =>
+      mappedModuleSymbols.get(qualifierSymbol)?.get(name),
+    getTypeName: (node) => {
+      const symbol = checker.getSymbolAtLocation(node);
+      const mapped = symbol && mapper.getSymbol(symbol);
+      if (mapped) return mapped;
+
+      if (isIdentifier(node)) return undefined;
+      const qualifier = ts.isQualifiedName(node) ? node.left : node.expression;
+      const name = ts.isQualifiedName(node) ? node.right.text : node.name.text;
+      const qualifierSymbol = checker.getSymbolAtLocation(qualifier);
+      return (
+        qualifierSymbol && mapper.getQualifiedSymbol(qualifierSymbol, name)
+      );
+    },
   };
 
   initMapper();
@@ -244,10 +267,16 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
             const rewrite = libraryRewrites.get(module)?.get(name);
             if (rewrite) mappedSymbols.set(symbol, rewrite);
             return;
+          } else if (ts.isImportClause(decl) || ts.isNamespaceImport(decl)) {
+            // TODO: Do `import foo` and `import * as foo` need any different treatment?
+            //   Here, we just treat them the same.
+            const importClause = ts.isImportClause(decl) ? decl : decl.parent;
+            const module = getModuleSpecifier(importClause.parent);
+            const rewrites = libraryRewrites.get(module);
+            if (rewrites) mappedModuleSymbols.set(symbol, rewrites);
+            return;
           }
         }
-
-        // TODO React.ReactFoo, i.e. symbol.parent.declarations has ImportClause
       }
 
       function isDefaultLibraryTopLevelDeclaration(
