@@ -28,3 +28,5 @@ var omit: {|
         "😀": mixed,
     |}>,
 |};
+
+declare interface I extends $ReadOnlyArray<string> {}

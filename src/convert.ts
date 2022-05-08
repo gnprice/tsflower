@@ -428,12 +428,12 @@ export function convertSourceFile(
           if (!isEntityNameOrEntityNameExpression(expression))
             return errorStatement(node, `'extends' not an entity name`);
 
-          extends_.push(
-            b.interfaceExtends.from({
-              id: convertEntityNameAsType(expression),
-              typeParameters: convertTypeArguments(expression, typeArguments),
-            })
-          );
+          const result = convertTypeReferenceLike(expression, typeArguments);
+          if (result.kind !== "success")
+            return result.kind === "error"
+              ? errorStatement(node, result.description)
+              : unimplementedStatement(node, result.description);
+          extends_.push(b.interfaceExtends.from(result.result));
         }
       } else {
         return unimplementedStatement(node, `class 'implements'`);

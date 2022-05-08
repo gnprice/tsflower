@@ -14,3 +14,7 @@ var omit: {
   c: Omit<{ a: string; b: number }, never>;
   d: Omit<{ a: string; b: number }, "12" | "😀">;
 };
+
+// Test that rewrites apply in `extends`, as well as TypeReference
+interface I extends ReadonlyArray<string> {}
+// class C implements ReadonlyArray<string> {} // TODO class implements
