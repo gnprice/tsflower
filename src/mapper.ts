@@ -15,7 +15,8 @@ export type MapResult =
       type: MapResultType.TypeReferenceMacro;
       convert(
         converter: Converter,
-        node: ts.TypeReferenceNode
+        typeName: ts.EntityName,
+        typeArguments: ts.NodeArray<ts.TypeNode> | void
       ): ErrorOr<{
         id: K.IdentifierKind | n.QualifiedTypeIdentifier;
         typeParameters: n.TypeParameterInstantiation | null;
@@ -34,12 +35,13 @@ const defaultLibraryRewrites: Map<string, MapResult> = new Map([
 
 function convertOmit(
   converter: Converter,
-  node: ts.TypeReferenceNode
+  // @ts-expect-error yes, this is unused
+  typeName: ts.EntityName,
+  typeArguments: ts.NodeArray<ts.TypeNode> | void
 ): ErrorOr<{
   id: K.IdentifierKind | n.QualifiedTypeIdentifier;
   typeParameters: n.TypeParameterInstantiation | null;
 }> {
-  const { typeArguments } = node;
   if (typeArguments?.length !== 2) {
     return mkError(
       `bad Omit: ${typeArguments?.length ?? 0} arguments (expected 2)`

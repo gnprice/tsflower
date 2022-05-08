@@ -745,7 +745,11 @@ export function convertSourceFile(
         );
 
       case MapResultType.TypeReferenceMacro: {
-        const result = mapped.convert(converter, node);
+        const result = mapped.convert(
+          converter,
+          node.typeName,
+          node.typeArguments
+        );
         if (result.kind !== "success")
           return result.kind === "error"
             ? errorType(node, result.description)
