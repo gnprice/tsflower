@@ -945,15 +945,30 @@ export function convertSourceFile(
         case ts.SyntaxKind.SetAccessor:
         case ts.SyntaxKind.IndexSignature:
         case ts.SyntaxKind.ClassStaticBlockDeclaration:
-          return mkUnimplemented(
-            `ClassElement|TypeElement kind: ${ts.SyntaxKind[member.kind]}`,
+          properties.push(
+            b.objectTypeProperty.from({
+              key: b.identifier(`$tsflower$property$${properties.length}`),
+              value: unimplementedType(
+                member,
+                `ClassElement|TypeElement kind: ${ts.SyntaxKind[member.kind]}`,
+              ),
+              optional: false,
+            }),
           );
+          break;
 
         default:
-          return mkError(
-            `unexpected ClassElement|TypeElement kind: ${
-              ts.SyntaxKind[member.kind]
-            }`,
+          properties.push(
+            b.objectTypeProperty.from({
+              key: b.identifier(`$tsflower$property$${properties.length}`),
+              value: errorType(
+                member,
+                `unexpected ClassElement|TypeElement kind: ${
+                  ts.SyntaxKind[member.kind]
+                }`,
+              ),
+              optional: false,
+            }),
           );
       }
     }
@@ -1073,7 +1088,7 @@ export function convertSourceFile(
   }
 
   function unimplementedType(
-    node: ts.TypeNode,
+    node: ts.Node,
     description: string,
   ): K.FlowTypeKind {
     const msg = ` tsflower-unimplemented: ${description} `;
