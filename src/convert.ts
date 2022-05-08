@@ -907,8 +907,13 @@ export function convertSourceFile(
           const { name, questionToken, type } =
             member as ts.PropertyDeclaration;
 
-          const key = convertName(name);
-          if (!key) continue;
+          const keyResult = convertName(name);
+          if (!keyResult) break;
+          if (keyResult.kind !== "success") {
+            properties.push(propertyOfError(member, keyResult));
+            break;
+          }
+          const key = keyResult.result;
 
           properties.push(
             b.objectTypeProperty(
@@ -924,8 +929,13 @@ export function convertSourceFile(
         case ts.SyntaxKind.MethodDeclaration: {
           const { name, questionToken } = member as ts.MethodDeclaration;
 
-          const key = convertName(name);
-          if (!key) continue;
+          const keyResult = convertName(name);
+          if (!keyResult) break;
+          if (keyResult.kind !== "success") {
+            properties.push(propertyOfError(member, keyResult));
+            break;
+          }
+          const key = keyResult.result;
 
           properties.push(
             b.objectTypeProperty.from({
@@ -973,9 +983,9 @@ export function convertSourceFile(
 
     function convertName(
       node: ts.PropertyName,
-    ): null | K.IdentifierKind | K.LiteralKind {
+    ): null | ErrorOr<K.IdentifierKind | K.LiteralKind> {
       if (ts.isIdentifier(node)) {
-        return convertIdentifier(node);
+        return mkSuccess(convertIdentifier(node));
       } else if (ts.isPrivateIdentifier(node)) {
         // A private property in `declare class` is useless, because it
         // can't be referred to by anything using the declaration.
@@ -985,11 +995,7 @@ export function convertSourceFile(
         // TODO(runtime): Handle private properties.
         return null;
       } else {
-        // TODO(error)
-        crudeError(
-          node,
-          `unimplemented: PropertyName kind ${ts.SyntaxKind[node.kind]}`,
-        );
+        return mkUnimplemented(`PropertyName kind ${ts.SyntaxKind[node.kind]}`);
       }
     }
 
