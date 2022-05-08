@@ -11,7 +11,6 @@ export type { Num as Nummm } from "./upstream";  // TODO wrong results: need exp
 export * from "./upstream";
 
 export declare type NumArray = Array<upstream.Num>;
-export declare type RONumArray = ReadonlyArray<Numm>;
 
 declare type ArrayArray<T, S extends T> = [S, T[]][];
 
@@ -30,12 +29,7 @@ var o: {
   e: never;
   f: <T>(x: T) => T[];
   g: { a: string }["a"];
-  h: Omit<{ a: string; b: number }, "a">;
-  i: Omit<{ a: string; b: number }, "a" | "c">;
-  j: Omit<{ a: string; b: number }, never>;
-  k: Omit<{ a: string; b: number }, "12" | "😀">;
   l: ({ x }: { x: number }) => number;
-  m: Readonly<{ a: string }>;
 };
 var oo: typeof o;
 var oa: typeof o.a;

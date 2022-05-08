@@ -11,7 +11,6 @@ export { Num } from "./upstream";
 export { Num as Nummm } from "./upstream";
 export * from "./upstream";
 export type NumArray = Array<upstream.Num>;
-export type RONumArray = $ReadOnlyArray<Numm>;
 type ArrayArray<T, S: T> = [S, T[]][];
 var a: void, b: void, c: boolean, d: number, e: string;
 var f: null, g: true, h: false, i: 3, j: "x";
@@ -28,30 +27,7 @@ var o: {|
     e: empty,
     f: <T>(x: T) => T[],
     g: $ElementType<{| a: string |}, "a">,
-    h: $Diff<{|
-        a: string,
-        b: number,
-    |}, {| "a": mixed |}>,
-    i: $Diff<{|
-        a: string,
-        b: number,
-    |}, {|
-        "a": mixed,
-        "c": mixed,
-    |}>,
-    j: $Diff<{|
-        a: string,
-        b: number,
-    |}, {| [key: empty]: mixed |}>,
-    k: $Diff<{|
-        a: string,
-        b: number,
-    |}, {|
-        "12": mixed,
-        "😀": mixed,
-    |}>,
     l: {| x: number |} => number,
-    m: $ReadOnly<{| a: string |}>,
 |};
 
 var oo: typeof o;
