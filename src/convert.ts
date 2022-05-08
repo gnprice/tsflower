@@ -39,7 +39,7 @@ export interface Converter {
   ): K.IdentifierKind | K.QualifiedTypeIdentifierKind;
   errorType(node: ts.TypeNode, description: string): K.FlowTypeKind;
   unimplementedType(node: ts.TypeNode, description: string): K.FlowTypeKind;
-  crudeError(node: ts.Node): never;
+  crudeError(node: ts.Node, description: string): never;
 }
 
 const headerComment = ` ${"@"}flow
@@ -1104,7 +1104,7 @@ export function convertSourceFile(
     return b.commentBlock(` ${text.replaceAll("*/", "* /")} `, false, true);
   }
 
-  function crudeError(node: ts.Node): never {
+  function crudeError(node: ts.Node, description: string): never {
     // TODO(error): Better than node.pos would be a whitespace-trimmed version.
     //   (As is, when something is the first thing on its line `pos` can be
     //   the end of the last non-whitespace line.)
@@ -1117,7 +1117,7 @@ export function convertSourceFile(
     throw new Error(
       `Internal error on ${ts.SyntaxKind[node.kind]} at ${
         sourceFile.fileName
-      }:${loc}`,
+      }:${loc}: ${description}`,
     );
   }
 }
