@@ -7,6 +7,7 @@ import { Converter, ErrorOr } from "./convert";
 import {
   getModuleSpecifier,
   isEntityNameOrEntityNameExpression,
+  isNamedDeclaration,
 } from "./tsutil";
 import { defaultLibraryRewrites, libraryRewrites } from "./rewrite";
 
@@ -92,6 +93,10 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
       return visitor;
 
       function visitor(node: ts.Node): ts.Node {
+        if (isNamedDeclaration(node)) {
+          visitNamedDeclaration(node);
+        }
+
         switch (node.kind) {
           case ts.SyntaxKind.TypeReference:
             visitTypeReference(node as ts.TypeReferenceNode);
@@ -102,6 +107,10 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
         }
 
         return ts.visitEachChild(node, visitor, context);
+      }
+
+      function visitNamedDeclaration(node: { name: ts.DeclarationName }) {
+        visitSymbol(checker.getSymbolAtLocation(node.name));
       }
 
       function visitTypeReference(node: ts.TypeReferenceNode) {

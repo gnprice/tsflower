@@ -31,6 +31,15 @@ export function isEntityNameOrEntityNameExpression(
   return false;
 }
 
+// Based on TS's isNamedDeclaration in src/compiler/utilitiesPublic.ts.
+export function isNamedDeclaration(
+  node: ts.Node
+): node is ts.NamedDeclaration & { name: ts.DeclarationName } {
+  // A comment in TS's own isNamedDeclaration says:
+  //   > A 'name' property should always be a DeclarationName.
+  return !!(node as ts.NamedDeclaration).name;
+}
+
 export function getModuleSpecifier(node: ts.ImportDeclaration): string {
   // JSDoc on ImportDeclaration#moduleSpecifier says:
   //   > If this is not a StringLiteral it will be a grammar error.
