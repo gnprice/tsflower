@@ -946,29 +946,25 @@ export function convertSourceFile(
         case ts.SyntaxKind.IndexSignature:
         case ts.SyntaxKind.ClassStaticBlockDeclaration:
           properties.push(
-            b.objectTypeProperty.from({
-              key: b.identifier(`$tsflower$property$${properties.length}`),
-              value: unimplementedType(
-                member,
+            propertyOfError(
+              member,
+              mkUnimplemented(
                 `ClassElement|TypeElement kind: ${ts.SyntaxKind[member.kind]}`,
               ),
-              optional: false,
-            }),
+            ),
           );
           break;
 
         default:
           properties.push(
-            b.objectTypeProperty.from({
-              key: b.identifier(`$tsflower$property$${properties.length}`),
-              value: errorType(
-                member,
+            propertyOfError(
+              member,
+              mkError(
                 `unexpected ClassElement|TypeElement kind: ${
                   ts.SyntaxKind[member.kind]
                 }`,
               ),
-              optional: false,
-            }),
+            ),
           );
       }
     }
@@ -995,6 +991,20 @@ export function convertSourceFile(
           `unimplemented: PropertyName kind ${ts.SyntaxKind[node.kind]}`,
         );
       }
+    }
+
+    function propertyOfError(
+      node: ts.Node,
+      desc: ErrorDescription,
+    ): n.ObjectTypeProperty {
+      return b.objectTypeProperty.from({
+        key: b.identifier(`$tsflower$property$${properties.length}`),
+        value:
+          desc.kind === "error"
+            ? errorType(node, desc.description)
+            : unimplementedType(node, desc.description),
+        optional: false,
+      });
     }
   }
 
