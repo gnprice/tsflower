@@ -234,18 +234,19 @@ export function convertSourceFile(
           const localSymbol = checker.getSymbolAtLocation(binding.name);
           const importedSymbol =
             localSymbol && checker.getImmediateAliasedSymbol(localSymbol);
-          // If the symbol is declared only as a type, not a value, then in
-          // Flow we need to say "type" on the import.  (It might have both:
-          // for example, both an interface and class declaration, like
-          // React.Component does.)
+
           const isTypeOnly =
-            importedSymbol && !(importedSymbol.flags & ts.SymbolFlags.Value);
+            binding.isTypeOnly ||
+            // If the symbol is declared only as a type, not a value, then in
+            // Flow we need to say "type" on the import.  (It might have both:
+            // for example, both an interface and class declaration, like
+            // React.Component does.)
+            (importedSymbol && !(importedSymbol.flags & ts.SymbolFlags.Value));
 
           specifiers.push(
             b.importSpecifier.from({
               imported: convertIdentifier(binding.propertyName ?? binding.name),
               local: convertIdentifier(binding.name),
-              // TODO: use modifier on this ts.ImportSpecifier, if present.
               importKind: isTypeOnly ? "type" : "value",
             })
           );
@@ -259,7 +260,11 @@ export function convertSourceFile(
 
     const source = b.stringLiteral(getModuleSpecifier(node));
 
-    return b.importDeclaration(specifiers, source);
+    return b.importDeclaration(
+      specifiers,
+      source,
+      importClause.isTypeOnly ? "type" : "value"
+    );
   }
 
   function convertExportDeclaration(

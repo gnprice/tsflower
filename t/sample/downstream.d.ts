@@ -2,6 +2,8 @@ import * as upstream from "./upstream";
 import { Num as Numm } from "./upstream";
 import { x as ux } from "./upstream";
 import upstream2 from "./upstream";
+import { C as UpC, type C as UpCT } from "./upstream";
+import type { C as UpCTT } from "./upstream" ;
 import { Component } from "../imported/upupstream";
 
 export { x, x as uux } from "./upstream";
