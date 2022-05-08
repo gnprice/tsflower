@@ -1,3 +1,4 @@
+import path from "path";
 import ts from "typescript";
 import { builders as _b, namedTypes as n } from "ast-types";
 import K from "ast-types/gen/kinds";
@@ -40,7 +41,7 @@ export interface Mapper {
 }
 
 export function createMapper(program: ts.Program, targetFilenames: string[]) {
-  const targetSet = new Set(targetFilenames);
+  const targetSet = new Set(targetFilenames.map((f) => path.resolve(f)));
   const checker = program.getTypeChecker();
   const seenSymbols: Set<ts.Symbol> = new Set();
 
@@ -77,7 +78,7 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
     const sourceFiles = program.getSourceFiles();
     for (let i = 0; i < sourceFiles.length; i++) {
       const sourceFile = sourceFiles[i];
-      if (targetSet.has(sourceFile.fileName)) {
+      if (targetSet.has(path.resolve(sourceFile.fileName))) {
         findRewrites(sourceFile);
       }
     }
