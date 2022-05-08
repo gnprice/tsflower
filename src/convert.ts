@@ -744,7 +744,7 @@ export function convertSourceFile(
   }
 
   function convertTypeReferenceLike(
-    typeName: ts.EntityName,
+    typeName: ts.EntityNameOrEntityNameExpression,
     typeArguments: ts.NodeArray<ts.TypeNode> | void
   ): ErrorOr<{
     id: K.IdentifierKind | n.QualifiedTypeIdentifier;
@@ -774,14 +774,18 @@ export function convertSourceFile(
   }
 
   function convertEntityNameAsType(
-    node: ts.EntityName
+    node: ts.EntityNameOrEntityNameExpression
   ): K.IdentifierKind | K.QualifiedTypeIdentifierKind {
-    return ts.isIdentifier(node)
-      ? convertIdentifier(node)
-      : b.qualifiedTypeIdentifier(
-          convertEntityNameAsType(node.left),
-          convertIdentifier(node.right)
-        );
+    if (ts.isIdentifier(node)) return convertIdentifier(node);
+    if (ts.isQualifiedName(node))
+      return b.qualifiedTypeIdentifier(
+        convertEntityNameAsType(node.left),
+        convertIdentifier(node.right)
+      );
+    return b.qualifiedTypeIdentifier(
+      convertEntityNameAsType(node.expression),
+      convertIdentifier(node.name)
+    );
   }
 
   function convertUnionType(node: ts.UnionTypeNode): K.FlowTypeKind {

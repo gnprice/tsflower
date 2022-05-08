@@ -15,7 +15,7 @@ export type MapResult =
       type: MapResultType.TypeReferenceMacro;
       convert(
         converter: Converter,
-        typeName: ts.EntityName,
+        typeName: ts.EntityNameOrEntityNameExpression,
         typeArguments: ts.NodeArray<ts.TypeNode> | void
       ): ErrorOr<{
         id: K.IdentifierKind | n.QualifiedTypeIdentifier;
@@ -36,7 +36,7 @@ const defaultLibraryRewrites: Map<string, MapResult> = new Map([
 function convertOmit(
   converter: Converter,
   // @ts-expect-error yes, this is unused
-  typeName: ts.EntityName,
+  typeName: ts.EntityNameOrEntityNameExpression,
   typeArguments: ts.NodeArray<ts.TypeNode> | void
 ): ErrorOr<{
   id: K.IdentifierKind | n.QualifiedTypeIdentifier;
