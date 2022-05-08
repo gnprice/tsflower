@@ -15,6 +15,19 @@ export type MapResultType = "FixedName" | "TypeReferenceMacro";
 
 export type MapResult =
   | { type: "FixedName"; name: string }
+  /**
+   * Rename this type, both at its definition and references.
+   *
+   * Used in particular where TS has a type and value sharing a name, which
+   * Flow doesn't permit.  The value keeps the name, and the type gets a new
+   * one.
+   *
+   * There's an asymmetry here: we don't have a "RenameValue".  That's
+   * because we're translating type definitions, but those type definitions
+   * describe some actual runtime JS, which we don't modify (or even see),
+   * and the value name is a real fact about that actual runtime JS.
+   */
+  | { type: "RenameType"; name: string }
   | {
       type: "TypeReferenceMacro";
       convert(
@@ -45,6 +58,7 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
   const targetSet = new Set(targetFilenames.map((f) => path.resolve(f)));
   const checker = program.getTypeChecker();
   const seenSymbols: Set<ts.Symbol> = new Set();
+  let hadRenames = false;
 
   const mappedSymbols: Map<ts.Symbol, MapResult> = new Map();
   const mappedModuleSymbols: Map<ts.Symbol, Map<string, MapResult>> = new Map();
@@ -77,11 +91,16 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
 
   function initMapper() {
     const sourceFiles = program.getSourceFiles();
-    for (let i = 0; i < sourceFiles.length; i++) {
-      const sourceFile = sourceFiles[i];
-      if (targetSet.has(path.resolve(sourceFile.fileName))) {
-        findRewrites(sourceFile);
-      }
+    const targetFiles = sourceFiles.filter((sourceFile) =>
+      targetSet.has(path.resolve(sourceFile.fileName))
+    );
+
+    targetFiles.forEach(findRewrites);
+
+    while (hadRenames) {
+      // TODO make this linear instead of quadratic; build a graph to traverse
+      hadRenames = false;
+      targetFiles.forEach(findImportRenames);
     }
   }
 
@@ -148,6 +167,18 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
           return;
         }
 
+        if (
+          symbol.flags & ts.SymbolFlags.TypeAlias &&
+          symbol.flags & ts.SymbolFlags.Value
+        ) {
+          // TODO don't attempt if defined in non-target lib, like React
+          // TODO pick non-colliding name
+          const name = `${symbol.name}T`;
+          mappedSymbols.set(symbol, { type: "RenameType", name });
+          hadRenames = true;
+          return;
+        }
+
         for (const decl of symbol.declarations ?? []) {
           if (ts.isImportSpecifier(decl)) {
             const module = getModuleSpecifier(decl.parent.parent.parent);
@@ -176,6 +207,43 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
           ts.isSourceFile(parent) &&
           program.isSourceFileDefaultLibrary(parent)
         );
+      }
+    }
+  }
+
+  function findImportRenames(sourceFile: ts.SourceFile) {
+    ts.transform(sourceFile, [visitorFactory]);
+    return;
+
+    function visitorFactory(context: ts.TransformationContext) {
+      return visitor;
+
+      function visitor(node: ts.Node): ts.Node {
+        switch (node.kind) {
+          case ts.SyntaxKind.ImportSpecifier:
+            visitImportSpecifier(node as ts.ImportSpecifier);
+          // TODO also `export … from`?
+        }
+
+        return ts.visitEachChild(node, visitor, context);
+      }
+
+      function visitImportSpecifier(node: ts.ImportSpecifier) {
+        const localSymbol = checker.getSymbolAtLocation(node.name);
+        if (!localSymbol || mappedSymbols.has(localSymbol)) {
+          return;
+        }
+
+        const importedSymbol = checker.getImmediateAliasedSymbol(localSymbol);
+        const mapped = importedSymbol && mapper.getSymbol(importedSymbol);
+        if (!mapped || mapped.type !== "RenameType") {
+          return;
+        }
+
+        // TODO pick non-colliding name
+        const name = `${localSymbol.name}T`;
+        mappedSymbols.set(localSymbol, { type: "RenameType", name });
+        hadRenames = true;
       }
     }
   }

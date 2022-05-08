@@ -235,6 +235,53 @@ export function convertSourceFile(
           const importedSymbol =
             localSymbol && checker.getImmediateAliasedSymbol(localSymbol);
 
+          const mapped = importedSymbol && mapper.getSymbol(importedSymbol);
+          if (mapped && mapped.type === "RenameType") {
+            const mappedLocal = mapper.getSymbol(localSymbol);
+            if (!mappedLocal || mappedLocal.type !== "RenameType") {
+              // TODO(error): localize this to the one ts.ImportSpecifier
+              return errorStatement(
+                node,
+                `internal error: renamed the imported type \`${
+                  (binding.propertyName ?? binding.name).text
+                }\`, but not its local binding`
+              );
+            }
+
+            if (importClause.isTypeOnly) {
+              // It's an `import type`.  Use the type's name, but don't say
+              // `type` (the redundancy is invalid in both Flow and TS.)
+              specifiers.push(
+                b.importSpecifier.from({
+                  importKind: "value",
+                  imported: b.identifier(mapped.name),
+                  local: b.identifier(mappedLocal.name),
+                })
+              );
+            } else {
+              // Not an `import type`.  Import the type with `type`…
+              specifiers.push(
+                b.importSpecifier.from({
+                  importKind: "type",
+                  imported: b.identifier(mapped.name),
+                  local: b.identifier(mappedLocal.name),
+                })
+              );
+              // … and then the value, unless this was `import { type Foo }`.
+              if (!binding.isTypeOnly)
+                specifiers.push(
+                  b.importSpecifier.from({
+                    importKind: "value",
+                    imported: convertIdentifier(
+                      binding.propertyName ?? binding.name
+                    ),
+                    local: convertIdentifier(binding.name),
+                  })
+                );
+            }
+            continue;
+          }
+
           const isTypeOnly =
             binding.isTypeOnly ||
             // If the symbol is declared only as a type, not a value, then in
@@ -362,8 +409,24 @@ export function convertSourceFile(
   function convertTypeAliasDeclaration(
     node: ts.TypeAliasDeclaration
   ): K.StatementKind {
+    const symbol = checker.getSymbolAtLocation(node.name);
+    const mapped = symbol && mapper.getSymbol(symbol);
+    let name = node.name.text;
+    if (mapped) {
+      switch (mapped.type) {
+        case "RenameType":
+          name = mapped.name;
+          break;
+        case "FixedName":
+        case "TypeReferenceMacro":
+          break;
+        default:
+          ensureUnreachable(mapped);
+      }
+    }
+
     return b.typeAlias(
-      convertIdentifier(node.name),
+      b.identifier(name),
       convertTypeParameterDeclaration(node.typeParameters),
       convertType(node.type)
     );
@@ -769,6 +832,7 @@ export function convertSourceFile(
     if (mapped)
       switch (mapped.type) {
         case "FixedName":
+        case "RenameType":
           return mkSuccess({
             id: b.identifier(mapped.name),
             typeParameters: convertTypeArguments(typeName, typeArguments),

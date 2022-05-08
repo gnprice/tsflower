@@ -133,6 +133,13 @@ For more, see:
     both a type and a value declaration.  These need the type renamed at the
     declaration, and references need to follow.
 
+    A first cut at this is now done.  But it needs refinement:
+
+    - The new name needs to be unique; currently it could itself happen to
+      collide with something else.
+
+    - We don't handle `export … from`, and probably need to.
+
   - Type declarations inside namespaces.  These need to get moved to top
     level with some name, e.g. `$`-separated with the namespace as prefix.
     References need to follow.
