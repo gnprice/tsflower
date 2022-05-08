@@ -9,6 +9,9 @@
     "url": "https://github.com/gnprice/tsflower"
   },
   "homepage": "https://github.com/gnprice/tsflower",
+  "engines": {
+    "node": ">=16"
+  },
   "dependencies": {
     "ast-types": "npm:@gregprice/ast-types@^0.15.3-0.tsflower.3",
     "recast": "npm:@gregprice/recast@^0.21.2-0.tsflower.5",
