@@ -8,6 +8,7 @@ import {
   hasModifier,
   isEntityNameOrEntityNameExpression,
 } from "./tsutil";
+import { ensureUnreachable } from "./generics";
 
 export type ErrorDescription = {
   kind: "unimplemented" | "error";
@@ -307,7 +308,7 @@ export function convertSourceFile(
         exportKind: isTypeOnly ? "type" : "value",
       });
     } else {
-      ((_: never) => {})(exportClause);
+      ensureUnreachable(exportClause);
       return errorStatement(
         node,
         // @ts-expect-error yes, the types say this is unreachable
