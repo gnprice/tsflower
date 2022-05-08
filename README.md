@@ -40,12 +40,12 @@ For more, see:
 
   - Type references to things like `ReadonlyArray` in the default lib, which
     become a constant other identifier.  Use `defaultLibraryRewrites` with
-    `MapResultType.FixedName` in the mapper.
+    `'FixedName'` in the mapper.
 
   - Type references to things like `Omit` in the default lib, which have to
     act more like a macro -- rewriting the type reference in place, using
-    its arguments.  Use `defaultLibraryRewrites` with
-    `MapResultType.TypeReferenceMacro` in the mapper.
+    its arguments.  Use `defaultLibraryRewrites` with `'TypeReferenceMacro'`
+    in the mapper.
 
 - Extend the driver and CLI layer:
 
@@ -95,8 +95,8 @@ For more, see:
 
 - Figure out more renaming and rewriting:
 
-  - A possible intermediate category between `MapResultType.FixedName` and
-    `MapResultType.TypeReferenceMacro` is that some things could be defined
+  - A possible intermediate category between `'FixedName'` and
+    `'TypeReferenceMacro'` is that some things could be defined
     as a single (generic) type alias in the Flow type system, but just don't
     happen to be defined in the Flow stdlib.  For those, we may insert a
     definition at the top of the file.

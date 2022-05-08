@@ -2,12 +2,12 @@ import ts from "typescript";
 import { builders as b, namedTypes as n } from "ast-types";
 import K from "ast-types/gen/kinds";
 import { Converter, ErrorOr, mkError, mkSuccess } from "./convert";
-import { MapResult, MapResultType } from "./mapper";
+import { MapResult } from "./mapper";
 
 export const defaultLibraryRewrites: Map<string, MapResult> = new Map([
-  ["Readonly", { type: MapResultType.FixedName, name: "$ReadOnly" }],
-  ["ReadonlyArray", { type: MapResultType.FixedName, name: "$ReadOnlyArray" }],
-  ["Omit", { type: MapResultType.TypeReferenceMacro, convert: convertOmit }],
+  ["Readonly", { type: "FixedName", name: "$ReadOnly" }],
+  ["ReadonlyArray", { type: "FixedName", name: "$ReadOnlyArray" }],
+  ["Omit", { type: "TypeReferenceMacro", convert: convertOmit }],
 ]);
 
 export const libraryRewrites: Map<string, Map<string, MapResult>> = new Map([
@@ -17,14 +17,14 @@ export const libraryRewrites: Map<string, Map<string, MapResult>> = new Map([
       [
         "Component",
         {
-          type: MapResultType.TypeReferenceMacro,
+          type: "TypeReferenceMacro",
           convert: convertReactComponent,
         },
       ],
       [
         "ReactElement",
         {
-          type: MapResultType.TypeReferenceMacro,
+          type: "TypeReferenceMacro",
           convert: convertReactElement,
         },
       ],

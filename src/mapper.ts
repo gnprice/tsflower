@@ -9,15 +9,12 @@ import {
 } from "./tsutil";
 import { defaultLibraryRewrites, libraryRewrites } from "./rewrite";
 
-export enum MapResultType {
-  FixedName,
-  TypeReferenceMacro,
-}
+export type MapResultType = "FixedName" | "TypeReferenceMacro";
 
 export type MapResult =
-  | { type: MapResultType.FixedName; name: string }
+  | { type: "FixedName"; name: string }
   | {
-      type: MapResultType.TypeReferenceMacro;
+      type: "TypeReferenceMacro";
       convert(
         converter: Converter,
         typeName: ts.EntityNameOrEntityNameExpression,

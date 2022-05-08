@@ -2,7 +2,7 @@ import ts from "typescript";
 import { builders as b, namedTypes as n } from "ast-types";
 import K from "ast-types/gen/kinds";
 import { map, some } from "./util";
-import { Mapper, MapResultType } from "./mapper";
+import { Mapper } from "./mapper";
 import {
   getModuleSpecifier,
   hasModifier,
@@ -761,13 +761,13 @@ export function convertSourceFile(
   }> {
     const mapped = mapper.getTypeName(typeName);
     switch (mapped?.type) {
-      case MapResultType.FixedName:
+      case "FixedName":
         return mkSuccess({
           id: b.identifier(mapped.name),
           typeParameters: convertTypeArguments(typeName, typeArguments),
         });
 
-      case MapResultType.TypeReferenceMacro:
+      case "TypeReferenceMacro":
         return mapped.convert(converter, typeName, typeArguments);
 
       // TODO: How to get TypeScript to check that this switch is exhaustive?
