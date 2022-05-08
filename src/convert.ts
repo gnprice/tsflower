@@ -744,6 +744,8 @@ export function convertSourceFile(
     return b.genericTypeAnnotation.from(result.result);
   }
 
+  /** (This calls `mapper.getSymbol`.  Each call site should therefore have
+   * a corresponding case in the visitor in `createMapper`.) */
   function convertTypeReferenceLike(
     typeName: ts.EntityNameOrEntityNameExpression,
     typeArguments: ts.NodeArray<ts.TypeNode> | void

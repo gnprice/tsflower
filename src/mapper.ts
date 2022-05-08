@@ -3,6 +3,7 @@ import { builders as b, namedTypes as n } from "ast-types";
 import K from "ast-types/gen/kinds";
 import { some } from "./util";
 import { Converter, ErrorOr, mkError, mkSuccess } from "./convert";
+import { isEntityNameOrEntityNameExpression } from "./tsutil";
 
 export enum MapResultType {
   FixedName,
@@ -24,6 +25,9 @@ export type MapResult =
     };
 
 export interface Mapper {
+  /** (Each call to this in the converter should have a corresponding case
+   * in the visitor in `createMapper`, to ensure that we find and
+   * investigate that symbol.) */
   getSymbol(symbol: ts.Symbol): void | MapResult;
 }
 
@@ -147,21 +151,37 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
 
       function visitor(node: ts.Node): ts.Node {
         switch (node.kind) {
-          case ts.SyntaxKind.TypeReference: {
+          case ts.SyntaxKind.TypeReference:
             visitTypeReference(node as ts.TypeReferenceNode);
-          }
+            break;
+          case ts.SyntaxKind.HeritageClause:
+            visitHeritageClause(node as ts.HeritageClause);
+            break;
         }
 
         return ts.visitEachChild(node, visitor, context);
       }
 
       function visitTypeReference(node: ts.TypeReferenceNode) {
-        let name = node.typeName;
+        visitTypeName(node.typeName);
+      }
+
+      function visitHeritageClause(node: ts.HeritageClause) {
+        for (const base of node.types) {
+          const { expression } = base;
+          if (!isEntityNameOrEntityNameExpression(expression)) continue;
+          visitTypeName(expression);
+        }
+      }
+
+      function visitTypeName(name: ts.EntityNameOrEntityNameExpression) {
         visitSymbol(checker.getSymbolAtLocation(name));
-        while (ts.isQualifiedName(name)) {
+        if (ts.isQualifiedName(name)) {
           visitSymbol(checker.getSymbolAtLocation(name.right));
-          name = name.left;
-          visitSymbol(checker.getSymbolAtLocation(name));
+          visitTypeName(name.left);
+        } else if (ts.isPropertyAccessExpression(name)) {
+          visitSymbol(checker.getSymbolAtLocation(name.name));
+          visitTypeName(name.expression);
         }
       }
 
