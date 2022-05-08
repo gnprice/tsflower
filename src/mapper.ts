@@ -58,6 +58,13 @@ const libraryRewrites: Map<string, Map<string, MapResult>> = new Map([
           convert: convertReactComponent,
         },
       ],
+      [
+        "ReactElement",
+        {
+          type: MapResultType.TypeReferenceMacro,
+          convert: convertReactElement,
+        },
+      ],
     ]),
   ],
 ]);
@@ -157,6 +164,44 @@ function convertReactComponent(
 
   return mkSuccess({
     id: converter.convertEntityNameAsType(typeName),
+    typeParameters: b.typeParameterInstantiation(args),
+  });
+}
+
+function convertReactElement(
+  converter: Converter,
+  // @ts-expect-error yes, this is unused
+  typeName: ts.EntityNameOrEntityNameExpression,
+  typeArguments: ts.NodeArray<ts.TypeNode> | void
+) {
+  // TODO: If ReactElement is imported individually, we also need to rewrite
+  //   that import.
+
+  if ((typeArguments?.length ?? 0) > 2) {
+    return mkError(
+      `bad React.Element: ${
+        typeArguments?.length ?? 0
+      } arguments (expected 0-2)`
+    );
+  }
+  const [propsType, typeType] = typeArguments ?? [];
+
+  let args;
+  if (!propsType) {
+    args = [b.genericTypeAnnotation(b.identifier("React$ElementType"), null)];
+  } else if (!typeType) {
+    args = [
+      b.genericTypeAnnotation(
+        b.identifier("React$ComponentType"),
+        b.typeParameterInstantiation([converter.convertType(propsType)])
+      ),
+    ];
+  } else {
+    args = [converter.convertType(typeType)];
+  }
+
+  return mkSuccess({
+    id: b.identifier("React$Element"), // TODO use import
     typeParameters: b.typeParameterInstantiation(args),
   });
 }

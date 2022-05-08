@@ -22,3 +22,12 @@ type AProps = {|
 declare class A extends Component<AProps> {}
 declare class AA extends React.Component<AProps> {}
 declare class AAA extends React2.Component<AProps> {}
+
+var reactElement: {|
+    a2: React$Element<React$ElementType>,
+    a3: React$Element<React$ElementType>,
+    b2: React$Element<React$ComponentType<AProps>>,
+    b3: React$Element<React$ComponentType<AProps>>,
+    c2: React$Element<"div">,
+    c3: React$Element<"div">,
+|};

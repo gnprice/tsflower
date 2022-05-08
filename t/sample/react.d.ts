@@ -1,4 +1,8 @@
-import React, { Component, Component as Component2 } from "react";
+import React, {
+  Component,
+  Component as Component2,
+  //  ReactElement // TODO rewrite imports, too
+} from "react";
 import * as React2 from "react";
 
 // `React.Component` in Flow requires its first argument.
@@ -22,3 +26,17 @@ type AProps = { x: number; y: string };
 declare class A extends Component<AProps> {}
 declare class AA extends React.Component<AProps> {}
 declare class AAA extends React2.Component<AProps> {}
+
+// `React.ReactElement` corresponds to `React.Element` in Flow,
+// and with different type arguments.
+var reactElement: {
+  // a1: ReactElement;
+  a2: React.ReactElement;
+  a3: React2.ReactElement;
+  // b1: ReactElement<AProps>;
+  b2: React.ReactElement<AProps>;
+  b3: React2.ReactElement<AProps>;
+  // c1: ReactElement<AProps, "div">;
+  c2: React.ReactElement<AProps, "div">;
+  c3: React2.ReactElement<AProps, "div">;
+};
