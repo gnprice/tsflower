@@ -119,8 +119,6 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
 
   initMapper();
 
-  // console.log(mappedSymbols.size);
-
   seenSymbols.clear();
   targetSet.clear();
 
@@ -130,12 +128,6 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
     const sourceFiles = program.getSourceFiles();
     for (let i = 0; i < sourceFiles.length; i++) {
       const sourceFile = sourceFiles[i];
-
-      if (program.isSourceFileDefaultLibrary(sourceFile)) {
-        // const { exports } = sourceFile.;
-        // console.log(sourceFile.fileName);
-      }
-
       if (targetSet.has(sourceFile.fileName)) {
         findRewrites(sourceFile);
       }
@@ -192,8 +184,6 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
         seenSymbols.add(symbol);
 
         if (some(symbol.declarations, isDefaultLibraryTopLevelDeclaration)) {
-          // console.log(symbol.name);
-
           const rewrite = defaultLibraryRewrites.get(symbol.name);
           if (rewrite) mappedSymbols.set(symbol, rewrite);
         }
