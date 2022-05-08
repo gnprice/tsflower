@@ -3,7 +3,7 @@ import { builders as b, namedTypes as n } from "ast-types";
 import K from "ast-types/gen/kinds";
 import { map, some } from "./util";
 import { Mapper, MapResultType } from "./mapper";
-import { hasModifier } from "./tsutil";
+import { hasModifier, isEntityNameOrEntityNameExpression } from "./tsutil";
 
 export type ErrorDescription = {
   kind: "unimplemented" | "error";
@@ -425,11 +425,12 @@ export function convertSourceFile(
               }`
             );
           }
+          if (!isEntityNameOrEntityNameExpression(expression))
+            return errorStatement(node, `'extends' not an entity name`);
+
           extends_.push(
             b.interfaceExtends.from({
-              id: convertPropertyAccessExpressionAsQualifiedTypeIdentifier(
-                expression
-              ),
+              id: convertEntityNameAsType(expression),
               typeParameters: convertTypeArguments(expression, typeArguments),
             })
           );
@@ -941,24 +942,6 @@ export function convertSourceFile(
       return b.typeParameterInstantiation([]);
 
     return null;
-  }
-
-  function convertPropertyAccessExpressionAsQualifiedTypeIdentifier(
-    node: ts.Identifier | ts.PropertyAccessExpression
-  ): K.IdentifierKind | K.QualifiedTypeIdentifierKind {
-    if (ts.isIdentifier(node)) return convertIdentifier(node);
-
-    const { expression, name } = node;
-    if (ts.isPrivateIdentifier(name)) crudeError(node);
-    if (
-      !ts.isIdentifier(expression) &&
-      !ts.isPropertyAccessExpression(expression)
-    )
-      crudeError(node);
-    return b.qualifiedTypeIdentifier(
-      convertPropertyAccessExpressionAsQualifiedTypeIdentifier(expression),
-      convertIdentifier(name)
-    );
   }
 
   function convertIdentifier(
