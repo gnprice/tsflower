@@ -735,36 +735,42 @@ export function convertSourceFile(
   }
 
   function convertTypeReference(node: ts.TypeReferenceNode): K.FlowTypeKind {
-    const symbol = checker.getSymbolAtLocation(node.typeName);
+    const result = convertTypeReferenceLike(node.typeName, node.typeArguments);
+    if (result.kind !== "success")
+      return result.kind === "error"
+        ? errorType(node, result.description)
+        : unimplementedType(node, result.description);
+    return b.genericTypeAnnotation.from(result.result);
+  }
+
+  function convertTypeReferenceLike(
+    typeName: ts.EntityName,
+    typeArguments: ts.NodeArray<ts.TypeNode> | void
+  ): ErrorOr<{
+    id: K.IdentifierKind | n.QualifiedTypeIdentifier;
+    typeParameters: n.TypeParameterInstantiation | null;
+  }> {
+    const symbol = checker.getSymbolAtLocation(typeName);
     const mapped = symbol && mapper.getSymbol(symbol);
     switch (mapped?.type) {
       case MapResultType.FixedName:
-        return b.genericTypeAnnotation(
-          b.identifier(mapped.name),
-          convertTypeArguments(node.typeName, node.typeArguments)
-        );
+        return mkSuccess({
+          id: b.identifier(mapped.name),
+          typeParameters: convertTypeArguments(typeName, typeArguments),
+        });
 
-      case MapResultType.TypeReferenceMacro: {
-        const result = mapped.convert(
-          converter,
-          node.typeName,
-          node.typeArguments
-        );
-        if (result.kind !== "success")
-          return result.kind === "error"
-            ? errorType(node, result.description)
-            : unimplementedType(node, result.description);
-        return b.genericTypeAnnotation.from(result.result);
-      }
+      case MapResultType.TypeReferenceMacro:
+        return mapped.convert(converter, typeName, typeArguments);
+
       // TODO: How to get TypeScript to check that this switch is exhaustive?
       //   case undefined:
       //     break;
     }
 
-    return b.genericTypeAnnotation(
-      convertEntityNameAsType(node.typeName),
-      convertTypeArguments(node.typeName, node.typeArguments)
-    );
+    return mkSuccess({
+      id: convertEntityNameAsType(typeName),
+      typeParameters: convertTypeArguments(typeName, typeArguments),
+    });
   }
 
   function convertEntityNameAsType(
