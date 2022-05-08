@@ -10,8 +10,8 @@
   },
   "homepage": "https://github.com/gnprice/tsflower",
   "dependencies": {
-    "ast-types": "npm:@gregprice/ast-types@^0.15.3-0.tsflower.2",
-    "recast": "npm:@gregprice/recast@^0.21.2-0.tsflower.4",
+    "ast-types": "npm:@gregprice/ast-types@^0.15.3-0.tsflower.3",
+    "recast": "npm:@gregprice/recast@^0.21.2-0.tsflower.5",
     "typescript": "^4.6.3"
   },
   "devDependencies": {
