@@ -761,21 +761,20 @@ export function convertSourceFile(
     typeParameters: n.TypeParameterInstantiation | null;
   }> {
     const mapped = mapper.getTypeName(typeName);
-    switch (mapped?.type) {
-      case "FixedName":
-        return mkSuccess({
-          id: b.identifier(mapped.name),
-          typeParameters: convertTypeArguments(typeName, typeArguments),
-        });
+    if (mapped)
+      switch (mapped.type) {
+        case "FixedName":
+          return mkSuccess({
+            id: b.identifier(mapped.name),
+            typeParameters: convertTypeArguments(typeName, typeArguments),
+          });
 
-      case "TypeReferenceMacro":
-        return mapped.convert(converter, typeName, typeArguments);
+        case "TypeReferenceMacro":
+          return mapped.convert(converter, typeName, typeArguments);
 
-      // TODO: How to get TypeScript to check that this switch is exhaustive?
-      //   case undefined:
-      //     break;
-    }
-
+        default:
+          ensureUnreachable(mapped);
+      }
     return mkSuccess({
       id: convertEntityNameAsType(typeName),
       typeParameters: convertTypeArguments(typeName, typeArguments),
