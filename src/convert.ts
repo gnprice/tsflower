@@ -1021,11 +1021,13 @@ export function convertSourceFile(
 
   function quotedStatement(node: ts.Statement): K.CommentKind {
     const text = sourceFile.text.slice(node.pos, node.end);
+    // TODO(error): Escape any nested close-comment markers `*/`.
     return b.commentBlock(` ${text} `, false, true);
   }
 
   function quotedInlineNode(node: ts.Node): K.CommentKind {
     const text = sourceFile.text.slice(node.pos, node.end);
+    // TODO(error): Escape any nested close-comment markers `*/`.
     return b.commentBlock(` ${text} `, false, true);
   }
 
