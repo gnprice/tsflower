@@ -231,7 +231,9 @@ export function convertSourceFile(
     if (namedBindings) {
       if (ts.isNamedImports(namedBindings)) {
         for (const binding of namedBindings.elements) {
-          const localSymbol = checker.getSymbolAtLocation(binding.name);
+          const { name } = binding;
+          const propertyName = binding.propertyName ?? name;
+          const localSymbol = checker.getSymbolAtLocation(name);
           const importedSymbol =
             localSymbol && checker.getImmediateAliasedSymbol(localSymbol);
 
@@ -242,42 +244,20 @@ export function convertSourceFile(
               // TODO(error): localize this to the one ts.ImportSpecifier
               return errorStatement(
                 node,
-                `internal error: renamed the imported type \`${
-                  (binding.propertyName ?? binding.name).text
-                }\`, but not its local binding`
+                `internal error: renamed the imported type \`${propertyName.text}\`, but not its local binding`
               );
             }
 
             if (importClause.isTypeOnly) {
               // It's an `import type`.  Use the type's name, but don't say
               // `type` (the redundancy is invalid in both Flow and TS.)
-              specifiers.push(
-                b.importSpecifier.from({
-                  importKind: "value",
-                  imported: b.identifier(mapped.name),
-                  local: b.identifier(mappedLocal.name),
-                })
-              );
+              add("value", mapped.name, mappedLocal.name);
             } else {
               // Not an `import type`.  Import the type with `type`…
-              specifiers.push(
-                b.importSpecifier.from({
-                  importKind: "type",
-                  imported: b.identifier(mapped.name),
-                  local: b.identifier(mappedLocal.name),
-                })
-              );
+              add("type", mapped.name, mappedLocal.name);
               // … and then the value, unless this was `import { type Foo }`.
               if (!binding.isTypeOnly)
-                specifiers.push(
-                  b.importSpecifier.from({
-                    importKind: "value",
-                    imported: convertIdentifier(
-                      binding.propertyName ?? binding.name
-                    ),
-                    local: convertIdentifier(binding.name),
-                  })
-                );
+                add("value", propertyName.text, name.text);
             }
             continue;
           }
@@ -290,13 +270,26 @@ export function convertSourceFile(
             // React.Component does.)
             (importedSymbol && !(importedSymbol.flags & ts.SymbolFlags.Value));
 
-          specifiers.push(
-            b.importSpecifier.from({
-              imported: convertIdentifier(binding.propertyName ?? binding.name),
-              local: convertIdentifier(binding.name),
-              importKind: isTypeOnly ? "type" : "value",
-            })
-          );
+          add(isTypeOnly ? "type" : "value", propertyName.text, name.text);
+
+          function add(
+            importKind: "value" | "type" | "typeof",
+            importedText: string,
+            localText: string
+          ): void {
+            const imported = b.identifier(importedText);
+            const local = b.identifier(localText);
+            specifiers.push(buildImportSpecifier(imported, local, importKind));
+          }
+
+          // TODO(ast-types): b.importSpecifier should take importKind, like this
+          function buildImportSpecifier(
+            imported: K.IdentifierKind,
+            local?: K.IdentifierKind | null | undefined,
+            importKind?: "value" | "type" | "typeof" | undefined
+          ): n.ImportSpecifier {
+            return b.importSpecifier.from({ imported, local, importKind });
+          }
         }
       } else {
         specifiers.push(
