@@ -19,9 +19,6 @@ declare type ArrayArray<T, S extends T> = [S, T[]][];
 declare var a: undefined, b: void, c: boolean, d: number, e: string;
 var f: null, g: true, h: false, i: 3, j: "x";
 var k: boolean[], l: "a" | 3, ll: { a: "a" | "b" } & { a: "b" | "c" };
-var m: (x: string, y, ...b: boolean[]) => number;
-var n: (a: string, b?: number) => void;
-var nn: <T>(x: T) => T[];
 var o: {
   // prettier-ignore
   a: (number); // With parens -- the TS parser has a node for them.
@@ -29,23 +26,18 @@ var o: {
   c: unknown;
   d: any;
   e: never;
-  f: <T>(x: T) => T[];
   g: { a: string }["a"];
-  l: ({ x }: { x: number }) => number;
 };
 var oo: typeof o;
 var oa: typeof o.a;
 var ok: keyof typeof o;
 
-declare function ff<T>(x: T): { y: T };
-
-declare function ff(x: boolean): (b: true) => { y: number };
-export declare function ff(x: boolean): (b: true) => { y: number };
-
 export declare class C<T> {}
 export declare class D extends C<string> {}
 
 // export default class {} // TODO implement
+
+declare function ff(x: boolean): void;
 
 export {};
 export { ff as fff, C as CC };

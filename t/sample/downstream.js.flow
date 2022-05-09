@@ -17,9 +17,6 @@ type ArrayArray<T, S: T> = [S, T[]][];
 var a: void, b: void, c: boolean, d: number, e: string;
 var f: null, g: true, h: false, i: 3, j: "x";
 var k: boolean[], l: "a" | 3, ll: {| a: "a" | "b" |} & {| a: "b" | "c" |};
-var m: (x: string, y: any, ...b: boolean[]) => number;
-var n: (a: string, b?: number) => void;
-var nn: <T>(x: T) => T[];
 
 var o: {|
     a: number,
@@ -27,18 +24,14 @@ var o: {|
     c: mixed,
     d: any,
     e: empty,
-    f: <T>(x: T) => T[],
     g: $ElementType<{| a: string |}, "a">,
-    l: {| x: number |} => number,
 |};
 
 var oo: typeof o;
 var oa: typeof o.a;
 var ok: $Keys<typeof o>;
-declare function ff<T>(x: T): {| y: T |};
-declare function ff(x: boolean): (b: true) => {| y: number |};
-declare export function ff(x: boolean): (b: true) => {| y: number |};
 declare export class C<T> {};
 declare export class D extends C<string> {};
+declare function ff(x: boolean): void;
 export {};
 export { ff as fff, C as CC };
