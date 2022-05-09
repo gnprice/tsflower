@@ -981,12 +981,17 @@ export function convertSourceFile(
         }
         const key = keyResult.result;
 
+        const variance = hasModifier(member, ts.SyntaxKind.ReadonlyKeyword)
+          ? "plus"
+          : null;
+
         properties.push(
-          b.objectTypeProperty(
+          b.objectTypeProperty.from({
+            variance,
             key,
-            type ? convertType(type) : b.anyTypeAnnotation(),
-            !!questionToken,
-          ),
+            optional: !!questionToken,
+            value: type ? convertType(type) : b.anyTypeAnnotation(),
+          }),
         );
       }
     }

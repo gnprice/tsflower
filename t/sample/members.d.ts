@@ -2,6 +2,7 @@
 
 export declare var value: {
   property: string;
+  readonly propertyRo: string;
 
   get getter(): number;
   set setter(value: number);
@@ -33,6 +34,8 @@ export declare class C {
   g(other: this): this;
   // 'import'(cb: (s: string) => void): this;  // TS supports this, but Flow has no equivalent.
 
+  readonly propertyRo: string;
+
   get getter(): number;
   set setter(value: number);
 
@@ -53,6 +56,8 @@ export declare interface I {
   x;
   z?;
   w?: number;
+
+  readonly propertyRo: string;
 
   get getter(): number;
   set setter(value: number);

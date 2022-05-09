@@ -3,6 +3,7 @@
  */
 export var value: {|
     property: string,
+    +propertyRo: string,
     get getter(): number,
     set setter(value: number): void,
     method1(): void,
@@ -24,6 +25,7 @@ declare export class C {
     constructor(): any,
     f(cb: (s: string) => void): void,
     g(other: this): this,
+    +propertyRo: string,
     get getter(): number,
     set setter(value: number): void,
     x: any,
@@ -37,6 +39,7 @@ export interface I {
     x: any,
     z?: any,
     w?: number,
+    +propertyRo: string,
     get getter(): number,
     set setter(value: number): void,
 };
