@@ -1,4 +1,11 @@
 {
+  // Flow on non-TS files:
+  //   Stop TS complaining about the existence of Flow.  See:
+  //     https://github.com/Microsoft/vscode/issues/15171
+  "javascript.validate.enable": false,
+  //   zulip-mobile has this setting, but we seem not to need it:
+  // "flow.useNPMPackagedFlow": true,
+  //
   // Formatting options.
   "editor.tabSize": 2,
   "files.insertFinalNewline": true,
