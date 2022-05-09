@@ -160,3 +160,16 @@ For more, see:
     These need to be merged into one definition.
 
     What if they span files? Try to get away with not supporting that.
+
+
+## Developing
+
+This section is about doing development on TsFlower itself.  None of it is
+needed when simply using TsFlower.
+
+The test suite uses a handful of shell scripts.  These are formatted with
+[`shfmt`][shfmt].  You can install `shfmt` with your system's package
+manager, or with `nix-env -iA nixpkgs.shfmt` after installing [Nix][].
+
+[shfmt]: https://github.com/mvdan/sh#shfmt
+[Nix]: https://nixos.org/download.html#download-nix
