@@ -48,5 +48,10 @@ var typeOperations: {|
     intersection: {| a: "a" | "b" |} & {| a: "b" | "c" |},
     indexedAccess: $ElementType<{| a: string |}, "a">,
     array: boolean[],
-    tuple: [string, number],
+    tuple: {|
+        zero: [],
+        one: [string],
+        two: [string, number],
+        eight: [void, void, null, boolean, true, false, number, string],
+    |},
 |};

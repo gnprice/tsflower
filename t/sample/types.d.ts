@@ -58,7 +58,12 @@ var typeOperations: {
   intersection: { a: "a" | "b" } & { a: "b" | "c" };
   indexedAccess: { a: string }["a"];
   array: boolean[];
-  tuple: [string, number]; // TODO empty, singleton
+  tuple: {
+    zero: [];
+    one: [string];
+    two: [string, number];
+    eight: [undefined, void, null, boolean, true, false, number, string];
+  };
   // function types covered in function.d.ts
   // type literals covered in members.d.ts (plus incidentally here)
 };
