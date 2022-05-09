@@ -403,8 +403,43 @@ export function convertSourceFile(
 
     function convertVariableDeclaration(declaration: ts.VariableDeclaration) {
       const name = declaration.name /* TODO */ as ts.Identifier;
-      const type = declaration.type && convertType(declaration.type);
+      const type = declaration.type
+        ? convertType(declaration.type)
+        : convertInitializerToType(declaration.initializer);
       return b.variableDeclarator(convertIdentifier(name, type));
+    }
+
+    function convertInitializerToType(init: ts.Expression | void) {
+      // TS generates lines like `export declare const Foo = 'Foo'` in .d.ts
+      // files; when reading those, it infers the specific type from the
+      // literal.  Flow requires the type to be explicit if it's exported.
+      if (!init) {
+        return b.anyTypeAnnotation();
+      } else if (ts.isStringLiteral(init)) {
+        return b.stringLiteralTypeAnnotation(init.text, init.text);
+      } else if (ts.isNumericLiteral(init)) {
+        return b.numberLiteralTypeAnnotation(Number(init.text), init.text);
+      } else if (ts.isEnumMember(init)) {
+        return unimplementedType(
+          init,
+          `const type inferred from literal enum reference`,
+        );
+      } else {
+        // TODO(runtime): Without `declare` TS does more inference than
+        //   this.  Do we need to do any of it to help Flow?
+        //
+        // With `declare`, if you say `declare const x = []`,
+        // TS gives an error reading:
+        //   > A 'const' initializer in an ambient context must be a string
+        //   > or numeric literal or literal enum reference.
+        //
+        // I.e., the cases we covered above.  So in a `.d.ts` file,
+        // this case shouldn't arise.
+        return errorType(
+          init,
+          `const type inferred from ${ts.SyntaxKind[init.kind]}`,
+        );
+      }
     }
   }
 

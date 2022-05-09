@@ -18,6 +18,10 @@ export declare type NumArray = Array<upstream.Num>;
 
 declare type ArrayArray<T, S extends T> = [S, T[]][];
 
+export declare const xx = 3,
+  y = "a",
+  z: string = "b";
+
 export declare class C<T> {}
 export declare class D extends C<string> {}
 
