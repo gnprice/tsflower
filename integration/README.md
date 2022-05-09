@@ -8,15 +8,17 @@ To run TsFlower on some package:
 
     $ bin/tsflower tree integration/{node_modules,types}/react-native-gesture-handler
 
-To see errors in that package:
+To run it on a selected suite of packages:
 
-    $ grep -RohP 'tsflower-.*?(\*/| at )' integration/types/react-native-gesture-handler/ | sort | uniq -c | sort -n
+    $ integration/run
 
-To run Flow on the generated output:
+To see TsFlower errors in the generated output:
+
+    $ grep -RohP 'tsflower-.*?(\*/| at )' integration/types/ | sort | uniq -c | sort -n
+
+… and Flow errors:
 
     $ npx flow integration/
-
-Further handy Flow commands:
 
       # Count how many errors there are
     $ npx flow integration/ --json | jq '.errors | length'

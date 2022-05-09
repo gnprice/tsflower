@@ -1,3 +1,9 @@
 [ignore]
 ; https://github.com/facebook/flow/issues/2364
 .*/node_modules/resolve/test/resolver/malformed_package_json/.*
+
+[options]
+# This causes Flow to find our `types/foo/bar.js.flow`, if one exists,
+# when looking at an import from `foo/bar`.  (The `[^.]` is so Flow doesn't
+# try to apply this to relative imports.)
+module.name_mapper='^\([^.].*\)$' -> '<PROJECT_ROOT>/types/\0'

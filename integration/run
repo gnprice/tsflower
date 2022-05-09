@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+# A bit of a hack, but a step up from keeping things in shell history.
+#
+# Note this only produces the output, and makes no attempt to validate it;
+# for that, see integration/README.md .
+
+trees=(
+  @react-navigation
+  react-native-gesture-handler
+  react-native-safe-area-context
+)
+
+packages=(
+  @react-navigation/{core,elements,routers,native}
+  react-native-gesture-handler
+  react-native-safe-area-context
+)
+
+rm integration/types/ -rf
+
+# TODO: Do all packages as a single run, so the mapper works across them.
+for tree in "${trees[@]}"; do
+  bin/tsflower tree integration/{node_modules,types}/"${tree}"
+done
+
+generated='@'generated
+
+# Make the packages resolvable from each other.
+# (Note the `module.name_mapper` setting in the flowconfig.)
+for package in "${packages[@]}"; do
+  index=integration/types/"${package}"/index.js.flow
+  [ -e "${index}" ] && continue
+  typeref=$(jq .types -r integration/node_modules/"${package}"/package.json)
+  cat >"${index}" <<EOF
+/* @flow
+ * ${generated}
+ */
+export * from './${typeref%.d.ts}.js.flow';
+EOF
+done

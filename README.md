@@ -59,6 +59,9 @@ For more, see:
     via its package.json, find the desired destination via convention and/or
     configuration, and go.
 
+    See `integration/run` for a way to make the output resolvable for Flow,
+    by adding an `index.js.flow` indirection.
+
 - More consistently handle errors as nice and structured:
 
   - See remaining `TODO(error)` comments, and remaining `throw` statements.
@@ -84,6 +87,8 @@ For more, see:
     basically want to see those diffs in the development-iteration loop, but
     don't want to read them in the history.  Well, start by leaving out and
     just asking if Flow passes.
+
+    See `integration/run` for a start on this.
 
 - Preserve JSDoc, like `tsc` does when generating `.d.ts` files.
 
