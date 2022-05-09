@@ -949,7 +949,7 @@ export function convertSourceFile(
       ] {
     const properties: (n.ObjectTypeProperty | n.ObjectTypeSpreadProperty)[] =
       [];
-    const indexers: n.ObjectTypeIndexer[] | undefined = []; // TODO
+    const indexers: n.ObjectTypeIndexer[] = [];
     const callProperties: n.ObjectTypeCallProperty[] | undefined = []; // TODO
 
     for (const member of node.members) {
@@ -971,6 +971,10 @@ export function convertSourceFile(
           );
           break;
 
+        case ts.SyntaxKind.IndexSignature:
+          convertIndexer(member as ts.IndexSignatureDeclaration);
+          break;
+
         case ts.SyntaxKind.GetAccessor:
           convertGetAccessor(member as ts.GetAccessorDeclaration);
           break;
@@ -987,7 +991,6 @@ export function convertSourceFile(
         case ts.SyntaxKind.CallSignature:
         case ts.SyntaxKind.ConstructSignature:
         case ts.SyntaxKind.SemicolonClassElement:
-        case ts.SyntaxKind.IndexSignature:
         case ts.SyntaxKind.ClassStaticBlockDeclaration:
           properties.push(
             propertyOfError(
@@ -1039,6 +1042,36 @@ export function convertSourceFile(
           }),
         );
       }
+    }
+
+    function convertIndexer(member: ts.IndexSignatureDeclaration) {
+      const { parameters, type: valueType } = member;
+
+      if (parameters.length !== 1) {
+        properties.push(
+          propertyOfError(
+            member,
+            mkError(`TS index signature must have exactly 1 parameter`),
+          ),
+        );
+        return;
+      }
+      const parameter = parameters[0];
+      const { name, type: keyType } = parameter;
+
+      indexers.push(
+        b.objectTypeIndexer(
+          // The "parameter" in a TS index signature is always an
+          // identifier; if you try to write a binding pattern, it doesn't
+          // even parse.
+          convertIdentifier(name as ts.Identifier),
+          // The "parameter type" in a TS index signature is mandatory;
+          // without it, the syntax doesn't even parse as an index
+          // signature, but rather as a property with a computed name.
+          convertType(keyType!),
+          convertType(valueType),
+        ),
+      );
     }
 
     function convertGetAccessor(member: ts.GetAccessorDeclaration) {

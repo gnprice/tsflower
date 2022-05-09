@@ -43,3 +43,18 @@ export interface I {
     get getter(): number,
     set setter(value: number): void,
 };
+
+var vIndexer: {|
+    [key: number]: string,
+    plainProperty: number[],
+|};
+
+declare class CIndexer {
+    [key: number]: string,
+    plainProperty: number[],
+}
+
+declare interface IIndexer {
+    [key: number]: string,
+    plainProperty: number[],
+}
