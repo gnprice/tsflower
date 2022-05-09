@@ -268,7 +268,11 @@ export function convertSourceFile(
             // Flow we need to say "type" on the import.  (It might have both:
             // for example, both an interface and class declaration, like
             // React.Component does.)
-            (importedSymbol && !(importedSymbol.flags & ts.SymbolFlags.Value));
+            (importedSymbol &&
+              !(importedSymbol.flags & ts.SymbolFlags.Value) &&
+              // But if it's already an `import type`, avoid redundancy
+              // (which would be a syntax error.)
+              !importClause.isTypeOnly);
 
           add(isTypeOnly ? "type" : "value", propertyName.text, name.text);
 

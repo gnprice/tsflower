@@ -1,5 +1,6 @@
 import * as upstream from "./upstream";
-import { Num as Numm } from "./upstream";
+import { Num } from "./upstream";
+import type { Num as Numm } from "./upstream";
 import { x as ux } from "./upstream";
 import upstream2 from "./upstream";
 import { C as UpC, type C as UpCT } from "./upstream";
