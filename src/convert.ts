@@ -1110,18 +1110,32 @@ export function convertSourceFile(
     function convertName(
       node: ts.PropertyName,
     ): null | ErrorOr<K.IdentifierKind | K.LiteralKind> {
-      if (ts.isIdentifier(node)) {
-        return mkSuccess(convertIdentifier(node));
-      } else if (ts.isPrivateIdentifier(node)) {
-        // A private property in `declare class` is useless, because it
-        // can't be referred to by anything using the declaration.
-        // (Private properties can only be referred to within the class
-        // definition.)  TS allows them, but Flow doesn't; just drop it
-        // from the output.
-        // TODO(runtime): Handle private properties.
-        return null;
-      } else {
-        return mkUnimplemented(`PropertyName kind ${ts.SyntaxKind[node.kind]}`);
+      switch (node.kind) {
+        case ts.SyntaxKind.Identifier:
+          return mkSuccess(convertIdentifier(node));
+
+        case ts.SyntaxKind.PrivateIdentifier:
+          // A private property in `declare class` is useless, because it
+          // can't be referred to by anything using the declaration.
+          // (Private properties can only be referred to within the class
+          // definition.)  TS allows them, but Flow doesn't; just drop it
+          // from the output.
+          // TODO(runtime): Handle private properties.
+          return null;
+
+        case ts.SyntaxKind.StringLiteral:
+        case ts.SyntaxKind.NumericLiteral:
+        case ts.SyntaxKind.ComputedPropertyName:
+          return mkUnimplemented(
+            `PropertyName kind ${ts.SyntaxKind[node.kind]}`,
+          );
+
+        default:
+          ensureUnreachable(node);
+          return mkError(
+            // @ts-expect-error yes, the types say this is unreachable
+            `PropertyName kind ${ts.SyntaxKind[node.kind]}`,
+          );
       }
     }
 
