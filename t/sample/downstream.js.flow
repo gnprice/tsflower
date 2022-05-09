@@ -15,6 +15,7 @@ export { Num } from "./upstream";
 export { Num as Nummm } from "./upstream";
 export * from "./upstream";
 export type NumArray = Array<upstream.Num>;
+type ArrayArray<T, S: T> = [S, T[]][];
 declare export class C<T> {};
 declare export class D extends C<string> {};
 declare function ff(x: boolean): void;

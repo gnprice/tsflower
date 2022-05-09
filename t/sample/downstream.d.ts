@@ -16,6 +16,8 @@ export * from "./upstream";
 
 export declare type NumArray = Array<upstream.Num>;
 
+declare type ArrayArray<T, S extends T> = [S, T[]][];
+
 export declare class C<T> {}
 export declare class D extends C<string> {}
 
