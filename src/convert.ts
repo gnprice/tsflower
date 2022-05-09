@@ -864,67 +864,20 @@ export function convertSourceFile(
     for (const member of node.members) {
       switch (member.kind) {
         case ts.SyntaxKind.Constructor:
-          properties.push(
-            b.objectTypeProperty.from({
-              key: b.identifier("constructor"),
-              // TODO: return type should be void, not any
-              value: convertFunctionType(member as ts.ConstructorDeclaration),
-              optional: false,
-              method: true,
-            }),
-          );
+          convertConstructor(member as ts.ConstructorDeclaration);
           break;
 
         case ts.SyntaxKind.PropertySignature:
-        case ts.SyntaxKind.PropertyDeclaration: {
-          const { name, questionToken, type } = member as
-            | ts.PropertySignature
-            | ts.PropertyDeclaration;
-
-          const keyResult = convertName(name);
-          if (!keyResult) break;
-          if (keyResult.kind !== "success") {
-            properties.push(propertyOfError(member, keyResult));
-            break;
-          }
-          const key = keyResult.result;
-
-          properties.push(
-            b.objectTypeProperty(
-              key,
-              type ? convertType(type) : b.anyTypeAnnotation(),
-              !!questionToken,
-            ),
+        case ts.SyntaxKind.PropertyDeclaration:
+          convertProperty(
+            member as ts.PropertySignature | ts.PropertyDeclaration,
           );
           break;
-        }
 
         case ts.SyntaxKind.MethodSignature:
-        case ts.SyntaxKind.MethodDeclaration: {
-          const { name, questionToken } = member as
-            | ts.MethodSignature
-            | ts.MethodDeclaration;
-
-          const keyResult = convertName(name);
-          if (!keyResult) break;
-          if (keyResult.kind !== "success") {
-            properties.push(propertyOfError(member, keyResult));
-            break;
-          }
-          const key = keyResult.result;
-
-          properties.push(
-            b.objectTypeProperty.from({
-              key,
-              value: convertFunctionType(
-                member as ts.MethodSignature | ts.MethodDeclaration,
-              ),
-              optional: !!questionToken,
-              method: true,
-            }),
-          );
+        case ts.SyntaxKind.MethodDeclaration:
+          convertMethod(member as ts.MethodSignature | ts.MethodDeclaration);
           break;
-        }
 
         case ts.SyntaxKind.CallSignature:
         case ts.SyntaxKind.ConstructSignature:
@@ -958,6 +911,61 @@ export function convertSourceFile(
     }
 
     return [properties, indexers, callProperties];
+
+    function convertProperty(
+      member: ts.PropertySignature | ts.PropertyDeclaration,
+    ) {
+      {
+        const { name, questionToken, type } = member;
+        const keyResult = convertName(name);
+        if (!keyResult) return;
+        if (keyResult.kind !== "success") {
+          properties.push(propertyOfError(member, keyResult));
+          return;
+        }
+        const key = keyResult.result;
+
+        properties.push(
+          b.objectTypeProperty(
+            key,
+            type ? convertType(type) : b.anyTypeAnnotation(),
+            !!questionToken,
+          ),
+        );
+      }
+    }
+
+    function convertConstructor(member: ts.ConstructorDeclaration) {
+      properties.push(
+        b.objectTypeProperty.from({
+          key: b.identifier("constructor"),
+          // TODO: return type should be void, not any
+          value: convertFunctionType(member),
+          optional: false,
+          method: true,
+        }),
+      );
+    }
+
+    function convertMethod(member: ts.MethodSignature | ts.MethodDeclaration) {
+      const { name, questionToken } = member;
+      const keyResult = convertName(name);
+      if (!keyResult) return;
+      if (keyResult.kind !== "success") {
+        properties.push(propertyOfError(member, keyResult));
+        return;
+      }
+      const key = keyResult.result;
+
+      properties.push(
+        b.objectTypeProperty.from({
+          key,
+          value: convertFunctionType(member),
+          optional: !!questionToken,
+          method: true,
+        }),
+      );
+    }
 
     function convertName(
       node: ts.PropertyName,
