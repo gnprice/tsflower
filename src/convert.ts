@@ -608,9 +608,7 @@ export function convertSourceFile(
         );
 
       case ts.SyntaxKind.TupleType:
-        return b.tupleTypeAnnotation(
-          (node as ts.TupleTypeNode).elements.map(convertType),
-        );
+        return convertTupleType(node as ts.TupleTypeNode);
 
       case ts.SyntaxKind.FunctionType:
         return convertFunctionType(node as ts.FunctionTypeNode);
@@ -778,6 +776,10 @@ export function convertSourceFile(
 
   function convertUnionType(node: ts.UnionTypeNode): K.FlowTypeKind {
     return b.unionTypeAnnotation(node.types.map(convertType));
+  }
+
+  function convertTupleType(node: ts.TupleTypeNode): K.FlowTypeKind {
+    return b.tupleTypeAnnotation(node.elements.map(convertType));
   }
 
   function convertFunctionType(
