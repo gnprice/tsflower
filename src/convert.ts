@@ -581,6 +581,11 @@ export function convertSourceFile(
       }
 
       case ts.SyntaxKind.IndexedAccessType:
+        // TODO?: Look for `Foo[keyof Foo]` (including `Foo` an expression,
+        //   in particular `typeof bar`), and make that `$Values<Foo>`.
+        //   Seems a Flow bug that that's any different; but it works better
+        //   on npm:react-native-gesture-handler/State, cutting 75 errors
+        //   from its rdeps.
         return b.genericTypeAnnotation(
           // TODO(flow-155): Switch to Flow indexed-access-type syntax.
           b.identifier("$ElementType"),
