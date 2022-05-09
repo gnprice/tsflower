@@ -304,11 +304,14 @@ export function convertSourceFile(
 
     const source = b.stringLiteral(getModuleSpecifier(node));
 
-    return b.importDeclaration(
-      specifiers,
-      source,
-      importClause.isTypeOnly ? "type" : "value",
-    );
+    const importKind =
+      importClause.isTypeOnly &&
+      // TS accepts `import type * as …`, but Flow doesn't.
+      !(namedBindings && ts.isNamespaceImport(namedBindings))
+        ? "type"
+        : "value";
+
+    return b.importDeclaration(specifiers, source, importKind);
   }
 
   function convertExportDeclaration(
