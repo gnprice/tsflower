@@ -861,7 +861,14 @@ export function convertSourceFile(
       [];
     const indexers: n.ObjectTypeIndexer[] | undefined = []; // TODO
     const callProperties: n.ObjectTypeCallProperty[] | undefined = []; // TODO
+
     for (const member of node.members) {
+      convertMember(member);
+    }
+
+    return [properties, indexers, callProperties];
+
+    function convertMember(member: ts.ClassElement | ts.TypeElement) {
       switch (member.kind) {
         case ts.SyntaxKind.Constructor:
           convertConstructor(member as ts.ConstructorDeclaration);
@@ -909,8 +916,6 @@ export function convertSourceFile(
           );
       }
     }
-
-    return [properties, indexers, callProperties];
 
     function convertProperty(
       member: ts.PropertySignature | ts.PropertyDeclaration,
