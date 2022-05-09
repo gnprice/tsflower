@@ -11,6 +11,7 @@ export var value: {|
     destructuringMethod({| x: number |}): void,
     "property keyed by StringLiteral": string,
     "method StringLiteral"(): void,
+    "": number,
     "1": string,
     "20": string,
     "16": string,

@@ -1124,6 +1124,26 @@ export function convertSourceFile(
           return null;
 
         case ts.SyntaxKind.StringLiteral:
+          if (!name.text) {
+            // The property has an empty name.
+            switch (node.kind) {
+              case ts.SyntaxKind.InterfaceDeclaration:
+              case ts.SyntaxKind.ClassDeclaration:
+                // Flow disallows an empty-named property in some contexts.
+                // (Flow bug?  Seems like JS classes allow these just fine.)
+                return mkUnimplemented(
+                  `empty-named property on class or interface`,
+                );
+
+              case ts.SyntaxKind.TypeLiteral:
+                // But it allows it in others.  Go ahead as if nonempty.
+                break;
+
+              default:
+                ensureUnreachable(node);
+            }
+          }
+
           return mkSuccess(b.stringLiteral(name.text));
 
         case ts.SyntaxKind.NumericLiteral:
