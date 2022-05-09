@@ -881,6 +881,10 @@ export function convertSourceFile(
           );
           break;
 
+        case ts.SyntaxKind.GetAccessor:
+          convertGetAccessor(member as ts.GetAccessorDeclaration);
+          break;
+
         case ts.SyntaxKind.MethodSignature:
         case ts.SyntaxKind.MethodDeclaration:
           convertMethod(member as ts.MethodSignature | ts.MethodDeclaration);
@@ -889,7 +893,6 @@ export function convertSourceFile(
         case ts.SyntaxKind.CallSignature:
         case ts.SyntaxKind.ConstructSignature:
         case ts.SyntaxKind.SemicolonClassElement:
-        case ts.SyntaxKind.GetAccessor:
         case ts.SyntaxKind.SetAccessor:
         case ts.SyntaxKind.IndexSignature:
         case ts.SyntaxKind.ClassStaticBlockDeclaration:
@@ -938,6 +941,37 @@ export function convertSourceFile(
           ),
         );
       }
+    }
+
+    function convertGetAccessor(member: ts.GetAccessorDeclaration) {
+      const { name, type } = member;
+
+      const keyResult = convertName(name);
+      if (!keyResult) return;
+      if (keyResult.kind !== "success") {
+        properties.push(propertyOfError(member, keyResult));
+        return;
+      }
+      const key = keyResult.result;
+
+      // A missing result type is implicitly `any` in TS, but forbidden in Flow.
+      const returnType = !type ? b.anyTypeAnnotation() : convertType(type);
+
+      const value = b.functionTypeAnnotation.from({
+        returnType,
+        params: [], // A TS getter takes no parameters
+        rest: null, // … so in particular no rest-parameter
+        typeParameters: null, // A TS accessor has no type parameters
+      });
+
+      properties.push(
+        b.objectTypeProperty.from({
+          key,
+          kind: "get",
+          value,
+          optional: false,
+        }),
+      );
     }
 
     function convertConstructor(member: ts.ConstructorDeclaration) {

@@ -2,6 +2,9 @@
 
 export declare var value: {
   property: string;
+  get getter(): number;
+  // set xx(value: number); // TODO -> ditto plus `: void`
+
   method1(): void;
   method2(x: number): string;
   functionProperty: (x: number) => string;
@@ -15,6 +18,8 @@ export declare class C {
   f(cb: (s: string) => void): void;
   g(other: this): this;
   // 'import'(cb: (s: string) => void): this;  // TS supports this, but Flow has no equivalent.
+
+  get getter(): number;
 
   x;
   y: this;
@@ -33,4 +38,6 @@ export declare interface I {
   x;
   z?;
   w?: number;
+
+  get getter(): number;
 }
