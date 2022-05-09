@@ -1108,11 +1108,11 @@ export function convertSourceFile(
     }
 
     function convertName(
-      node: ts.PropertyName,
+      name: ts.PropertyName,
     ): null | ErrorOr<K.IdentifierKind | K.LiteralKind> {
-      switch (node.kind) {
+      switch (name.kind) {
         case ts.SyntaxKind.Identifier:
-          return mkSuccess(convertIdentifier(node));
+          return mkSuccess(convertIdentifier(name));
 
         case ts.SyntaxKind.PrivateIdentifier:
           // A private property in `declare class` is useless, because it
@@ -1124,7 +1124,7 @@ export function convertSourceFile(
           return null;
 
         case ts.SyntaxKind.StringLiteral:
-          return mkSuccess(b.stringLiteral(node.text));
+          return mkSuccess(b.stringLiteral(name.text));
 
         case ts.SyntaxKind.NumericLiteral:
           // Flow doesn't accept a number for a property key in an object
@@ -1137,18 +1137,18 @@ export function convertSourceFile(
           // latter implemented as `value + ""`, in `createNumericLiteral`
           // in `src/compiler/factory/nodeFactory.ts`.)  So that's exactly
           // what we want here.
-          return mkSuccess(b.stringLiteral(node.text));
+          return mkSuccess(b.stringLiteral(name.text));
 
         case ts.SyntaxKind.ComputedPropertyName:
           return mkUnimplemented(
-            `PropertyName kind ${ts.SyntaxKind[node.kind]}`,
+            `PropertyName kind ${ts.SyntaxKind[name.kind]}`,
           );
 
         default:
-          ensureUnreachable(node);
+          ensureUnreachable(name);
           return mkError(
             // @ts-expect-error yes, the types say this is unreachable
-            `PropertyName kind ${ts.SyntaxKind[node.kind]}`,
+            `PropertyName kind ${ts.SyntaxKind[name.kind]}`,
           );
       }
     }
