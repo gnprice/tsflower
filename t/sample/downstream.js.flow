@@ -15,23 +15,6 @@ export { Num } from "./upstream";
 export { Num as Nummm } from "./upstream";
 export * from "./upstream";
 export type NumArray = Array<upstream.Num>;
-type ArrayArray<T, S: T> = [S, T[]][];
-var a: void, b: void, c: boolean, d: number, e: string;
-var f: null, g: true, h: false, i: 3, j: "x";
-var k: boolean[], l: "a" | 3, ll: {| a: "a" | "b" |} & {| a: "b" | "c" |};
-
-var o: {|
-    a: number,
-    b: {...},
-    c: mixed,
-    d: any,
-    e: empty,
-    g: $ElementType<{| a: string |}, "a">,
-|};
-
-var oo: typeof o;
-var oa: typeof o.a;
-var ok: $Keys<typeof o>;
 declare export class C<T> {};
 declare export class D extends C<string> {};
 declare function ff(x: boolean): void;
