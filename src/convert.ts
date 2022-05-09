@@ -389,21 +389,23 @@ export function convertSourceFile(
   ): K.StatementKind {
     const flags =
       node.declarationList.flags & (ts.NodeFlags.Const | ts.NodeFlags.Let);
-    return b.variableDeclaration(
+    const kind =
       flags === ts.NodeFlags.Const
         ? "var" // TODO(runtime): For .js.flow files, we always declare `var`, not `const`.
         : flags === ts.NodeFlags.Let
         ? "let"
-        : "var",
-      map(node.declarationList.declarations, (node) => {
-        return b.variableDeclarator(
-          convertIdentifier(
-            node.name /* TODO */ as ts.Identifier,
-            node.type && convertType(node.type),
-          ),
-        );
-      }),
+        : "var";
+
+    return b.variableDeclaration(
+      kind,
+      map(node.declarationList.declarations, convertVariableDeclaration),
     );
+
+    function convertVariableDeclaration(declaration: ts.VariableDeclaration) {
+      const name = declaration.name /* TODO */ as ts.Identifier;
+      const type = declaration.type && convertType(declaration.type);
+      return b.variableDeclarator(convertIdentifier(name, type));
+    }
   }
 
   function convertTypeAliasDeclaration(
