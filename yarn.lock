@@ -89,10 +89,10 @@ react@^18.1.0:
   dependencies:
     loose-envify "^1.1.0"
 
-"recast@npm:@gregprice/recast@^0.21.2-0.tsflower.5":
-  version "0.21.2-0.tsflower.5"
-  resolved "https://registry.yarnpkg.com/@gregprice/recast/-/recast-0.21.2-0.tsflower.5.tgz#b9d64190b1acf09db9ec698396ab0a865f650a79"
-  integrity sha512-emJRCatm2YqiEgrPx9zesTufhOw0JayvdpBdWDteFt/xpwGrK+L//xTtRIEwaKticllxAd3aZSxXHsGtit0vbg==
+"recast@npm:@gregprice/recast@^0.21.2-0.tsflower.6":
+  version "0.21.2-0.tsflower.6"
+  resolved "https://registry.yarnpkg.com/@gregprice/recast/-/recast-0.21.2-0.tsflower.6.tgz#b2510a55593e8b339210e0afff4c6b5a1ef7b579"
+  integrity sha512-XiiEFfk9M8DXa43VIlR4fNNfjsQ5UeVjdrA8/1o9Vbb6AuiN0sSBG3EcMEn6S3nGevgSywGYMUtvYGMaCqUn7w==
   dependencies:
     ast-types "npm:@gregprice/ast-types@^0.15.3-0.tsflower.3"
     esprima "~4.0.0"

@@ -15,6 +15,6 @@ declare function ff<T>(x: T): { y: T };
 declare function ff(x: boolean): (b: true) => { y: number };
 export declare function ff(x: boolean): (b: true) => { y: number };
 
-// declare function fDestructuring({ x }: destructuringArgs): void; // TODO(recast) produces broken syntax
+declare function fDestructuring({ x }: destructuringArgs): void;
 
 type destructuringArgs = { x: boolean };

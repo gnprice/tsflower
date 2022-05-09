@@ -6,7 +6,7 @@ export declare var value: {
   method2(x: number): string;
   functionProperty: (x: number) => string;
 
-  // destructuringMethod({ x }: { x: number }): void; // TODO(recast) produces broken syntax
+  destructuringMethod({ x }: { x: number }): void;
 };
 
 export declare class C {
