@@ -53,5 +53,7 @@ var typeOperations: {|
         one: [string],
         two: [string, number],
         eight: [void, void, null, boolean, true, false, number, string],
+        named: [string],
+        named2: [string, number],
     |},
 |};

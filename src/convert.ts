@@ -618,8 +618,6 @@ export function convertSourceFile(
 
       case ts.SyntaxKind.TypePredicate:
       case ts.SyntaxKind.ConstructorType:
-      case ts.SyntaxKind.OptionalType:
-      case ts.SyntaxKind.RestType:
       case ts.SyntaxKind.ConditionalType:
       case ts.SyntaxKind.InferType:
       case ts.SyntaxKind.MappedType:
@@ -630,7 +628,10 @@ export function convertSourceFile(
         return unimplementedType(node, ts.SyntaxKind[node.kind]);
 
       case ts.SyntaxKind.NamedTupleMember:
-        // Not actually types -- pieces of types.
+      case ts.SyntaxKind.OptionalType:
+      case ts.SyntaxKind.RestType:
+        // Not actually types -- pieces of types.  We handle these below,
+        // as part of handling the types they appear in.
         return errorType(
           node,
           `unexpected type kind: ${ts.SyntaxKind[node.kind]}`,
@@ -779,7 +780,37 @@ export function convertSourceFile(
   }
 
   function convertTupleType(node: ts.TupleTypeNode): K.FlowTypeKind {
-    return b.tupleTypeAnnotation(node.elements.map(convertType));
+    let warningDescription;
+    const elements: K.FlowTypeKind[] = [];
+    for (const element of node.elements) {
+      if (
+        ts.isOptionalTypeNode(element) ||
+        (ts.isNamedTupleMember(element) && element.questionToken)
+      ) {
+        // Flow has no equivalent.  It could be emulated by a union of tuple
+        // types, though imperfectly because Flow limits itself on unions.
+        warningDescription = `unimplemented: optional tuple member`;
+        break;
+      }
+      if (
+        ts.isRestTypeNode(element) ||
+        (ts.isNamedTupleMember(element) && element.dotDotDotToken)
+      ) {
+        // Flow has no equivalent.  Could be approximated from below by a
+        // union out to some finite length, or from above by an array type.
+        warningDescription = `unimplemented: rest tuple member`;
+        break;
+      }
+      elements.push(
+        convertType(ts.isNamedTupleMember(element) ? element.type : element),
+      );
+    }
+
+    const result = b.tupleTypeAnnotation(elements);
+
+    return warningDescription
+      ? warningType(result, node, warningDescription)
+      : result;
   }
 
   function convertFunctionType(
@@ -1196,6 +1227,20 @@ export function convertSourceFile(
     return b.emptyStatement.from({
       comments: [b.commentBlock(msg, true, false), quotedStatement(node)],
     });
+  }
+
+  function warningType(
+    outNode: K.FlowTypeKind,
+    node: ts.TypeNode,
+    description: string,
+  ): K.FlowTypeKind {
+    const msg = ` tsflower-warning: ${description} `;
+    return {
+      ...outNode,
+      // TODO(error): Get the quoted original before the output, to be next
+      //   to the warning description
+      comments: [b.commentBlock(msg, true, false), quotedInlineNode(node)],
+    };
   }
 
   function unimplementedType(
