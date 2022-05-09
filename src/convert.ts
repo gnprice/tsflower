@@ -885,6 +885,10 @@ export function convertSourceFile(
           convertGetAccessor(member as ts.GetAccessorDeclaration);
           break;
 
+        case ts.SyntaxKind.SetAccessor:
+          convertSetAccessor(member as ts.SetAccessorDeclaration);
+          break;
+
         case ts.SyntaxKind.MethodSignature:
         case ts.SyntaxKind.MethodDeclaration:
           convertMethod(member as ts.MethodSignature | ts.MethodDeclaration);
@@ -893,7 +897,6 @@ export function convertSourceFile(
         case ts.SyntaxKind.CallSignature:
         case ts.SyntaxKind.ConstructSignature:
         case ts.SyntaxKind.SemicolonClassElement:
-        case ts.SyntaxKind.SetAccessor:
         case ts.SyntaxKind.IndexSignature:
         case ts.SyntaxKind.ClassStaticBlockDeclaration:
           properties.push(
@@ -968,6 +971,59 @@ export function convertSourceFile(
         b.objectTypeProperty.from({
           key,
           kind: "get",
+          value,
+          optional: false,
+        }),
+      );
+    }
+
+    function convertSetAccessor(member: ts.SetAccessorDeclaration) {
+      const { name, parameters } = member;
+
+      const keyResult = convertName(name);
+      if (!keyResult) return;
+      if (keyResult.kind !== "success") {
+        properties.push(propertyOfError(member, keyResult));
+        return;
+      }
+      const key = keyResult.result;
+
+      // TODO: Refactor convertFunctionType so as to reuse most of it here.
+
+      if (parameters.length !== 1) {
+        properties.push(
+          propertyOfError(
+            member,
+            mkError(`TS setter must take exactly 1 parameter`),
+          ),
+        );
+        return;
+      }
+      const parameter = parameters[0];
+
+      // Take the name or leave it, much the same as for a normal function;
+      // see `convertFunctionType`.
+      const paramName = !ts.isIdentifier(parameter.name)
+        ? null
+        : convertIdentifier(parameter.name);
+
+      const param = b.functionTypeParam(
+        paramName,
+        parameter.type ? convertType(parameter.type) : b.anyTypeAnnotation(),
+        false, // TS setter cannot be optional
+      );
+
+      const value = b.functionTypeAnnotation.from({
+        returnType: b.voidTypeAnnotation(),
+        params: [param],
+        rest: null, // A TS setter cannot take a rest-parameter
+        typeParameters: null, // A TS accessor has no type parameters
+      });
+
+      properties.push(
+        b.objectTypeProperty.from({
+          key,
+          kind: "set",
           value,
           optional: false,
         }),

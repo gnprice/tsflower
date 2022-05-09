@@ -3,7 +3,7 @@
 export declare var value: {
   property: string;
   get getter(): number;
-  // set xx(value: number); // TODO -> ditto plus `: void`
+  set setter(value: number);
 
   method1(): void;
   method2(x: number): string;
@@ -20,6 +20,7 @@ export declare class C {
   // 'import'(cb: (s: string) => void): this;  // TS supports this, but Flow has no equivalent.
 
   get getter(): number;
+  set setter(value: number);
 
   x;
   y: this;
@@ -40,4 +41,5 @@ export declare interface I {
   w?: number;
 
   get getter(): number;
+  set setter(value: number);
 }
