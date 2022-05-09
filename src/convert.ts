@@ -744,8 +744,14 @@ export function convertSourceFile(
           b.typeParameterInstantiation([convertType(type)]),
         );
 
-      case ts.SyntaxKind.UniqueKeyword:
       case ts.SyntaxKind.ReadonlyKeyword:
+        return warningType(
+          convertType(type),
+          node,
+          `unimplemented: 'readonly' as type operator`,
+        );
+
+      case ts.SyntaxKind.UniqueKeyword:
         return unimplementedType(
           node,
           `type operator: ${ts.SyntaxKind[operator]}`,
