@@ -27,7 +27,20 @@ var literalTypes: {
   n: null;
   t: true;
   f: false;
-  num: 3; // TODO also negative numbers, floats, exponential notation
+  num: {
+    nat: 3;
+    neg: -1;
+    float: 1.2;
+    floatNeg: -2.3;
+    expPIP: 1e2;
+    expPFP: 1.2e3;
+    expPIN: 1e-2;
+    expPFN: 1.2e-3;
+    expNIP: -1e2;
+    expNFP: -1.2e3;
+    expNIN: -1e-2;
+    expNFN: -1.2e-3;
+  };
   str: "x";
 };
 
@@ -45,7 +58,7 @@ var typeOperations: {
   intersection: { a: "a" | "b" } & { a: "b" | "c" };
   indexedAccess: { a: string }["a"];
   array: boolean[];
-  tuple: [string, number];
+  tuple: [string, number]; // TODO empty, singleton
   // function types covered in function.d.ts
   // type literals covered in members.d.ts (plus incidentally here)
 };

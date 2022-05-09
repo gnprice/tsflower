@@ -20,7 +20,20 @@ var literalTypes: {|
     n: null,
     t: true,
     f: false,
-    num: 3,
+    num: {|
+        nat: 3,
+        neg: -1,
+        float: 1.2,
+        floatNeg: -2.3,
+        expPIP: 100,
+        expPFP: 1200,
+        expPIN: 0.01,
+        expPFN: 0.0012,
+        expNIP: -100,
+        expNFP: -1200,
+        expNIN: -0.01,
+        expNFN: -0.0012,
+    |},
     str: "x",
 |};
 
