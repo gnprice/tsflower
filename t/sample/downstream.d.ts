@@ -43,33 +43,9 @@ declare function ff(x: boolean): (b: true) => { y: number };
 export declare function ff(x: boolean): (b: true) => { y: number };
 
 export declare class C<T> {}
-export declare class D extends C<string> {
-  constructor(); // TODO: should return void, not any
-
-  f(cb: (s: string) => void): void;
-  g(other: this): this;
-  // 'import'(cb: (s: string) => void): this;  // TS supports this, but Flow has no equivalent.
-
-  x;
-  y: this;
-  z?;
-  w?: number;
-  // TODO implement
-  // 3: string;
-  // 'extends': string;
-  // [3]: string;
-  // ['extends']: string;
-}
+export declare class D extends C<string> {}
 
 // export default class {} // TODO implement
-
-declare interface I {
-  f(cb: (s: string) => void): void;
-
-  x;
-  z?;
-  w?: number;
-}
 
 export {};
 export { ff as fff, C as CC };

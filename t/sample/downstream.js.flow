@@ -39,23 +39,6 @@ declare function ff<T>(x: T): {| y: T |};
 declare function ff(x: boolean): (b: true) => {| y: number |};
 declare export function ff(x: boolean): (b: true) => {| y: number |};
 declare export class C<T> {};
-
-declare export class D extends C<string> {
-    constructor(): any,
-    f(cb: (s: string) => void): void,
-    g(other: this): this,
-    x: any,
-    y: this,
-    z?: any,
-    w?: number,
-};
-
-declare interface I {
-    f(cb: (s: string) => void): void,
-    x: any,
-    z?: any,
-    w?: number,
-}
-
+declare export class D extends C<string> {};
 export {};
 export { ff as fff, C as CC };
