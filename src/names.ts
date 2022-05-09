@@ -1,5 +1,5 @@
 /**
- * Make a deterministic, unique, JS-valid identifier based on the given string.
+ * Make a deterministic, unique, JS-valid identifier based on the given strings.
  *
  * The result is a string which begins with `prefix` and can be used as a
  * JavaScript identifier name.  It's always the same when called with the
@@ -8,22 +8,27 @@
  *
  * The argument `prefix` is required to be a valid JS identifier name.
  */
-export function escapeNameAsIdentifierWithPrefix(
+export function escapeNamesAsIdentifierWithPrefix(
   prefix: string,
-  name: string,
+  ...names: string[]
 ): string {
   // The set of valid JS identifier names is defined here:
   //   https://tc39.es/ecma262/#prod-IdentifierName
   // In particular, after the first character, each character can be `$`
   // or any character with the `ID_Continue` Unicode property, among others.
 
-  // For our construction, first, we produce a string where all characters
-  // have `ID_Continue`, as an invertible function of `name`.
-  const escapedName = escapeAsIdContinue(name);
+  // For our construction, first, we produce a list of strings where all
+  // characters have `ID_Continue`, as an invertible function of `names`,
+  // and none of them is simply `_`.
+  const escapedNamesList = names.map(escapeAsIdContinue);
 
-  // Then we delimit the prefix from the escaped name with `$`, which lacks
-  // `ID_Continue` and therefore cannot appear in the escaped name.
-  return prefix + "$" + escapedName;
+  // Then we delimit the escaped names with `$`, which lacks `ID_Continue`
+  // and therefore cannot appear in the escaped names…
+  const escapedNamesString = escapedNamesList.join("$");
+
+  // … and we delimit the prefix from that with `$_$`, which cannot appear
+  // in the combined escaped-names string because no escaped name is `_`.
+  return prefix + "$_$" + escapedNamesString;
 }
 
 /**
@@ -32,6 +37,8 @@ export function escapeNameAsIdentifierWithPrefix(
  * That is, each character in the result has the `ID_Continue` Unicode
  * property; and the result is always the same when called with the same
  * argument, and always different when called with different arguments.
+ *
+ * Moreover, the result is never the string `_`, a single underscore.
  */
 function escapeAsIdContinue(name: string): string {
   // For our construction:
@@ -53,6 +60,9 @@ function escapeAsIdContinue(name: string): string {
   //         String.fromCodePoint(Number.parseInt(s.substring(1), 16)),
   //       ),
   //   );
+
+  // And the result is never simply `_`, because we replace all underscores
+  // in the output, and we introduce them always in pairs.
 
   return escapedName;
 }
