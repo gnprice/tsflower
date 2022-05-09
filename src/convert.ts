@@ -52,6 +52,7 @@ export function convertSourceFile(
   program: ts.Program,
 ): n.File {
   const checker = program.getTypeChecker();
+  const preambleStatements: K.StatementKind[] = [];
 
   const converter: Converter = {
     convertType,
@@ -61,10 +62,16 @@ export function convertSourceFile(
     crudeError,
   };
 
+  const convertedStatements = sourceFile.statements.map(convertStatement);
+
+  const body = preambleStatements.length
+    ? [...preambleStatements, ...convertedStatements]
+    : convertedStatements;
+
   return b.file(
     b.program.from({
       comments: [b.commentBlock(headerComment)],
-      body: sourceFile.statements.map(convertStatement),
+      body,
     }),
     sourceFile.fileName,
   );
