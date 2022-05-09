@@ -1127,6 +1127,18 @@ export function convertSourceFile(
           return mkSuccess(b.stringLiteral(node.text));
 
         case ts.SyntaxKind.NumericLiteral:
+          // Flow doesn't accept a number for a property key in an object
+          // type.  But at runtime, such a key really means its
+          // stringification anyway; so emit that in the type.  (It's
+          // possible this still leaves glitches on trying to use the type.)
+          //
+          // Note that `ts.NumericLiteral#text` isn't the original text from
+          // the source code; it's the result of parsing and unparsing (the
+          // latter implemented as `value + ""`, in `createNumericLiteral`
+          // in `src/compiler/factory/nodeFactory.ts`.)  So that's exactly
+          // what we want here.
+          return mkSuccess(b.stringLiteral(node.text));
+
         case ts.SyntaxKind.ComputedPropertyName:
           return mkUnimplemented(
             `PropertyName kind ${ts.SyntaxKind[node.kind]}`,

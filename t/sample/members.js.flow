@@ -11,6 +11,12 @@ export var value: {|
     destructuringMethod({| x: number |}): void,
     "property keyed by StringLiteral": string,
     "method StringLiteral"(): void,
+    "1": string,
+    "20": string,
+    "16": string,
+    "26": string,
+    "100": string,
+    "1200": string,
 |};
 
 declare export class C {

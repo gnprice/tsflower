@@ -16,6 +16,13 @@ export declare var value: {
   "method StringLiteral"(): void;
   // hmm, Flow rejects with "Get/set properties not yet supported.":
   // get "getter StringLiteral"(): string;
+
+  1: string;
+  020: string;
+  0o020: string;
+  0x1a: string;
+  1e2: string;
+  1.2e3: string;
 };
 
 export declare class C {
