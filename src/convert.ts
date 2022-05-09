@@ -632,13 +632,9 @@ export function convertSourceFile(
         //   Seems a Flow bug that that's any different; but it works better
         //   on npm:react-native-gesture-handler/State, cutting 75 errors
         //   from its rdeps.
-        return b.genericTypeAnnotation(
-          // TODO(flow-155): Switch to Flow indexed-access-type syntax.
-          b.identifier("$ElementType"),
-          b.typeParameterInstantiation([
-            convertType((node as ts.IndexedAccessTypeNode).objectType),
-            convertType((node as ts.IndexedAccessTypeNode).indexType),
-          ]),
+        return buildElementType(
+          convertType((node as ts.IndexedAccessTypeNode).objectType),
+          convertType((node as ts.IndexedAccessTypeNode).indexType),
         );
 
       case ts.SyntaxKind.ArrayType:
@@ -1324,6 +1320,17 @@ export function convertSourceFile(
           name: node.text,
           typeAnnotation: b.typeAnnotation(type),
         });
+  }
+
+  function buildElementType(
+    objectType: K.FlowTypeKind,
+    indexType: K.FlowTypeKind,
+  ): K.FlowTypeKind {
+    return b.genericTypeAnnotation(
+      // TODO(flow-155): Switch to Flow indexed-access-type syntax.
+      b.identifier("$ElementType"),
+      b.typeParameterInstantiation([objectType, indexType]),
+    );
   }
 
   function warningStatement(
