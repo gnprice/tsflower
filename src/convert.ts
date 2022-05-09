@@ -1252,7 +1252,7 @@ export function convertSourceFile(
     }
     const [properties, indexers, callProperties] = members;
 
-    const exact = true; // TODO
+    const exact = false; // TODO
 
     return b.objectTypeAnnotation.from({
       properties,

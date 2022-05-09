@@ -20,14 +20,15 @@ export { Num as Nummm } from "./upstream";
 export * from "./upstream";
 export type NumArray = Array<upstream.Num>;
 
-declare var importType: {|
+declare var importType: {
     whole: $tsflower_import_typeof$_$_2e__2f_upstream,
     value: $ElementType<$tsflower_import_typeof$_$_2e__2f_upstream, "x">,
     subvalue: $ElementType<$ElementType<$ElementType<$tsflower_import_typeof$_$_2e__2f_upstream, "xx">, "y">, "z">,
     type: $tsflower_import_type$_$_2e__2f_upstream$Num,
     typeArgs: $tsflower_import_type$_$_2e__2f_upstream$ArrayArray<number>,
     typeDefaultArgs: $tsflower_import_type$_$_2e__2f_upstream$ArrayArray2<>,
-|};
+    ...
+};
 
 type TupleArray<T, S: T> = [S, T[]][];
 declare export var xx: 3;

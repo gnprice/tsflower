@@ -6,13 +6,14 @@ var vOptionalParam: (a: string, b?: number) => void;
 var vGeneric: <T>(x: T) => T[];
 var vDestructuring: destructuringArgs => void;
 
-declare export var value: {|
+declare export var value: {
     pGeneric: <T>(x: T) => T[],
-    pDestructuring: {| x: number |} => number,
-|};
+    pDestructuring: { x: number, ... } => number,
+    ...
+};
 
-declare function ff<T>(x: T): {| y: T |};
-declare function ff(x: boolean): (b: true) => {| y: number |};
-declare export function ff(x: boolean): (b: true) => {| y: number |};
+declare function ff<T>(x: T): { y: T, ... };
+declare function ff(x: boolean): (b: true) => { y: number, ... };
+declare export function ff(x: boolean): (b: true) => { y: number, ... };
 declare function fDestructuring(destructuringArgs): void;
-type destructuringArgs = {| x: boolean |};
+type destructuringArgs = { x: boolean, ... };

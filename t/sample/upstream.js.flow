@@ -7,11 +7,12 @@ export type Num = number;
 export type ArrayArray<T> = T[][];
 export type ArrayArray2<T=string> = T[][];
 declare export var x: Num;
-declare export var xx: {| y: {| z: string |} |};
+declare export var xx: { y: { z: string, ... }, ... };
 
-var _default: {|
+var _default: {
     y: Num,
-    z: {| w: string |},
-|};
+    z: { w: string, ... },
+    ...
+};
 
 export default _default;
