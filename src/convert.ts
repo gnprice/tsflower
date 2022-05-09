@@ -773,6 +773,7 @@ export function convertSourceFile(
       | ts.FunctionTypeNode
       | ts.FunctionDeclaration
       | ts.ConstructorDeclaration
+      | ts.MethodSignature
       | ts.MethodDeclaration,
   ): K.FlowTypeKind {
     const typeParams = convertTypeParameterDeclaration(node.typeParameters);
@@ -876,8 +877,9 @@ export function convertSourceFile(
 
         case ts.SyntaxKind.PropertySignature:
         case ts.SyntaxKind.PropertyDeclaration: {
-          const { name, questionToken, type } =
-            member as ts.PropertyDeclaration;
+          const { name, questionToken, type } = member as
+            | ts.PropertySignature
+            | ts.PropertyDeclaration;
 
           const keyResult = convertName(name);
           if (!keyResult) break;
@@ -899,7 +901,9 @@ export function convertSourceFile(
 
         case ts.SyntaxKind.MethodSignature:
         case ts.SyntaxKind.MethodDeclaration: {
-          const { name, questionToken } = member as ts.MethodDeclaration;
+          const { name, questionToken } = member as
+            | ts.MethodSignature
+            | ts.MethodDeclaration;
 
           const keyResult = convertName(name);
           if (!keyResult) break;
@@ -912,7 +916,9 @@ export function convertSourceFile(
           properties.push(
             b.objectTypeProperty.from({
               key,
-              value: convertFunctionType(member as ts.MethodDeclaration),
+              value: convertFunctionType(
+                member as ts.MethodSignature | ts.MethodDeclaration,
+              ),
               optional: !!questionToken,
               method: true,
             }),
