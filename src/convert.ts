@@ -590,6 +590,8 @@ export function convertSourceFile(
         return b.numberTypeAnnotation();
       case ts.SyntaxKind.StringKeyword:
         return b.stringTypeAnnotation();
+      case ts.SyntaxKind.SymbolKeyword:
+        return b.symbolTypeAnnotation();
       case ts.SyntaxKind.ObjectKeyword:
         return b.objectTypeAnnotation.from({ properties: [], inexact: true });
 

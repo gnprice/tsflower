@@ -19,6 +19,7 @@ var keywordTypes: {
   bool: boolean;
   num: number;
   str: string;
+  sym: symbol;
   obj: object;
   // for `this`, see members.d.ts
 };
