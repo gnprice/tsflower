@@ -4,6 +4,7 @@
 var vRestParam: (x: string, y: any, ...b: boolean[]) => number;
 var vOptionalParam: (a: string, b?: number) => void;
 var vGeneric: <T>(x: T) => T[];
+var vDestructuring: destructuringArgs => void;
 
 export var value: {|
     pGeneric: <T>(x: T) => T[],
@@ -13,3 +14,4 @@ export var value: {|
 declare function ff<T>(x: T): {| y: T |};
 declare function ff(x: boolean): (b: true) => {| y: number |};
 declare export function ff(x: boolean): (b: true) => {| y: number |};
+type destructuringArgs = {| x: boolean |};
