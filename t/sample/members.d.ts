@@ -2,6 +2,7 @@
 
 export declare var value: {
   property: string;
+
   get getter(): number;
   set setter(value: number);
 
@@ -10,6 +11,11 @@ export declare var value: {
   functionProperty: (x: number) => string;
 
   destructuringMethod({ x }: { x: number }): void;
+
+  "property keyed by StringLiteral": string;
+  "method StringLiteral"(): void;
+  // hmm, Flow rejects with "Get/set properties not yet supported.":
+  // get "getter StringLiteral"(): string;
 };
 
 export declare class C {

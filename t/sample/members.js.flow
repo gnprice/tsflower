@@ -9,6 +9,8 @@ export var value: {|
     method2(x: number): string,
     functionProperty: (x: number) => string,
     destructuringMethod({| x: number |}): void,
+    "property keyed by StringLiteral": string,
+    "method StringLiteral"(): void,
 |};
 
 declare export class C {

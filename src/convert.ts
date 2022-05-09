@@ -1124,6 +1124,8 @@ export function convertSourceFile(
           return null;
 
         case ts.SyntaxKind.StringLiteral:
+          return mkSuccess(b.stringLiteral(node.text));
+
         case ts.SyntaxKind.NumericLiteral:
         case ts.SyntaxKind.ComputedPropertyName:
           return mkUnimplemented(
