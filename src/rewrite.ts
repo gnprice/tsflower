@@ -10,6 +10,10 @@ export const defaultLibraryRewrites: Map<string, MapResult> = new Map([
   ["Omit", { type: "TypeReferenceMacro", convert: convertOmit }],
 ]);
 
+export const ambientRewrites: Map<string, Map<string, MapResult>> = new Map([
+  ["JSX", new Map([["Element", { type: "FixedName", name: "ItsJsxElement" }]])],
+]);
+
 export const libraryRewrites: Map<string, Map<string, MapResult>> = new Map([
   [
     "react",

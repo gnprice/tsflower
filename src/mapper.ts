@@ -9,7 +9,11 @@ import {
   isEntityNameOrEntityNameExpression,
   isNamedDeclaration,
 } from "./tsutil";
-import { defaultLibraryRewrites, libraryRewrites } from "./rewrite";
+import {
+  ambientRewrites,
+  defaultLibraryRewrites,
+  libraryRewrites,
+} from "./rewrite";
 import { debugFormatNode, formatSymbol } from "./tsdebug";
 
 /*
@@ -204,6 +208,16 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
           const rewrite = defaultLibraryRewrites.get(symbol.name);
           if (rewrite) mappedSymbols.set(symbol, rewrite);
           return;
+        }
+
+        if (symbol.parent?.parent?.name === "__global") {
+          // TODO make this less ad hoc: arbitrary number of levels of
+          //   nesting; and confirm that each ancestor symbol has flag
+          //   NamespaceModule.
+          const rewrite = ambientRewrites
+            .get(symbol.parent.name)
+            ?.get(symbol.name);
+          if (rewrite) mappedSymbols.set(symbol, rewrite);
         }
 
         if (

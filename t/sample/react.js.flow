@@ -32,4 +32,4 @@ var reactElement: {|
     c3: React$Element<"div">,
 |};
 
-var jsx: {| element: JSX.Element |};
+var jsx: {| element: ItsJsxElement |};
