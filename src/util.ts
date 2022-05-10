@@ -38,6 +38,10 @@ export function map<T, U>(array: readonly T[], f: (x: T, i: number) => U): U[];
 export function map<T, U>(
   array: readonly T[] | void,
   f: (x: T, i: number) => U,
+): U[] | void;
+export function map<T, U>(
+  array: readonly T[] | void,
+  f: (x: T, i: number) => U,
 ): U[] | void {
   if (!array) return undefined;
   return array.map(f);
