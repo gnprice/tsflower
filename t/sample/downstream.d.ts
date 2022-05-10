@@ -16,7 +16,17 @@ export * from "./upstream";
 
 export declare type NumArray = Array<upstream.Num>;
 
-declare type ArrayArray<T, S extends T> = [S, T[]][];
+declare const importType: {
+  whole: typeof import("./upstream");
+  value: typeof import("./upstream").x;
+  subvalue: typeof import("./upstream").xx.y.z;
+
+  type: import("./upstream").Num;
+  typeArgs: import("./upstream").ArrayArray<number>;
+  typeDefaultArgs: import("./upstream").ArrayArray2;
+};
+
+declare type TupleArray<T, S extends T> = [S, T[]][];
 
 export declare const xx = 3,
   y = "a",

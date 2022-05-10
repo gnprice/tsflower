@@ -100,6 +100,9 @@ For more, see:
 
 - Figure out more renaming and rewriting:
 
+  - Apply rewrites to import types, like `import('react').Component`, just
+    like we do for type references like `React.Component`.
+
   - A possible intermediate category between `'FixedName'` and
     `'TypeReferenceMacro'` is that some things could be defined
     as a single (generic) type alias in the Flow type system, but just don't

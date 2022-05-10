@@ -9,6 +9,7 @@ import {
   isEntityNameOrEntityNameExpression,
 } from "./tsutil";
 import { ensureUnreachable } from "./generics";
+import { escapeNamesAsIdentifierWithPrefix } from "./names";
 
 export type ErrorDescription = {
   kind: "unimplemented" | "error";
@@ -52,6 +53,10 @@ export function convertSourceFile(
   program: ts.Program,
 ): n.File {
   const checker = program.getTypeChecker();
+
+  // Elements are local names.
+  const importTypeImports: Set<string> = new Set();
+
   const preambleStatements: K.StatementKind[] = [];
 
   const converter: Converter = {
@@ -622,6 +627,9 @@ export function convertSourceFile(
       case ts.SyntaxKind.TypeOperator:
         return convertTypeOperator(node as ts.TypeOperatorNode);
 
+      case ts.SyntaxKind.ImportType:
+        return convertImportType(node as ts.ImportTypeNode);
+
       case ts.SyntaxKind.TypeReference:
         return convertTypeReference(node as ts.TypeReferenceNode);
 
@@ -666,7 +674,6 @@ export function convertSourceFile(
       case ts.SyntaxKind.LiteralType:
       case ts.SyntaxKind.TemplateLiteralType:
       case ts.SyntaxKind.TemplateLiteralTypeSpan:
-      case ts.SyntaxKind.ImportType:
         return unimplementedType(node, ts.SyntaxKind[node.kind]);
 
       case ts.SyntaxKind.NamedTupleMember:
@@ -768,6 +775,146 @@ export function convertSourceFile(
     }
   }
 
+  function convertImportType(node: ts.ImportTypeNode): K.FlowTypeKind {
+    if (
+      !ts.isLiteralTypeNode(node.argument) ||
+      !ts.isStringLiteral(node.argument.literal)
+    ) {
+      // TS (as of 4.6.2) gives an error if the argument to `import(…)`
+      // isn't a string literal, saying "String literal expected."
+      // So this case should be impossible.
+      return errorType(
+        node,
+        `invalid argument to import(…): not a string literal`,
+      );
+    }
+    const moduleSpecifier = node.argument.literal.text;
+
+    if (node.isTypeOf) {
+      // The reference is under a `typeof`, referring to the type of some
+      // value: either the module as a whole, or some dotted name inside it.
+      //
+      // (`typeof import(…).foo` doesn't get parsed as a ts.TypeQueryNode
+      // like `typeof` ordinarily does, but rather as just this `isTypeOf`
+      // flag on the ts.ImportTypeNode.)
+
+      const localName = ensureImportTypeofWhole(moduleSpecifier);
+
+      // We've imported the module itself under `typeof`.  Here's a
+      // reference to that:
+      const typeofModule = b.genericTypeAnnotation(
+        b.identifier(localName),
+        null, // already an actual value type, not generic -- doesn't take type parameters
+      );
+
+      // Now apply the qualifier.  Get a list of the dot-separated names:
+      const names = [];
+      let qualifier = node.qualifier;
+      if (qualifier) {
+        while (ts.isQualifiedName(qualifier)) {
+          names.push(qualifier.right.text);
+          qualifier = qualifier.left;
+        }
+        names.push(qualifier.text);
+      }
+
+      // … and apply them one by one, starting from the module's own type.
+      let result: K.FlowTypeKind = typeofModule;
+      let name;
+      while ((name = names.pop()) !== undefined) {
+        result = buildElementType(
+          result,
+          b.stringLiteralTypeAnnotation(name, name),
+        );
+      }
+
+      return result;
+    } else {
+      // The reference is to some named type directly.
+      //
+      // We can't get this through an `import typeof`; more generally,
+      // there doesn't seem to be a way to get this in Flow (a) by a
+      // single import of the module (b) without causing a runtime import
+      // (which could have side effects.)  So, import the individual item.
+
+      const { qualifier } = node;
+      if (!qualifier) {
+        // If you write something like `import("foo")` in type position,
+        // with no indirections after the module, TS gives an error.
+        return errorType(node, `Whole module from 'import(…)' used as a type`);
+      }
+
+      if (!ts.isIdentifier(qualifier)) {
+        // On the other hand if you write more than one indirection, like
+        // `import("foo").bar.baz` -- without `typeof` -- then the
+        // intermediate ones must be TS namespaces.  After all, the only
+        // things a type can be nested in are a module (aka a TS "external
+        // module", corresponding to a real JS module) or a TS namespace
+        // (aka a TS "internal module").
+        //
+        // Namespaced types don't have a direct equivalent in Flow, and we
+        // don't yet support them.
+        return unimplementedType(node, `namespaced type via import(…)`);
+      }
+
+      // TODO Send the type through the mapper.
+
+      const localName = ensureImportTypeIndividual(
+        moduleSpecifier,
+        qualifier.text,
+      );
+      return b.genericTypeAnnotation(
+        b.identifier(localName),
+        convertTypeArguments(
+          checker.getSymbolAtLocation(qualifier),
+          node.typeArguments,
+        ),
+      );
+    }
+
+    function ensureImportTypeofWhole(moduleSpecifier: string) {
+      const localName = escapeNamesAsIdentifierWithPrefix(
+        "$tsflower$import$typeof",
+        moduleSpecifier,
+      );
+      if (!importTypeImports.has(localName)) {
+        importTypeImports.add(localName);
+        preambleStatements.push(
+          b.importDeclaration.from({
+            importKind: "typeof",
+            source: b.stringLiteral(moduleSpecifier),
+            // TODO or should it be a default import?
+            specifiers: [b.importNamespaceSpecifier(b.identifier(localName))],
+          }),
+        );
+      }
+      return localName;
+    }
+
+    function ensureImportTypeIndividual(moduleSpecifier: string, name: string) {
+      const localName = escapeNamesAsIdentifierWithPrefix(
+        "$tsflower$import$type",
+        moduleSpecifier,
+        name,
+      );
+      if (!importTypeImports.has(localName)) {
+        importTypeImports.add(localName);
+        // TODO It'd be kind of nice to collect these in one statement per
+        //   imported module.
+        preambleStatements.push(
+          b.importDeclaration.from({
+            importKind: "type",
+            source: b.stringLiteral(moduleSpecifier),
+            specifiers: [
+              b.importSpecifier(b.identifier(name), b.identifier(localName)),
+            ],
+          }),
+        );
+      }
+      return localName;
+    }
+  }
+
   function convertTypeReference(node: ts.TypeReferenceNode): K.FlowTypeKind {
     const result = convertTypeReferenceLike(node.typeName, node.typeArguments);
     if (result.kind !== "success")
@@ -793,7 +940,10 @@ export function convertSourceFile(
         case "RenameType":
           return mkSuccess({
             id: b.identifier(mapped.name),
-            typeParameters: convertTypeArguments(typeName, typeArguments),
+            typeParameters: convertTypeArguments(
+              checker.getSymbolAtLocation(typeName),
+              typeArguments,
+            ),
           });
 
         case "TypeReferenceMacro":
@@ -804,7 +954,10 @@ export function convertSourceFile(
       }
     return mkSuccess({
       id: convertEntityNameAsType(typeName),
-      typeParameters: convertTypeArguments(typeName, typeArguments),
+      typeParameters: convertTypeArguments(
+        checker.getSymbolAtLocation(typeName),
+        typeArguments,
+      ),
     });
   }
 
@@ -1295,9 +1448,7 @@ export function convertSourceFile(
   }
 
   function convertTypeArguments(
-    // TODO Really this just wants the symbol there; take the symbol instead?
-    //   The caller probably needs to be looking it up anyway.
-    typeName: ts.Node,
+    typeNameSymbol: void | ts.Symbol,
     typeArguments: void | ts.NodeArray<ts.TypeNode>,
   ): null | n.TypeParameterInstantiation {
     if (typeArguments)
@@ -1308,9 +1459,8 @@ export function convertSourceFile(
     // all parameters and this reference is using the defaults.  In the
     // latter case, while TS requires it to be spelled with no list, Flow
     // requires it to be spelled with an empty list.
-    const symbol = checker.getSymbolAtLocation(typeName);
     // @ts-expect-error TODO(tsutil) express "does decl have type parameters"
-    if (some(symbol?.declarations, (decl) => !!decl.typeParameters))
+    if (some(typeNameSymbol?.declarations, (decl) => !!decl.typeParameters))
       return b.typeParameterInstantiation([]);
 
     return null;

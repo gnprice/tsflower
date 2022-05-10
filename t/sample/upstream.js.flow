@@ -4,6 +4,14 @@
 export interface I {};
 declare export class C {};
 export type Num = number;
+export type ArrayArray<T> = T[][];
+export type ArrayArray2<T=string> = T[][];
 export var x: Num;
-var _default: {| y: Num |};
+export var xx: {| y: {| z: string |} |};
+
+var _default: {|
+    y: Num,
+    z: {| w: string |},
+|};
+
 export default _default;
