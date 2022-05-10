@@ -10,13 +10,7 @@ import {
   isNamedDeclaration,
 } from "./tsutil";
 import { defaultLibraryRewrites, libraryRewrites } from "./rewrite";
-import {
-  debugFormatNode,
-  formatNodeFlags,
-  formatSymbol,
-  formatSymbolFlags,
-  formatSyntaxKind,
-} from "./tsdebug";
+import { debugFormatNode, formatSymbol } from "./tsdebug";
 
 /*
  * See docs/notes/mapper.md for some scratch notes on the background
@@ -141,6 +135,17 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
       }
 
       function visitNamedDeclaration(node: { name: ts.DeclarationName }) {
+        if (ts.isImportSpecifier(node)) {
+          const { moduleSpecifier } = node.parent.parent.parent;
+          if (moduleSpecifier.text === "react")
+            console.log(
+              // This works!  That method on the checker is internal...  but
+              // that's only a fact about the TypeChecker interface, which
+              // is a types-only construct.  The actual checker object
+              // perfectly well has the method (well, function property).
+              formatSymbol(checker.resolveExternalModuleName(moduleSpecifier)),
+            );
+        }
         visitSymbol(checker.getSymbolAtLocation(node.name));
       }
 
@@ -186,6 +191,13 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
             );
             n = n.parent;
           }
+          console.log(
+            // This doesn't work.  But see other resolveExternalModuleName
+            // call above, which does.
+            checker.resolveExternalModuleName(
+              context.factory.createStringLiteral("react"),
+            ),
+          );
         }
 
         if (some(symbol.declarations, isDefaultLibraryTopLevelDeclaration)) {
