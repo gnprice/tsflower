@@ -11,6 +11,7 @@ import {
 } from "./tsutil";
 import { defaultLibraryRewrites, libraryRewrites } from "./rewrite";
 import {
+  debugFormatNode,
   formatNodeFlags,
   formatSymbol,
   formatSymbolFlags,
@@ -173,32 +174,15 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
         seenSymbols.add(symbol);
 
         if (symbol.name === "Element") {
-          console.log(
-            // symbol,
-            formatSymbol(symbol),
-            symbol.declarations?.map((d) => formatSyntaxKind(d.kind)),
-            formatSymbol(symbol.parent),
-            // symbol.parent.parent,
-            // symbol.declarations[0].parent,
-            formatSyntaxKind(symbol.declarations[0].kind),
-            formatSyntaxKind(symbol.declarations[0].parent.kind),
-            formatSyntaxKind(symbol.declarations[0].parent.parent.kind),
-            formatSyntaxKind(symbol.declarations[0].parent.parent.parent?.kind),
-            formatSyntaxKind(
-              symbol.declarations[0].parent.parent.parent?.parent?.kind,
-            ),
-            formatSyntaxKind(
-              symbol.declarations[0].parent.parent.parent?.parent?.parent?.kind,
-            ),
-          );
+          console.log(formatSymbol(symbol));
+          console.log(formatSymbol(symbol.parent));
+          console.log(formatSymbol(symbol.parent?.parent));
           let n: ts.Node = symbol.declarations[0];
           while (n) {
             console.log(
-              formatSyntaxKind(n.kind),
-              formatNodeFlags(n.flags),
+              debugFormatNode(n),
               n.name?.escapedText,
               formatSymbol(n.symbol),
-              formatSymbol(n.localSymbol),
             );
             n = n.parent;
           }
