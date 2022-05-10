@@ -12,6 +12,7 @@ import {
 import { defaultLibraryRewrites, libraryRewrites } from "./rewrite";
 import {
   formatNodeFlags,
+  formatSymbol,
   formatSymbolFlags,
   formatSyntaxKind,
 } from "./tsdebug";
@@ -174,9 +175,9 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
         if (symbol.name === "Element") {
           console.log(
             // symbol,
-            formatSymbolFlags(symbol.flags),
+            formatSymbol(symbol),
             symbol.declarations?.map((d) => formatSyntaxKind(d.kind)),
-            formatSymbolFlags(symbol.parent.flags),
+            formatSymbol(symbol.parent),
             // symbol.parent.parent,
             // symbol.declarations[0].parent,
             formatSyntaxKind(symbol.declarations[0].kind),
@@ -196,8 +197,8 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
               formatSyntaxKind(n.kind),
               formatNodeFlags(n.flags),
               n.name?.escapedText,
-              formatSymbolFlags(n.symbol?.flags),
-              formatSymbolFlags(n.localSymbol?.flags),
+              formatSymbol(n.symbol),
+              formatSymbol(n.localSymbol),
             );
             n = n.parent;
           }
