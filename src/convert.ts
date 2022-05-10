@@ -10,6 +10,7 @@ import {
 } from "./tsutil";
 import { ensureUnreachable } from "./generics";
 import { escapeNamesAsIdentifierWithPrefix } from "./names";
+import { formatSyntaxKind } from "./tsdebug";
 
 export type ErrorDescription = {
   kind: "unimplemented" | "error";
@@ -167,7 +168,7 @@ export function convertSourceFile(
       case ts.SyntaxKind.ImportEqualsDeclaration:
       case ts.SyntaxKind.MissingDeclaration:
         // These statements might actually appear in .d.ts files.
-        return unimplementedStatement(node, ts.SyntaxKind[node.kind]);
+        return unimplementedStatement(node, formatSyntaxKind(node.kind));
 
       case ts.SyntaxKind.ExpressionStatement:
       case ts.SyntaxKind.IfStatement:
@@ -188,7 +189,7 @@ export function convertSourceFile(
       case ts.SyntaxKind.CaseBlock:
         // These shouldn't appear in .d.ts files.  So they shouldn't come up
         // unless we try to handle normal source files.
-        return unimplementedStatement(node, ts.SyntaxKind[node.kind]);
+        return unimplementedStatement(node, formatSyntaxKind(node.kind));
 
       case ts.SyntaxKind.VariableDeclaration:
       case ts.SyntaxKind.VariableDeclarationList:
@@ -204,13 +205,13 @@ export function convertSourceFile(
         // these below, as part of handling the statements they appear in.
         return errorStatement(
           node,
-          `unexpected statement kind: ${ts.SyntaxKind[node.kind]}`,
+          `unexpected statement kind: ${formatSyntaxKind(node.kind)}`,
         );
 
       default:
         return errorStatement(
           node,
-          `unexpected statement kind: ${ts.SyntaxKind[node.kind]}`,
+          `unexpected statement kind: ${formatSyntaxKind(node.kind)}`,
         );
     }
   }
@@ -376,7 +377,7 @@ export function convertSourceFile(
       return errorStatement(
         node,
         // @ts-expect-error yes, the types say this is unreachable
-        `unexpected export clause: ${ts.SyntaxKind[exportClause.kind]}`,
+        `unexpected export clause: ${formatSyntaxKind(exportClause.kind)}`,
       );
     }
   }
@@ -449,7 +450,7 @@ export function convertSourceFile(
         // this case shouldn't arise.
         return errorType(
           init,
-          `const type inferred from ${ts.SyntaxKind[init.kind]}`,
+          `const type inferred from ${formatSyntaxKind(init.kind)}`,
         );
       }
     }
@@ -542,9 +543,9 @@ export function convertSourceFile(
           ) {
             return errorStatement(
               node,
-              `unexpected 'extends' base kind: ${
-                ts.SyntaxKind[expression.kind]
-              }`,
+              `unexpected 'extends' base kind: ${formatSyntaxKind(
+                expression.kind,
+              )}`,
             );
           }
           if (!isEntityNameOrEntityNameExpression(expression))
@@ -674,7 +675,7 @@ export function convertSourceFile(
       case ts.SyntaxKind.LiteralType:
       case ts.SyntaxKind.TemplateLiteralType:
       case ts.SyntaxKind.TemplateLiteralTypeSpan:
-        return unimplementedType(node, ts.SyntaxKind[node.kind]);
+        return unimplementedType(node, formatSyntaxKind(node.kind));
 
       case ts.SyntaxKind.NamedTupleMember:
       case ts.SyntaxKind.OptionalType:
@@ -683,13 +684,13 @@ export function convertSourceFile(
         // as part of handling the types they appear in.
         return errorType(
           node,
-          `unexpected type kind: ${ts.SyntaxKind[node.kind]}`,
+          `unexpected type kind: ${formatSyntaxKind(node.kind)}`,
         );
 
       default:
         return errorType(
           node,
-          `unexpected type kind: ${ts.SyntaxKind[node.kind]}`,
+          `unexpected type kind: ${formatSyntaxKind(node.kind)}`,
         );
     }
   }
@@ -708,16 +709,16 @@ export function convertSourceFile(
         if (literal.operator !== ts.SyntaxKind.MinusToken)
           return errorType(
             node,
-            `LiteralTypeNode with PrefixUnaryExpression operator ${
-              ts.SyntaxKind[literal.operator]
-            }; expected MinusToken`,
+            `LiteralTypeNode with PrefixUnaryExpression operator ${formatSyntaxKind(
+              literal.operator,
+            )}; expected MinusToken`,
           );
         if (!ts.isNumericLiteral(literal.operand))
           return errorType(
             node,
-            `LiteralTypeNode with unary-minus of ${
-              ts.SyntaxKind[literal.operand.kind]
-            }; expected NumericLiteral`,
+            `LiteralTypeNode with unary-minus of ${formatSyntaxKind(
+              literal.operand.kind,
+            )}; expected NumericLiteral`,
           );
         const { text } = literal.operand;
         // TODO: is more conversion needed on these number literals?
@@ -740,7 +741,9 @@ export function convertSourceFile(
       default:
         return errorType(
           node,
-          `unexpected literal-type kind: ${ts.SyntaxKind[node.literal.kind]}`,
+          `unexpected literal-type kind: ${formatSyntaxKind(
+            node.literal.kind,
+          )}`,
         );
     }
   }
@@ -764,13 +767,13 @@ export function convertSourceFile(
       case ts.SyntaxKind.UniqueKeyword:
         return unimplementedType(
           node,
-          `type operator: ${ts.SyntaxKind[operator]}`,
+          `type operator: ${formatSyntaxKind(operator)}`,
         );
 
       default:
         return errorType(
           node,
-          `unexpected type operator: ${ts.SyntaxKind[operator]}`,
+          `unexpected type operator: ${formatSyntaxKind(operator)}`,
         );
     }
   }
@@ -1152,7 +1155,9 @@ export function convertSourceFile(
             propertyOfError(
               member,
               mkUnimplemented(
-                `ClassElement|TypeElement kind: ${ts.SyntaxKind[member.kind]}`,
+                `ClassElement|TypeElement kind: ${formatSyntaxKind(
+                  member.kind,
+                )}`,
               ),
             ),
           );
@@ -1163,9 +1168,9 @@ export function convertSourceFile(
             propertyOfError(
               member,
               mkError(
-                `unexpected ClassElement|TypeElement kind: ${
-                  ts.SyntaxKind[member.kind]
-                }`,
+                `unexpected ClassElement|TypeElement kind: ${formatSyntaxKind(
+                  member.kind,
+                )}`,
               ),
             ),
           );
@@ -1400,14 +1405,14 @@ export function convertSourceFile(
 
         case ts.SyntaxKind.ComputedPropertyName:
           return mkUnimplemented(
-            `PropertyName kind ${ts.SyntaxKind[name.kind]}`,
+            `PropertyName kind ${formatSyntaxKind(name.kind)}`,
           );
 
         default:
           ensureUnreachable(name);
           return mkError(
             // @ts-expect-error yes, the types say this is unreachable
-            `PropertyName kind ${ts.SyntaxKind[name.kind]}`,
+            `PropertyName kind ${formatSyntaxKind(name.kind)}`,
           );
       }
     }
@@ -1582,7 +1587,7 @@ export function convertSourceFile(
         ? `${1 + start.line}:${start.character}-${end.character}`
         : `${1 + start.line}-${1 + end.line}`;
     throw new Error(
-      `Internal error on ${ts.SyntaxKind[node.kind]} at ${
+      `Internal error on ${formatSyntaxKind(node.kind)} at ${
         sourceFile.fileName
       }:${loc}: ${description}`,
     );
