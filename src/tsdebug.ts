@@ -8,6 +8,16 @@
 // Apache-2.0 license as the rest of TsFlower.
 
 import ts from "typescript";
+import { map } from "./util";
+
+export function formatSymbol(symbol: ts.Symbol): string {
+  return `{ name: ${ts.unescapeLeadingUnderscores(
+    symbol.escapedName,
+  )}; flags: ${formatSymbolFlags(symbol.flags)}; declarations: ${map(
+    symbol.declarations,
+    (node) => formatSyntaxKind(node.kind),
+  )} }`;
+}
 
 /**
  * Formats an enum value as a string for debugging and debug assertions.
