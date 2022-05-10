@@ -31,3 +31,5 @@ var reactElement: {|
     c2: React$Element<"div">,
     c3: React$Element<"div">,
 |};
+
+var jsx: {| element: JSX.Element |};

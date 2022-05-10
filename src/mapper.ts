@@ -166,6 +166,38 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
         if (seenSymbols.has(symbol)) return;
         seenSymbols.add(symbol);
 
+        if (symbol.name === "Element") {
+          console.log(
+            // symbol,
+            ts.SymbolFlags[symbol.flags],
+            symbol.declarations?.map((d) => ts.SyntaxKind[d.kind]),
+            ts.SymbolFlags[symbol.parent.flags],
+            // symbol.parent.parent,
+            // symbol.declarations[0].parent,
+            ts.SyntaxKind[symbol.declarations[0].kind],
+            ts.SyntaxKind[symbol.declarations[0].parent.kind],
+            ts.SyntaxKind[symbol.declarations[0].parent.parent.kind],
+            ts.SyntaxKind[symbol.declarations[0].parent.parent.parent?.kind],
+            ts.SyntaxKind[
+              symbol.declarations[0].parent.parent.parent?.parent?.kind
+            ],
+            ts.SyntaxKind[
+              symbol.declarations[0].parent.parent.parent?.parent?.parent?.kind
+            ],
+          );
+          let n: ts.Node = symbol.declarations[0];
+          while (n) {
+            console.log(
+              ts.SyntaxKind[n.kind],
+              n.flags,
+              n.name?.escapedText,
+              n.symbol?.flags,
+              n.localSymbol?.flags,
+            );
+            n = n.parent;
+          }
+        }
+
         if (some(symbol.declarations, isDefaultLibraryTopLevelDeclaration)) {
           const rewrite = defaultLibraryRewrites.get(symbol.name);
           if (rewrite) mappedSymbols.set(symbol, rewrite);
