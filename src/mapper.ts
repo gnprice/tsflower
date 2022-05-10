@@ -10,7 +10,11 @@ import {
   isNamedDeclaration,
 } from "./tsutil";
 import { defaultLibraryRewrites, libraryRewrites } from "./rewrite";
-import { formatSymbolFlags, formatSyntaxKind } from "./tsdebug";
+import {
+  formatNodeFlags,
+  formatSymbolFlags,
+  formatSyntaxKind,
+} from "./tsdebug";
 
 /*
  * See docs/notes/mapper.md for some scratch notes on the background
@@ -190,10 +194,10 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
           while (n) {
             console.log(
               formatSyntaxKind(n.kind),
-              n.flags,
+              formatNodeFlags(n.flags),
               n.name?.escapedText,
-              n.symbol?.flags,
-              n.localSymbol?.flags,
+              formatSymbolFlags(n.symbol?.flags),
+              formatSymbolFlags(n.localSymbol?.flags),
             );
             n = n.parent;
           }
