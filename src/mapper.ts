@@ -10,6 +10,7 @@ import {
   isNamedDeclaration,
 } from "./tsutil";
 import { defaultLibraryRewrites, libraryRewrites } from "./rewrite";
+import { formatSymbolFlags, formatSyntaxKind } from "./tsdebug";
 
 /*
  * See docs/notes/mapper.md for some scratch notes on the background
@@ -169,26 +170,26 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
         if (symbol.name === "Element") {
           console.log(
             // symbol,
-            ts.SymbolFlags[symbol.flags],
-            symbol.declarations?.map((d) => ts.SyntaxKind[d.kind]),
-            ts.SymbolFlags[symbol.parent.flags],
+            formatSymbolFlags(symbol.flags),
+            symbol.declarations?.map((d) => formatSyntaxKind(d.kind)),
+            formatSymbolFlags(symbol.parent.flags),
             // symbol.parent.parent,
             // symbol.declarations[0].parent,
-            ts.SyntaxKind[symbol.declarations[0].kind],
-            ts.SyntaxKind[symbol.declarations[0].parent.kind],
-            ts.SyntaxKind[symbol.declarations[0].parent.parent.kind],
-            ts.SyntaxKind[symbol.declarations[0].parent.parent.parent?.kind],
-            ts.SyntaxKind[
-              symbol.declarations[0].parent.parent.parent?.parent?.kind
-            ],
-            ts.SyntaxKind[
-              symbol.declarations[0].parent.parent.parent?.parent?.parent?.kind
-            ],
+            formatSyntaxKind(symbol.declarations[0].kind),
+            formatSyntaxKind(symbol.declarations[0].parent.kind),
+            formatSyntaxKind(symbol.declarations[0].parent.parent.kind),
+            formatSyntaxKind(symbol.declarations[0].parent.parent.parent?.kind),
+            formatSyntaxKind(
+              symbol.declarations[0].parent.parent.parent?.parent?.kind,
+            ),
+            formatSyntaxKind(
+              symbol.declarations[0].parent.parent.parent?.parent?.parent?.kind,
+            ),
           );
           let n: ts.Node = symbol.declarations[0];
           while (n) {
             console.log(
-              ts.SyntaxKind[n.kind],
+              formatSyntaxKind(n.kind),
               n.flags,
               n.name?.escapedText,
               n.symbol?.flags,
