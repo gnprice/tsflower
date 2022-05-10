@@ -45,3 +45,17 @@ export function getModuleSpecifier(node: ts.ImportDeclaration): string {
   //   > If this is not a StringLiteral it will be a grammar error.
   return (node.moduleSpecifier as ts.StringLiteral).text;
 }
+
+// Adapted from TS's version in src/compiler/utilitiesPublic.ts.
+export function isGeneratedIdentifier(
+  node: ts.Node,
+): node is ts.Identifier & { autoGenerateFlags: ts.GeneratedIdentifierFlags } {
+  if (!ts.isIdentifier) return false;
+
+  const KindMask = 7; // ts.GeneratedIdentifierFlags.KindMask
+  const { autoGenerateFlags } = node as ts.Identifier & {
+    autoGenerateFlags?: ts.GeneratedIdentifierFlags;
+  };
+  const kind = autoGenerateFlags! & KindMask;
+  return kind > ts.GeneratedIdentifierFlags.None;
+}

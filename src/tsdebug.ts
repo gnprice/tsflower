@@ -8,6 +8,7 @@
 // Apache-2.0 license as the rest of TsFlower.
 
 import ts from "typescript";
+import { isGeneratedIdentifier } from "./tsutil";
 import { map } from "./util";
 
 export function formatSymbol(symbol: void | ts.Symbol): string {
@@ -102,4 +103,51 @@ export function formatObjectFlags(flags: ts.ObjectFlags | undefined): string {
 
 export function formatFlowFlags(flags: ts.FlowFlags | undefined): string {
   return formatEnum(flags, ts.FlowFlags, /*isFlags*/ true);
+}
+
+// Adapted from the `__tsDebuggerDisplay` definition for nodes found in TS's
+// `src/compiler/debug.ts`.
+export function debugFormatNode(node: ts.Node): string {
+  // prettier-ignore
+  const nodeHeader =
+    isGeneratedIdentifier(node) ? "GeneratedIdentifier" :
+    ts.isIdentifier(node) ? `Identifier '${ts.idText(node)}'` :
+    ts.isPrivateIdentifier(node) ? `PrivateIdentifier '${ts.idText(node)}'` :
+    ts.isStringLiteral(node) ? `StringLiteral ${JSON.stringify(node.text.length < 10 ? node.text : node.text.slice(10) + "...")}` :
+    ts.isNumericLiteral(node) ? `NumericLiteral ${node.text}` :
+    ts.isBigIntLiteral(node) ? `BigIntLiteral ${node.text}n` :
+    ts.isTypeParameterDeclaration(node) ? "TypeParameterDeclaration" :
+    ts.isParameter(node) ? "ParameterDeclaration" :
+    ts.isConstructorDeclaration(node) ? "ConstructorDeclaration" :
+    ts.isGetAccessorDeclaration(node) ? "GetAccessorDeclaration" :
+    ts.isSetAccessorDeclaration(node) ? "SetAccessorDeclaration" :
+    ts.isCallSignatureDeclaration(node) ? "CallSignatureDeclaration" :
+    ts.isConstructSignatureDeclaration(node) ? "ConstructSignatureDeclaration" :
+    ts.isIndexSignatureDeclaration(node) ? "IndexSignatureDeclaration" :
+    ts.isTypePredicateNode(node) ? "TypePredicateNode" :
+    ts.isTypeReferenceNode(node) ? "TypeReferenceNode" :
+    ts.isFunctionTypeNode(node) ? "FunctionTypeNode" :
+    ts.isConstructorTypeNode(node) ? "ConstructorTypeNode" :
+    ts.isTypeQueryNode(node) ? "TypeQueryNode" :
+    ts.isTypeLiteralNode(node) ? "TypeLiteralNode" :
+    ts.isArrayTypeNode(node) ? "ArrayTypeNode" :
+    ts.isTupleTypeNode(node) ? "TupleTypeNode" :
+    ts.isOptionalTypeNode(node) ? "OptionalTypeNode" :
+    ts.isRestTypeNode(node) ? "RestTypeNode" :
+    ts.isUnionTypeNode(node) ? "UnionTypeNode" :
+    ts.isIntersectionTypeNode(node) ? "IntersectionTypeNode" :
+    ts.isConditionalTypeNode(node) ? "ConditionalTypeNode" :
+    ts.isInferTypeNode(node) ? "InferTypeNode" :
+    ts.isParenthesizedTypeNode(node) ? "ParenthesizedTypeNode" :
+    ts.isThisTypeNode(node) ? "ThisTypeNode" :
+    ts.isTypeOperatorNode(node) ? "TypeOperatorNode" :
+    ts.isIndexedAccessTypeNode(node) ? "IndexedAccessTypeNode" :
+    ts.isMappedTypeNode(node) ? "MappedTypeNode" :
+    ts.isLiteralTypeNode(node) ? "LiteralTypeNode" :
+    ts.isNamedTupleMember(node) ? "NamedTupleMember" :
+    ts.isImportTypeNode(node) ? "ImportTypeNode" :
+  formatSyntaxKind(node.kind);
+  return `${nodeHeader}${
+    node.flags ? ` (${formatNodeFlags(node.flags)})` : ""
+  }`;
 }
