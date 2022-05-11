@@ -160,8 +160,14 @@ export function convertSourceFile(
           node as ts.ClassDeclaration | ts.InterfaceDeclaration,
         );
 
-      case ts.SyntaxKind.Block:
       case ts.SyntaxKind.EmptyStatement:
+        return b.emptyStatement();
+
+      case ts.SyntaxKind.Block: // TODO(runtime)
+        // Blocks can't contain exports, nor any declarations visible
+        // outside the block.  So they don't matter for type definitions.
+        return b.emptyStatement();
+
       case ts.SyntaxKind.EnumDeclaration:
       case ts.SyntaxKind.ModuleDeclaration:
       case ts.SyntaxKind.NamespaceExportDeclaration:
@@ -186,8 +192,8 @@ export function convertSourceFile(
       case ts.SyntaxKind.TryStatement:
       case ts.SyntaxKind.DebuggerStatement:
       case ts.SyntaxKind.CaseBlock:
-        // These shouldn't appear in .d.ts files.  So they shouldn't come up
-        // unless we try to handle normal source files.
+        // TODO(runtime): These shouldn't appear in .d.ts files.  So they
+        // shouldn't come up unless we try to handle normal source files.
         return unimplementedStatement(node, formatSyntaxKind(node.kind));
 
       case ts.SyntaxKind.VariableDeclaration:
