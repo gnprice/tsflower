@@ -11,6 +11,11 @@ import {
 } from "./tsutil";
 import { defaultLibraryRewrites, libraryRewrites } from "./rewrite";
 
+/*
+ * See docs/notes/mapper.md for some scratch notes on the background
+ * and architecture of this.
+ */
+
 export type MapResultType = "FixedName" | "TypeReferenceMacro";
 
 export type MapResult =
