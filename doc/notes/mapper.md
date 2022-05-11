@@ -3,6 +3,118 @@ This file has some scratch notes on the design of the mapper.
 
 # What do we want when we see a reference to a name?
 
+## Type declarations (aliases, interfaces, enums, imports, exports)
+
+We may need to rename these, if it's in a file we're translating:
+
+* Rename to avoid collision with a value name.
+
+* For types inside a namespace, rename to put at the top level of the
+  module.  (Or of the global ambient "module", if that's where it is.)
+
+* For enums, make a type alias with its own name, as well as a
+  variable with the original name.
+
+* For imports, follow any rename or split on the remote name.
+
+  * Or if it's from a file TsFlower won't be operating on, then apply
+    whatever translation we have for it -- which may be in another
+    file entirely.
+
+    … Or actually perhaps emit nothing for the import itself in this
+    case.  Instead, when we handle an actual reference to the thing,
+    add whatever imports we need to the preamble.  These might be
+    none, if we just open-code the translation, or several, if we have
+    to assemble it from multiple pieces.
+
+    Possibly we'd want that translation to make its generated imports
+    relative to the original import… but actually I think probably
+    not.  If e.g. you for some reason import React from a specifier
+    other than `'react'`, and we somehow recognize it as React and
+    realize we need to translate the references accordingly, then I
+    think we still want to import from `'react'` -- that's where Flow
+    has the types we're trying to use, even if you've somehow arranged
+    something odd on the TS side.
+
+* For re-exports... is `export { T } from 'foo'` exactly equivalent to
+  `import { T as $freshname } from 'foo'; export type T = $freshname`?
+  (When `T` in `foo` is a pure type, that is, else mutatis mutandis.)
+  If so, then that'd answer questions on how to handle it.
+
+  For `export` modifying some declaration, I think we just handle the
+  declaration the same as if it weren't exported.
+
+  And `export default` can't be of a pure type.  Then I think that
+  covers all exports.
+
+
+## Type references, and pure-type heritage
+
+This covers TypeReferenceNode, interface-extends, and
+class-implements.  As explained below, these are:
+
+  > a dotted chain where (a) the last element is a type; (b) the first
+  > element, if not also last, is either a module or a namespace; and
+  > (c) any intermediate elements are namespaces.
+
+* If it's a plain identifier, i.e. a dotted chain with one element,
+  then it's a type declared in this module (possibly by an import), or
+  else as a global ambient declaration somewhere.
+
+  We may have renamed it; that's a fact about this symbol, determined
+  when we looked at its declaration.
+
+  * Though if it's an import from a file we translate, we may not be
+    able to do that until we've handled the remote declaration.  We
+    can handle that by rescanning imports after we add renames, as
+    with `findImportRenames` inside `createMapper`.
+
+  * Hmm, what if it's a global ambient declaration we *are*
+    translating?  Not sure yet how important that'll be as a use case,
+    but certainly it'd be good in principle to do so.  (I guess it'd
+    mean some output would have to go to a libdef file.)  I guess that
+    doesn't change anything here, as long as the mapper sees all files
+    before the converter starts going.
+
+  Or it may be an import from a file with external translation.  We'll
+  have determined that when we looked at the import, and can record
+  that as a fact about this symbol as well, along with how to
+  translate references.
+
+  Also, whether renamed or not, and whether local or imported or even
+  externally translated, it may take type arguments.  If so, we need
+  to add `<>` if we're not passing any.  Again this is a fact about
+  the symbol.
+
+  In short, at mapper time we can look purely at declarations
+  (including imports), not references, to build a map on symbols that
+  covers this case.
+
+* If it's a qualified name starting with a namespace (vs. a module),
+  then the namespace is declared in this module (possibly by an
+  import); or, again, as a global ambient.  The type itself, and for
+  that matter any other namespaces in the chain, may be declared
+  somewhere else entirely.
+
+  We will definitely need to rewrite the reference.
+
+  If the type's declaration is itself local (or global ambient and
+  translated by TsFlower), then we'll have renamed it -- from
+  `namespace N { type T = … }` to like `type N_T = …` -- and that
+  renamed definition will be just as directly accessible.  So we just
+  replace the whole qualified name with the new name.
+
+  If the declaration is via an import somewhere... Hmm, can this only
+  mean the namespace at the root of this qualified name is imported?
+
+  * TS gives "Export declarations are not permitted in a namespace."
+    if you try `namespace N { export * from 'react' }`.
+
+  * TODO WORK HERE
+
+
+# Type position, value position, hybrid type/value position
+
 * Some references are in pure value position.  We don't touch those,
   because those names are real facts about the JS.  This includes:
 
