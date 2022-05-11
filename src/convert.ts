@@ -166,7 +166,6 @@ export function convertSourceFile(
       case ts.SyntaxKind.ModuleDeclaration:
       case ts.SyntaxKind.NamespaceExportDeclaration:
       case ts.SyntaxKind.ImportEqualsDeclaration:
-      case ts.SyntaxKind.MissingDeclaration:
         // These statements might actually appear in .d.ts files.
         return unimplementedStatement(node, formatSyntaxKind(node.kind));
 
@@ -207,6 +206,9 @@ export function convertSourceFile(
           node,
           `unexpected statement kind: ${formatSyntaxKind(node.kind)}`,
         );
+
+      case ts.SyntaxKind.MissingDeclaration:
+      // These arise only when the input has a syntax error.
 
       default:
         return errorStatement(
