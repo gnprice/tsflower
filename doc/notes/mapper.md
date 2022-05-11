@@ -54,8 +54,15 @@ This file has some scratch notes on the design of the mapper.
       to React Native's actual types (from its actual implementation,
       which is in Flow)
 
-    * Possibly other libraries -- e.g., Node is described both in
-      `@types/node` and in flowlib
+    * Possibly other libraries; for example:
+
+      * Node is described both in `@types/node` and in flowlib.
+
+      * Immutable is written in untyped JS but has first-party type
+        definitions for both TS and Flow.  Maintained together, so one
+        can hope for some coherence; but still an automatic
+        translation of one is not going to be the same as the other.
+        The user probably wants the real first-party Flow definitions.
 
   * Further, when the reference starts with `import(…)` -- i.e. is an
     ImportTypeNode -- there is no direct equivalent of that construct
@@ -179,14 +186,93 @@ Working that out in detail:
 
 ## Hybrid type/value references
 
-These can be gnarlier.  Here's an example which both TS and Flow accept:
+These can be gnarlier.  Focusing on class-extends:
 
-    export class C<T> { x: T[] = [] }
-    export const N = { C }
-    export const M = { N }
-    export class D1 extends C<number> {}
-    export class D2 extends N.C<number> {}
-    export class D3 extends { ...M }['N'].C<number> {}
+* They don't have to be a mere dotted name.  Here's an example which
+  both TS and Flow accept:
 
-So it seems the class-extends `.expression` can truly be a property
-access on an arbitrary expression.
+      export class C<T> { x: T[] = [] }
+      export const N = { C }
+      export const M = { N }
+      export class D1 extends C<number> {}
+      export class D2 extends N.C<number> {}
+      export class D3 extends N['C']<number> {}
+      export class D4 extends { ...M }['N'].C<number> {}
+
+  So it seems the class-extends `.expression` can truly be a property
+  access on an arbitrary expression.  (On a LeftHandSideExpression,
+  anyway; but that's a merely syntactic restriction, as it can be
+  parens around an arbitrary expression.)
+
+* However, in at least a generated .d.ts file, it seems they are.
+  Here's what TS generates (reformatted slightly) for a .d.ts from
+  that previous example:
+
+      export declare class C<T> { x: T[]; }
+      export declare const N: { C: typeof C; };
+      export declare const M: { N: { C: typeof C; }; };
+      export declare class D1 extends C<number> {}
+      export declare class D2 extends N.C<number> {}
+
+      declare const D3_base: typeof C;
+      export declare class D3 extends D3_base<number> {}
+
+      declare const D4_base: typeof C;
+      export declare class D4 extends D4_base<number> {}
+
+  So it seems like it ensures the expression is just a dotted name
+  after all, an EntityNameExpression.  If it wasn't already, then it
+  makes up a name for it and just says what the type is.
+
+  * TODO determine if TS also requires that when consuming a .d.ts
+    file, so that it also applies to hand-written definitions.
+
+* As that example also illustrates, when it is a dotted name, the
+  non-last elements can be ordinary values, not just modules and
+  namespaces.  After all, the class is a value.
+
+  And yet the type has to ride along with it -- complete with the
+  meaning and constraints assigned to its type parameters.  For
+  example, the type could ultimately be `React.Component`, whose type
+  arguments we have to rewrite as mentioned above.  Example:
+
+      export class CC1 extends React.Component {}
+      export class CC2 extends (await import('react')).Component {}
+      export const NN = { O: { P: React['Component'] } }
+      export class CC3 extends NN.O.P {}
+
+  And generated .d.ts:
+
+      export declare class CC1 extends React.Component {}
+      declare const CC2_base: typeof React.Component;
+      export declare class CC2 extends CC2_base {}
+      export declare const NN: { O: { P: typeof React.Component; }; };
+      export declare class CC3 extends NN.O.P {}
+
+
+I think perhaps the right strategy for class-extends, given that last
+point, is that we should just ask TS directly what the *type* of the
+expression is.
+
+* Could be some class, and then we look at its declaration.
+
+* Could be `typeof …`, as in the last example.  Then I guess we
+  recurse on the `typeof` argument.  (And I guess it could probably be
+  an ImportTypeNode, as well as a TypeQueryNode.)
+
+* Could be, hmm, some ConstructorType, or type literal with a
+  ConstructSignature:
+
+      declare const Df2_base: { new <T = string>(): Cf<T>; ss: 3 };
+      export declare class Df2 extends Df2_base {}
+
+  I guess I'm not sure there's a Flow equivalent of those in the first
+  place.
+
+  If there is, then to handle those, we'll need to go look at that
+  construct-signature to see if it has any type parameters, so
+  convertTypeArguments can do its job to turn `extends foo` into
+  `extends foo<>`.
+
+* Maybe could be other things?  But probably "some class" is like 90%,
+  and that plus `typeof Some.Class` is like 99%, in the wild.
