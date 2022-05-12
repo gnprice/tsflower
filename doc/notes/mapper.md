@@ -98,19 +98,36 @@ class-implements.  As explained below, these are:
 
   We will definitely need to rewrite the reference.
 
-  If the type's declaration is itself local (or global ambient and
-  translated by TsFlower), then we'll have renamed it -- from
-  `namespace N { type T = … }` to like `type N_T = …` -- and that
-  renamed definition will be just as directly accessible.  So we just
-  replace the whole qualified name with the new name.
+  * If the type's declaration is itself local (or global ambient and
+    translated by TsFlower), then we'll have renamed it -- from
+    `namespace N { type T = … }` to like `type N_T = …` -- and that
+    renamed definition will be just as directly accessible.  So we
+    just replace the whole qualified name with the new name.
 
-  If the declaration is via an import somewhere... Hmm, can this only
-  mean the namespace at the root of this qualified name is imported?
+  * If the declaration is via an import somewhere... Hmm, can this
+    only mean the namespace at the root of this qualified name is
+    imported?  Yes, I think it does:
 
-  * TS gives "Export declarations are not permitted in a namespace."
-    if you try `namespace N { export * from 'react' }`.
+    * TS gives "Export declarations are not permitted in a namespace."
+      if you try `namespace N { export * from 'react' }`.
 
-  * TODO WORK HERE
+    * So yeah, without those, I think the only way to put a namespace
+      in (the exports of!) a namespace is to have an actual namespace
+      declaration there (with an `export` modifier).  And the only way
+      to put a type there is to have a type-making declaration (see
+      `./ts.md` for what those can be) -- one with an `export`
+      modifier, so not an import.
+
+    So, there's some import by which we got that namespace that's at
+    the start of the qualified name.  Moreover, by the same reasoning
+    applied to WORK HERE
+
+    If the import is from a file we'll be translating, then we have a
+    rename for the type.  We just need to emit an import for *that*
+    name, with the same module specifier as the original import.  (
+
+  If it's from a file with external translation, we'll need to apply
+  that.  WORK HERE
 
 
 # Type position, value position, hybrid type/value position
