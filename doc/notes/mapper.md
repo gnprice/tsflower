@@ -90,11 +90,12 @@ class-implements.  As explained below, these are:
   (including imports), not references, to build a map on symbols that
   covers this case.
 
-* If it's a qualified name starting with a namespace (vs. a module),
-  then the namespace is declared in this module (possibly by an
-  import); or, again, as a global ambient.  The type itself, and for
-  that matter any other namespaces in the chain, may be declared
-  somewhere else entirely.
+
+* If it's a qualified name starting with a namespace (other than a
+  whole real module), then the namespace is declared in this module
+  (possibly by an import); or, again, as a global ambient.  The type
+  itself, and for that matter any other namespaces in the chain, may
+  be declared somewhere else entirely.
 
   We will definitely need to rewrite the reference.
 
@@ -119,15 +120,32 @@ class-implements.  As explained below, these are:
       modifier, so not an import.
 
     So, there's some import by which we got that namespace that's at
-    the start of the qualified name.  Moreover, by the same reasoning
-    applied to WORK HERE
+    the start of the qualified name.
 
-    If the import is from a file we'll be translating, then we have a
-    rename for the type.  We just need to emit an import for *that*
-    name, with the same module specifier as the original import.  (
+    Moreover, I *think* that by applying the same reasoning to
+    wherever we got that root namespace from, we can conclude the type
+    has a declaration there.  (Possibly an import, but an import of
+    the type and not of some namespace above it.)
 
-  If it's from a file with external translation, we'll need to apply
-  that.  WORK HERE
+    So if the import is from a file we'll be translating, then we have
+    a rename for the type.  We just need to emit an import for *that*
+    name, with the same module specifier as the original import.
+
+    And if it's from a file with external translation, we'll need to
+    apply that translation.
+
+
+* If it's a qualified name starting with a namespace that we imported
+  as a whole real module, then...
+
+  * Hmm, is it possible that the next-level namespace was imported
+    there from some other file?  And the next from some other file,
+    etc.  In that case, we'll need to either (a) add an import from
+    the ultimate type declaration's module, or (b) in translating the
+    intermediate modules, explicitly name all the types found in the
+    namespaces they re-export.
+
+    TODO determine if that's possible.
 
 
 # Type position, value position, hybrid type/value position
