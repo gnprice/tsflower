@@ -1,4 +1,8 @@
 # Files in Git tree, for use at dev time:
+.prettierignore
+.prettierrc
+.vscode/
+/doc/notes/
 /integration/
 /t/
 tsconfig.json
