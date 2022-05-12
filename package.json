@@ -30,7 +30,7 @@
     "tsflower": "bin/tsflower"
   },
   "scripts": {
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "npm run build && npm run test",
     "test": "t/run",
     "format": "prettier --write .",
     "build": "tsc"
