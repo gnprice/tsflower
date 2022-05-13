@@ -140,12 +140,97 @@ class-implements.  As explained below, these are:
 
   * Hmm, is it possible that the next-level namespace was imported
     there from some other file?  And the next from some other file,
-    etc.  In that case, we'll need to either (a) add an import from
-    the ultimate type declaration's module, or (b) in translating the
-    intermediate modules, explicitly name all the types found in the
-    namespaces they re-export.
+    etc.
 
-    TODO determine if that's possible.
+    ... Yup.  Doesn't even need to have any namespace declarations.
+    Here's a test case (for TS's test framework):
+
+        // @declaration: true
+        // @Filename: a.ts
+        export type T = string;
+        export class O { x: number; }
+
+        // @Filename: b.ts
+        export * as A from './a';
+
+        // @Filename: c.ts
+        export * as B from './b';
+
+        // @Filename: d.ts
+        import * as C from './c';
+        export const u: C.B.A.T = 'x'; // ok
+        const v: C.B.A.T = 3; // error
+        const o: C.B.A.O = new C.B.A.O();
+        const x: number = o.x;
+
+    So we'll need to either (a) add an import from the ultimate type
+    declaration's module, or (b) in translating the intermediate
+    modules, explicitly name all the types found in the namespaces
+    they re-export.
+
+    The latter is quadratic.  (Consider a long chain of re-exports,
+    and then a long list of types declared at the far end of it.)
+
+    OTOH consider the user trying to use one of those re-exporting
+    modules, like `c.ts`.  Just like `d.ts`, they'll say something
+    like `import * as C from …`.  They'll say `new C.B.A.O()` to get
+    at the values from inside there.  It'd sure be nice for them to be
+    able to say like `C.B_A_O` to get at the corresponding
+    types... rather than have to basically reverse-engineer to figure
+    out they need to import from `a` and say `A.O`.  So perhaps the
+    quadratic thing is nevertheless the best answer.
+
+  Well, so.  Perhaps what we want is to maintain the following
+  invariant:
+
+    For any namespace declaration in a SourceFile we're translating,
+    for each type declaration that's reachable through that namespace,
+    we make sure to emit in that file's output a name for that type.
+
+    That includes all declarations that create a namespace:
+    NamespaceDeclaration, EnumDeclaration, and imports/re-exports.
+
+    The type names get put in the exports, or the file's local names,
+    or both, according to how they are in the source:
+
+    * a re-export for a re-export, putting them only in exports;
+    * an `import` for an `import`, putting them only in locals;
+    * an un-exported `type =` for an un-exported NamespaceDeclaration
+      or EnumDeclaration, putting them only in locals;
+    * an exported `type =` for an exported NamespaceDeclaration or
+      EnumDeclaration, putting them in both.
+
+  To maintain that invariant:
+
+  * Because we'll have observed the same invariant on any file we're
+    importing from -- provided it's one we translate -- we'll be able
+    to handle imports and re-exports, because that file's output will
+    have a direct name for the type.
+
+  * If we import from something with external translation, then
+    according to the plan above for plain identifiers we'll delete the
+    import, and emit fresh imports as needed for any references.
+
+  * If we re-export from something with external translation, then…
+    well, there may not be a good answer for that in general.  Even
+    just re-exporting a type, not a namespace: if the type's
+    translation requires a macro, there's nothing we can export that
+    will simulate that for user code trying to consume the re-export.
+
+    But in any case where the translation is just a name… or for that
+    matter some type expression… or even something that depends on
+    type arguments, but in a way that we can express as a Flow generic
+    type… then we should emit an export of that.  I guess that means
+    that, again (as discussed in the "type declarations" sibling
+    section above) we should basically treat a re-export as import to
+    a fresh name, followed by export.
+
+    * Where if it's a generic type, the emitted `export type` will
+      clone its type parameters from the translation.
+
+    And then if the input re-exports a *namespace* from something with
+    external translation, then we'll handle its nested types and
+    namespaces recursively in the same way.
 
 
 # Type position, value position, hybrid type/value position
