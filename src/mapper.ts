@@ -96,15 +96,18 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
   function initMapper() {
     const sourceFiles = program.getSourceFiles();
 
+    const targetFiles = [];
     for (const sourceFile of sourceFiles) {
+      const isTarget = targetSet.has(path.resolve(sourceFile.fileName));
       if (program.isSourceFileDefaultLibrary(sourceFile)) {
         findRewritesInDefaultLibrary(sourceFile);
+        if (isTarget) {
+          warn(`attempted to target default library: ${sourceFile.fileName}`);
+        }
+      } else if (isTarget) {
+        targetFiles.push(sourceFile);
       }
     }
-
-    const targetFiles = sourceFiles.filter((sourceFile) =>
-      targetSet.has(path.resolve(sourceFile.fileName)),
-    );
 
     targetFiles.forEach(findRewrites);
 
