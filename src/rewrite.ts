@@ -2,12 +2,23 @@ import ts from "typescript";
 import { builders as b, namedTypes as n } from "ast-types";
 import K from "ast-types/gen/kinds";
 import { Converter, ErrorOr, mkError, mkSuccess } from "./convert";
-import { MapResult } from "./mapper";
+import { MapResult, RecursiveMapResult } from "./mapper";
 
 export const defaultLibraryRewrites: Map<string, MapResult> = new Map([
   ["Readonly", { type: "FixedName", name: "$ReadOnly" }],
   ["ReadonlyArray", { type: "FixedName", name: "$ReadOnlyArray" }],
   ["Omit", { type: "TypeReferenceMacro", convert: convertOmit }],
+]);
+
+export const globalRewrites: Map<string, RecursiveMapResult> = new Map([
+  // If adding to this: note the unimplemented cases in findGlobalRewrites,
+  // where we use this map.
+  [
+    "JSX",
+    new Map([
+      // None yet; we'll add some
+    ]),
+  ],
 ]);
 
 export const libraryRewrites: Map<string, Map<string, MapResult>> = new Map([

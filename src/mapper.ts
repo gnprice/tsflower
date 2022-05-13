@@ -4,7 +4,11 @@ import { builders as _b, namedTypes as n } from "ast-types";
 import K from "ast-types/gen/kinds";
 import { Converter, ErrorOr } from "./convert";
 import { getModuleSpecifier, isNamedDeclaration } from "./tsutil";
-import { defaultLibraryRewrites, libraryRewrites } from "./rewrite";
+import {
+  defaultLibraryRewrites,
+  globalRewrites,
+  libraryRewrites,
+} from "./rewrite";
 import { ensureUnreachable } from "./generics";
 
 /*
@@ -40,6 +44,11 @@ export type MapResult =
         typeParameters: n.TypeParameterInstantiation | null;
       }>;
     };
+
+export type RecursiveMapResult =
+  | MapResult
+  // for a namespace, keyed by names within it
+  | Map<string, RecursiveMapResult>;
 
 export interface Mapper {
   /** (Each call to this in the converter should have a corresponding case
@@ -107,6 +116,8 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
       }
     }
 
+    ts.transform([...sourceFiles], [findGlobalRewrites]);
+
     ts.transform(defaultLibraryFiles, [findRewritesInDefaultLibrary]);
 
     ts.transform(targetFiles, [findRewrites]);
@@ -170,6 +181,90 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
             if (rewrites) mappedModuleSymbols.set(symbol, rewrites);
             return;
           }
+        }
+      }
+    }
+  }
+
+  /**
+   * Search all files for `declare global`, and scan those for rewrites.
+   *
+   * In other words, scan all "global augmentation" declarations.
+   */
+  function findGlobalRewrites(_context: ts.TransformationContext) {
+    return visitSourceFile;
+
+    function visitSourceFile(sourceFile: ts.SourceFile): ts.SourceFile {
+      // Declarations `declare global` are always directly nested in source
+      // files.  In particular, if you try:
+      //   namespace n { declare global { }}
+      // you get the error:
+      //   > Augmentations for the global scope can only be directly nested in
+      //   > external modules or ambient module declarations.
+      // So we just scan through the direct-child statements.
+      for (const statement of sourceFile.statements) {
+        // In the AST, they look like ts.ModuleDeclaration with flag
+        // ts.NodeFlags.GlobalAugmentation.  (See reference in parser
+        // to that flag.)
+        if (
+          ts.isModuleDeclaration(statement) &&
+          statement.flags & ts.NodeFlags.GlobalAugmentation
+        ) {
+          visitGlobalAugmentation(statement, globalRewrites);
+        }
+      }
+      return sourceFile;
+
+      function visitGlobalAugmentation(
+        node: ts.ModuleDeclaration,
+        rewrites: Map<string, RecursiveMapResult>,
+      ) {
+        if (!node.body || !ts.isModuleBlock(node.body)) {
+          // TODO(error): should be invalid TS
+          return;
+        }
+        visitModuleBlock(node.body, rewrites);
+      }
+
+      function visitModuleBlock(
+        node: ts.ModuleBlock,
+        rewrites: Map<string, RecursiveMapResult>,
+      ) {
+        for (const statement of node.statements) {
+          if (ts.isModuleDeclaration(statement)) {
+            const subRewrites = rewrites.get(statement.name.text);
+            if (!subRewrites) continue;
+            if (!(subRewrites instanceof Map)) {
+              // TODO(error): expected type, found namespace
+              continue;
+            }
+            if (!statement.body) continue; // TODO(error): invalid TS
+            if (ts.isModuleBlock(statement.body)) {
+              visitModuleBlock(statement.body, subRewrites);
+            } else if (ts.isModuleDeclaration(statement.body)) {
+              // TODO(unimplemented): `namespace n.m { … }`
+            } else {
+              // TODO(error): JSDoc annotation
+            }
+            continue;
+          }
+
+          if (ts.isInterfaceDeclaration(statement)) {
+            const rewrite = rewrites.get(statement.name.text);
+            if (!rewrite) continue;
+            if (rewrite instanceof Map) {
+              // TODO(error): expected namespace, found type
+              continue;
+            }
+            const symbol = checker.getSymbolAtLocation(statement.name);
+            if (!symbol) {
+              // TODO(error): missing symbol
+              continue;
+            }
+            mappedSymbols.set(symbol, rewrite);
+          }
+          // TODO(unimplemented): other type declarations: type alias, class
+          //   (for type parameters), enum, enum member; imports/re-exports?
         }
       }
     }
