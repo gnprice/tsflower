@@ -112,7 +112,9 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
     while (hadRenames) {
       // TODO make this linear instead of quadratic; build a graph to traverse
       hadRenames = false;
-      targetFiles.forEach(findImportRenames);
+      for (const sourceFile of targetFiles) {
+        ts.transform(sourceFile, [findImportRenames]);
+      }
     }
   }
 
@@ -211,17 +213,16 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
     }
   }
 
-  function findImportRenames(sourceFile: ts.SourceFile) {
-    ts.transform(sourceFile, [visitorFactory]);
-    return;
+  function findImportRenames(context: ts.TransformationContext) {
+    return visitSourceFile;
 
-    function visitorFactory(context: ts.TransformationContext) {
-      return visitor;
+    function visitSourceFile(sourceFile: ts.SourceFile): ts.SourceFile {
+      return visitor(sourceFile);
 
-      function visitor(node: ts.Node): ts.Node {
+      function visitor<T extends ts.Node>(node: T): T {
         switch (node.kind) {
           case ts.SyntaxKind.ImportSpecifier:
-            visitImportSpecifier(node as ts.ImportSpecifier);
+            visitImportSpecifier(node as ts.Node as ts.ImportSpecifier);
           // TODO also `export … from`?
         }
 
