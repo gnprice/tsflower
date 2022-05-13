@@ -92,11 +92,12 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
   function initMapper() {
     const sourceFiles = program.getSourceFiles();
 
+    const defaultLibraryFiles = [];
     const targetFiles = [];
     for (const sourceFile of sourceFiles) {
       const isTarget = targetSet.has(path.resolve(sourceFile.fileName));
       if (program.isSourceFileDefaultLibrary(sourceFile)) {
-        ts.transform(sourceFile, [findRewritesInDefaultLibrary]);
+        defaultLibraryFiles.push(sourceFile);
         if (isTarget) {
           warn(`attempted to target default library: ${sourceFile.fileName}`);
         }
@@ -105,16 +106,14 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
       }
     }
 
-    for (const sourceFile of targetFiles) {
-      ts.transform(sourceFile, [findRewrites]);
-    }
+    ts.transform(defaultLibraryFiles, [findRewritesInDefaultLibrary]);
+
+    ts.transform(targetFiles, [findRewrites]);
 
     while (hadRenames) {
       // TODO make this linear instead of quadratic; build a graph to traverse
       hadRenames = false;
-      for (const sourceFile of targetFiles) {
-        ts.transform(sourceFile, [findImportRenames]);
-      }
+      ts.transform(targetFiles, [findImportRenames]);
     }
   }
 
