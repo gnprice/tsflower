@@ -19,11 +19,11 @@ class CliError extends Error {
   }
 }
 
-type FilenameOrPipe = string | { type: "pipe" };
+type FilenameOrPipe = string | { kind: "pipe" };
 
 type CliCommand =
-  | { type: "file"; src: string; dest: FilenameOrPipe }
-  | { type: "tree"; src: string; dest: string | null };
+  | { kind: "file"; src: string; dest: FilenameOrPipe }
+  | { kind: "tree"; src: string; dest: string | null };
 
 main();
 
@@ -32,7 +32,7 @@ function main() {
 
   const command = parseCommandLineOrExit(argv);
 
-  switch (command.type) {
+  switch (command.kind) {
     case "file": {
       const { src, dest } = command;
       const result = convertFileToString(src);
@@ -53,7 +53,7 @@ function main() {
     default:
       ensureUnreachable(command);
       // @ts-expect-error yes, the types say this is unreachable
-      throw new Error(`internal error: unexpected subcommand: ${command.type}`);
+      throw new Error(`internal error: unexpected subcommand: ${command.kind}`);
   }
 }
 
@@ -121,9 +121,9 @@ function parseFileCommandLine(argv: string[]): CliCommand {
   const [inputFilename, outputFilename] = argv;
 
   return {
-    type: "file",
+    kind: "file",
     src: inputFilename,
-    dest: outputFilename !== undefined ? outputFilename : { type: "pipe" },
+    dest: outputFilename !== undefined ? outputFilename : { kind: "pipe" },
   };
 
   function usageError(message: string): never {
@@ -156,7 +156,7 @@ function parseTreeCommandLine(argv: string[]): CliCommand {
   const [inputPath, outputPath] = argv;
 
   return {
-    type: "tree",
+    kind: "tree",
     src: inputPath,
     dest: outputPath !== undefined ? outputPath : null,
   };
