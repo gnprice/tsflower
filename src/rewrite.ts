@@ -16,7 +16,7 @@ export const globalRewrites: Map<string, RecursiveMapResult> = new Map([
   [
     "JSX",
     new Map([
-      // None yet; we'll add some
+      ["Element", { type: "TypeReferenceMacro", convert: convertJsxElement }],
     ]),
   ],
 ]);
@@ -177,5 +177,18 @@ function convertReactElement(
   return mkSuccess({
     id: b.identifier("React$Element"), // TODO use import
     typeParameters: b.typeParameterInstantiation(args),
+  });
+}
+
+// // @types/react/index.d.ts
+// declare global {
+//   namespace JSX {
+//       interface Element extends React.ReactElement<any, any> { }
+//
+// So do the equivalent of convertReactElement with `any, any`.
+function convertJsxElement() {
+  return mkSuccess({
+    id: b.identifier("React$Element"), // TODO use import
+    typeParameters: b.typeParameterInstantiation([b.anyTypeAnnotation()]),
   });
 }

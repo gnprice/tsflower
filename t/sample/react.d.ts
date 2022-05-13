@@ -40,3 +40,7 @@ var reactElement: {
   c2: React.ReactElement<AProps, "div">;
   c3: React2.ReactElement<AProps, "div">;
 };
+
+var jsx: {
+  element: JSX.Element;
+};
