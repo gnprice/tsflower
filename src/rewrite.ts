@@ -3,8 +3,6 @@ import { builders as b, namedTypes as n } from "ast-types";
 import K from "ast-types/gen/kinds";
 import { Converter, ErrorOr, mkError, mkSuccess } from "./convert";
 
-export type MapResultType = "FixedName" | "TypeReferenceMacro";
-
 export type MapResult =
   | { type: "FixedName"; name: string }
   /**
