@@ -3,11 +3,7 @@ import ts from "typescript";
 import { builders as _b, namedTypes as n } from "ast-types";
 import K from "ast-types/gen/kinds";
 import { Converter, ErrorOr } from "./convert";
-import {
-  getModuleSpecifier,
-  isEntityNameOrEntityNameExpression,
-  isNamedDeclaration,
-} from "./tsutil";
+import { getModuleSpecifier, isNamedDeclaration } from "./tsutil";
 import { defaultLibraryRewrites, libraryRewrites } from "./rewrite";
 
 /*
@@ -130,43 +126,11 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
           visitNamedDeclaration(node);
         }
 
-        switch (node.kind) {
-          case ts.SyntaxKind.TypeReference:
-            visitTypeReference(node as ts.TypeReferenceNode);
-            break;
-          case ts.SyntaxKind.HeritageClause:
-            visitHeritageClause(node as ts.HeritageClause);
-            break;
-        }
-
         return ts.visitEachChild(node, visitor, context);
       }
 
       function visitNamedDeclaration(node: { name: ts.DeclarationName }) {
         visitSymbol(checker.getSymbolAtLocation(node.name));
-      }
-
-      function visitTypeReference(node: ts.TypeReferenceNode) {
-        visitTypeName(node.typeName);
-      }
-
-      function visitHeritageClause(node: ts.HeritageClause) {
-        for (const base of node.types) {
-          const { expression } = base;
-          if (!isEntityNameOrEntityNameExpression(expression)) continue;
-          visitTypeName(expression);
-        }
-      }
-
-      function visitTypeName(name: ts.EntityNameOrEntityNameExpression) {
-        visitSymbol(checker.getSymbolAtLocation(name));
-        if (ts.isQualifiedName(name)) {
-          visitSymbol(checker.getSymbolAtLocation(name.right));
-          visitTypeName(name.left);
-        } else if (ts.isPropertyAccessExpression(name)) {
-          visitSymbol(checker.getSymbolAtLocation(name.name));
-          visitTypeName(name.expression);
-        }
       }
 
       function visitSymbol(symbol: void | ts.Symbol) {
