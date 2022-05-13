@@ -233,6 +233,72 @@ class-implements.  As explained below, these are:
     namespaces recursively in the same way.
 
 
+## Hybrid type/value references
+
+These are class-extends, and some imports and re-exports.
+
+* For imports and re-exports, we'll split them into
+
+  (a) a value reference that keeps the name;
+
+  (b) a type reference that follows the underlying name.  This one
+      will also result in a rename for the symbol this declares
+      (either locally for an import, or in the module's exports for a
+      re-export); we'll try to give it the same name as the underlying
+      symbol got, but may have to pick a different one for uniqueness.
+
+
+* For class-extends, we'll keep the name, because after all it refers
+  to a value.
+
+  But we may have to adjust the type arguments, in case it comes
+  ultimately from some file with external translation.  This
+  adjustment should be based, I think, on the *type* of the
+  expression.  See details under the other "Hybrid type/value
+  references" section below (around the mention of `getType…`.)
+
+  Plus as usual we may need to turn a lack of type arguments into an
+  empty list of them.  That'll again be based on the type of the
+  expression.
+
+
+## Namespace references
+
+These are… some imports and re-exports, and I guess the left part of
+any `QualifiedName` that's a type reference (including hybrid) or a
+namespace reference.
+
+Equivalently, because imports and re-exports don't do `QualifiedName`:
+some imports and re-exports, and the transitive left-parts of any
+`QualifiedName` that's a type reference, including a class-extends.
+
+* For the left-parts of a `QualifiedName`, the namespace reference
+  doesn't directly produce anything we emit.  It serves only as part
+  of finding the referenced type.
+
+  * Then for a pure type reference, that gets reflected in the whole
+    emitted reference; for a class-extends, it gets reflected in the
+    type arguments.
+
+* For imports and re-exports, as discussed in detail at the end of the
+  "Type references" sibling section above: we'll emit a corresponding
+  import or re-export for each of the type declarations transitively
+  reachable through the referenced namespace.
+
+  If the namespace also refers to a value, we'll also emit a value
+  import.  This is a special case of our general handling of imports
+  and re-exports: they produce a value import/re-export if they refer
+  to a value, and also one for the type if they refer to a type, and
+  this section is just adding that if they refer to a namespace then
+  they also produce one for each enclosed type in the namespace.
+
+
+## Pure value references
+
+We just emit these verbatim.  Though also, they shouldn't appear in
+`.d.ts` files anyway.
+
+
 # Type position, value position, hybrid type/value position
 
 * Some references are in pure value position.  We don't touch those,
@@ -484,7 +550,7 @@ These can be gnarlier.  Focusing on class-extends:
 
 I think perhaps the right strategy for class-extends, given that last
 point, is that we should just ask TS directly what the *type* of the
-expression is.
+expression is (with like `checker.getTypeAtLocation`.)
 
 * Could be some class, and then we look at its declaration.
 
