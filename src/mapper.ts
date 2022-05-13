@@ -5,6 +5,7 @@ import K from "ast-types/gen/kinds";
 import { Converter, ErrorOr } from "./convert";
 import { getModuleSpecifier, isNamedDeclaration } from "./tsutil";
 import { defaultLibraryRewrites, libraryRewrites } from "./rewrite";
+import { ensureUnreachable } from "./generics";
 
 /*
  * See docs/notes/mapper.md for some scratch notes on the background
@@ -212,20 +213,49 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
     }
   }
 
-  function findImportRenames(context: ts.TransformationContext) {
+  function findImportRenames(_context: ts.TransformationContext) {
     return visitSourceFile;
 
     function visitSourceFile(sourceFile: ts.SourceFile): ts.SourceFile {
-      return visitor(sourceFile);
+      sourceFile.statements.forEach(visitStatement);
+      return sourceFile;
 
-      function visitor<T extends ts.Node>(node: T): T {
-        switch (node.kind) {
-          case ts.SyntaxKind.ImportSpecifier:
-            visitImportSpecifier(node as ts.Node as ts.ImportSpecifier);
-          // TODO also `export … from`?
+      function visitStatement(node: ts.Statement) {
+        if (ts.isModuleDeclaration(node)) {
+          visitModuleDeclaration(node);
+        } else if (ts.isImportDeclaration(node)) {
+          visitImportDeclaration(node);
         }
+      }
 
-        return ts.visitEachChild(node, visitor, context);
+      function visitModuleDeclaration(node: ts.ModuleDeclaration) {
+        // I.e., a namespace declaration.  These can contain some kinds of
+        // imports, so recurse.
+        if (!node.body) return;
+        switch (node.body.kind) {
+          case ts.SyntaxKind.ModuleDeclaration:
+            visitModuleDeclaration(node.body);
+            break;
+          case ts.SyntaxKind.ModuleBlock:
+            node.body.statements.forEach(visitStatement);
+            break;
+          case ts.SyntaxKind.Identifier:
+            // TODO(error): In fact it shouldn't even be possible to get
+            //   here, because we don't recurse into JSDoc annotations.
+            warn(
+              `unsupported: JSDoc annotation for namespace ${node.name} in ${sourceFile.fileName}`,
+            );
+            break;
+          default:
+            ensureUnreachable(node.body);
+        }
+      }
+
+      function visitImportDeclaration(node: ts.ImportDeclaration) {
+        if (!node.importClause) return;
+        if (!node.importClause.namedBindings) return;
+        if (!ts.isNamedImports(node.importClause.namedBindings)) return;
+        node.importClause.namedBindings.elements.forEach(visitImportSpecifier);
       }
 
       function visitImportSpecifier(node: ts.ImportSpecifier) {
