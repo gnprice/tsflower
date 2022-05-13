@@ -90,6 +90,9 @@ class-implements.  As explained below, these are:
   (including imports), not references, to build a map on symbols that
   covers this case.
 
+  * Except references to global ambient declarations.  Unless we try
+    to go through those up front, too?
+
 
 * If it's a qualified name starting with a namespace (other than a
   whole real module), then the namespace is declared in this module
