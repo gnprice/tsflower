@@ -2,7 +2,6 @@ import path from "path";
 import ts from "typescript";
 import { builders as _b, namedTypes as n } from "ast-types";
 import K from "ast-types/gen/kinds";
-import { some } from "./util";
 import { Converter, ErrorOr } from "./convert";
 import {
   getModuleSpecifier,
@@ -96,6 +95,13 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
 
   function initMapper() {
     const sourceFiles = program.getSourceFiles();
+
+    for (const sourceFile of sourceFiles) {
+      if (program.isSourceFileDefaultLibrary(sourceFile)) {
+        findRewritesInDefaultLibrary(sourceFile);
+      }
+    }
+
     const targetFiles = sourceFiles.filter((sourceFile) =>
       targetSet.has(path.resolve(sourceFile.fileName)),
     );
@@ -166,12 +172,6 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
         if (seenSymbols.has(symbol)) return;
         seenSymbols.add(symbol);
 
-        if (some(symbol.declarations, isDefaultLibraryTopLevelDeclaration)) {
-          const rewrite = defaultLibraryRewrites.get(symbol.name);
-          if (rewrite) mappedSymbols.set(symbol, rewrite);
-          return;
-        }
-
         if (
           symbol.flags & ts.SymbolFlags.TypeAlias &&
           symbol.flags & ts.SymbolFlags.Value
@@ -202,16 +202,48 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
           }
         }
       }
+    }
+  }
 
-      function isDefaultLibraryTopLevelDeclaration(
-        node: ts.Declaration,
-      ): boolean {
-        const { parent } = node;
-        return (
-          parent &&
-          ts.isSourceFile(parent) &&
-          program.isSourceFileDefaultLibrary(parent)
-        );
+  function findRewritesInDefaultLibrary(sourceFile: ts.SourceFile) {
+    ts.transform(sourceFile, [visitorFactory]);
+    return;
+
+    function visitorFactory(_context: ts.TransformationContext) {
+      return visitSourceFile;
+
+      function visitSourceFile(node: ts.SourceFile): ts.SourceFile {
+        for (const statement of node.statements) {
+          visitStatement(statement);
+        }
+        return node;
+      }
+
+      function visitStatement(node: ts.Statement) {
+        if (ts.isModuleDeclaration(node)) {
+          // TODO add logic here to handle references to types in e.g. Intl;
+          //   basically just recurse, but remembering what namespace we're in
+          return;
+        }
+
+        if (
+          ts.isTypeAliasDeclaration(node) ||
+          ts.isInterfaceDeclaration(node)
+        ) {
+          const { name } = node;
+          const rewrite = defaultLibraryRewrites.get(name.text);
+          if (rewrite) {
+            const symbol = checker.getSymbolAtLocation(name);
+            if (!symbol) {
+              warn(
+                `missing symbol at declaration of ${name.text} in ${sourceFile.fileName}`,
+              );
+              return;
+            }
+            mappedSymbols.set(symbol, rewrite);
+          }
+          return;
+        }
       }
     }
   }
@@ -251,5 +283,9 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
         hadRenames = true;
       }
     }
+  }
+
+  function warn(description: string) {
+    process.stderr.write(`warning: ${description}\n`);
   }
 }
