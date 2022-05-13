@@ -105,7 +105,9 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
       }
     }
 
-    targetFiles.forEach(findRewrites);
+    for (const sourceFile of targetFiles) {
+      ts.transform(sourceFile, [findRewrites]);
+    }
 
     while (hadRenames) {
       // TODO make this linear instead of quadratic; build a graph to traverse
@@ -114,14 +116,13 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
     }
   }
 
-  function findRewrites(sourceFile: ts.SourceFile) {
-    ts.transform(sourceFile, [visitorFactory]);
-    return;
+  function findRewrites(context: ts.TransformationContext) {
+    return visitSourceFile;
 
-    function visitorFactory(context: ts.TransformationContext) {
-      return visitor;
+    function visitSourceFile(sourceFile: ts.SourceFile): ts.SourceFile {
+      return visitor(sourceFile);
 
-      function visitor(node: ts.Node): ts.Node {
+      function visitor<T extends ts.Node>(node: T): T {
         if (isNamedDeclaration(node)) {
           visitNamedDeclaration(node);
         }
