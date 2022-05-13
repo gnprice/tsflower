@@ -125,7 +125,7 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
           // TODO don't attempt if defined in non-target lib, like React
           // TODO pick non-colliding name
           const name = `${symbol.name}T`;
-          mappedSymbols.set(symbol, { type: "RenameType", name });
+          mappedSymbols.set(symbol, { kind: "RenameType", name });
           hadRenames = true;
           return;
         }
@@ -326,13 +326,13 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
 
         const importedSymbol = checker.getImmediateAliasedSymbol(localSymbol);
         const mapped = importedSymbol && mapper.getSymbol(importedSymbol);
-        if (!mapped || mapped.type !== "RenameType") {
+        if (!mapped || mapped.kind !== "RenameType") {
           return;
         }
 
         // TODO pick non-colliding name
         const name = `${localSymbol.name}T`;
-        mappedSymbols.set(localSymbol, { type: "RenameType", name });
+        mappedSymbols.set(localSymbol, { kind: "RenameType", name });
         hadRenames = true;
       }
     }

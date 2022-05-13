@@ -259,9 +259,9 @@ export function convertSourceFile(
             localSymbol && checker.getImmediateAliasedSymbol(localSymbol);
 
           const mapped = importedSymbol && mapper.getSymbol(importedSymbol);
-          if (mapped && mapped.type === "RenameType") {
+          if (mapped && mapped.kind === "RenameType") {
             const mappedLocal = mapper.getSymbol(localSymbol);
-            if (!mappedLocal || mappedLocal.type !== "RenameType") {
+            if (!mappedLocal || mappedLocal.kind !== "RenameType") {
               // TODO(error): localize this to the one ts.ImportSpecifier
               return errorStatement(
                 node,
@@ -471,7 +471,7 @@ export function convertSourceFile(
     const mapped = symbol && mapper.getSymbol(symbol);
     let name = node.name.text;
     if (mapped) {
-      switch (mapped.type) {
+      switch (mapped.kind) {
         case "RenameType":
           name = mapped.name;
           break;
@@ -946,7 +946,7 @@ export function convertSourceFile(
   }> {
     const mapped = mapper.getTypeName(typeName);
     if (mapped)
-      switch (mapped.type) {
+      switch (mapped.kind) {
         case "FixedName":
         case "RenameType":
           return mkSuccess({

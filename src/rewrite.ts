@@ -4,7 +4,7 @@ import K from "ast-types/gen/kinds";
 import { Converter, ErrorOr, mkError, mkSuccess } from "./convert";
 
 export type MapResult =
-  | { type: "FixedName"; name: string }
+  | { kind: "FixedName"; name: string }
   /**
    * Rename this type, both at its definition and references.
    *
@@ -17,9 +17,9 @@ export type MapResult =
    * describe some actual runtime JS, which we don't modify (or even see),
    * and the value name is a real fact about that actual runtime JS.
    */
-  | { type: "RenameType"; name: string }
+  | { kind: "RenameType"; name: string }
   | {
-      type: "TypeReferenceMacro";
+      kind: "TypeReferenceMacro";
       convert(
         converter: Converter,
         typeName: ts.EntityNameOrEntityNameExpression,
@@ -36,9 +36,9 @@ export type RecursiveMapResult =
   | Map<string, RecursiveMapResult>;
 
 export const defaultLibraryRewrites: Map<string, MapResult> = new Map([
-  ["Readonly", { type: "FixedName", name: "$ReadOnly" }],
-  ["ReadonlyArray", { type: "FixedName", name: "$ReadOnlyArray" }],
-  ["Omit", { type: "TypeReferenceMacro", convert: convertOmit }],
+  ["Readonly", { kind: "FixedName", name: "$ReadOnly" }],
+  ["ReadonlyArray", { kind: "FixedName", name: "$ReadOnlyArray" }],
+  ["Omit", { kind: "TypeReferenceMacro", convert: convertOmit }],
 ]);
 
 export const globalRewrites: Map<string, RecursiveMapResult> = new Map([
@@ -47,7 +47,7 @@ export const globalRewrites: Map<string, RecursiveMapResult> = new Map([
   [
     "JSX",
     new Map([
-      ["Element", { type: "TypeReferenceMacro", convert: convertJsxElement }],
+      ["Element", { kind: "TypeReferenceMacro", convert: convertJsxElement }],
     ]),
   ],
 ]);
@@ -59,14 +59,14 @@ export const libraryRewrites: Map<string, Map<string, MapResult>> = new Map([
       [
         "Component",
         {
-          type: "TypeReferenceMacro",
+          kind: "TypeReferenceMacro",
           convert: convertReactComponent,
         },
       ],
       [
         "ReactElement",
         {
-          type: "TypeReferenceMacro",
+          kind: "TypeReferenceMacro",
           convert: convertReactElement,
         },
       ],
