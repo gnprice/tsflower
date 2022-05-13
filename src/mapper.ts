@@ -1,13 +1,12 @@
 import path from "path";
 import ts from "typescript";
-import { builders as _b, namedTypes as n } from "ast-types";
-import K from "ast-types/gen/kinds";
-import { Converter, ErrorOr } from "./convert";
 import { getModuleSpecifier, isNamedDeclaration } from "./tsutil";
 import {
   defaultLibraryRewrites,
   globalRewrites,
   libraryRewrites,
+  MapResult,
+  RecursiveMapResult,
 } from "./rewrite";
 import { ensureUnreachable } from "./generics";
 
@@ -15,40 +14,6 @@ import { ensureUnreachable } from "./generics";
  * See docs/notes/mapper.md for some scratch notes on the background
  * and architecture of this.
  */
-
-export type MapResultType = "FixedName" | "TypeReferenceMacro";
-
-export type MapResult =
-  | { type: "FixedName"; name: string }
-  /**
-   * Rename this type, both at its definition and references.
-   *
-   * Used in particular where TS has a type and value sharing a name, which
-   * Flow doesn't permit.  The value keeps the name, and the type gets a new
-   * one.
-   *
-   * There's an asymmetry here: we don't have a "RenameValue".  That's
-   * because we're translating type definitions, but those type definitions
-   * describe some actual runtime JS, which we don't modify (or even see),
-   * and the value name is a real fact about that actual runtime JS.
-   */
-  | { type: "RenameType"; name: string }
-  | {
-      type: "TypeReferenceMacro";
-      convert(
-        converter: Converter,
-        typeName: ts.EntityNameOrEntityNameExpression,
-        typeArguments: ts.NodeArray<ts.TypeNode> | void,
-      ): ErrorOr<{
-        id: K.IdentifierKind | n.QualifiedTypeIdentifier;
-        typeParameters: n.TypeParameterInstantiation | null;
-      }>;
-    };
-
-export type RecursiveMapResult =
-  | MapResult
-  // for a namespace, keyed by names within it
-  | Map<string, RecursiveMapResult>;
 
 export interface Mapper {
   /** (Each call to this in the converter should have a corresponding case
