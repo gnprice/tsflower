@@ -3,7 +3,10 @@ import { builders as b, namedTypes as n } from "ast-types";
 import K from "ast-types/gen/kinds";
 import { Converter, ErrorOr, mkError, mkSuccess } from "./convert";
 
-export type MapResult =
+/**
+ * What to do to rewrite some type.
+ */
+export type TypeRewrite =
   | { kind: "FixedName"; name: string }
   /**
    * Rename this type, both at its definition and references.
@@ -30,18 +33,18 @@ export type MapResult =
       }>;
     };
 
-export type RecursiveMapResult =
-  | MapResult
+export type TypeOrNamespaceRewrite =
+  | TypeRewrite
   // for a namespace, keyed by names within it
-  | Map<string, RecursiveMapResult>;
+  | Map<string, TypeOrNamespaceRewrite>;
 
-export const defaultLibraryRewrites: Map<string, MapResult> = new Map([
+export const defaultLibraryRewrites: Map<string, TypeRewrite> = new Map([
   ["Readonly", { kind: "FixedName", name: "$ReadOnly" }],
   ["ReadonlyArray", { kind: "FixedName", name: "$ReadOnlyArray" }],
   ["Omit", { kind: "TypeReferenceMacro", convert: convertOmit }],
 ]);
 
-export const globalRewrites: Map<string, RecursiveMapResult> = new Map([
+export const globalRewrites: Map<string, TypeOrNamespaceRewrite> = new Map([
   // If adding to this: note the unimplemented cases in findGlobalRewrites,
   // where we use this map.
   [
@@ -52,7 +55,7 @@ export const globalRewrites: Map<string, RecursiveMapResult> = new Map([
   ],
 ]);
 
-export const libraryRewrites: Map<string, Map<string, MapResult>> = new Map([
+export const libraryRewrites: Map<string, Map<string, TypeRewrite>> = new Map([
   [
     "react",
     new Map([

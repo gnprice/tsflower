@@ -5,8 +5,8 @@ import {
   defaultLibraryRewrites,
   globalRewrites,
   libraryRewrites,
-  MapResult,
-  RecursiveMapResult,
+  TypeRewrite,
+  TypeOrNamespaceRewrite,
 } from "./rewrite";
 import { ensureUnreachable } from "./generics";
 
@@ -19,14 +19,16 @@ export interface Mapper {
   /** (Each call to this in the converter should have a corresponding case
    * in the visitor in `createMapper`, to ensure that we find and
    * investigate that symbol.) */
-  getSymbol(symbol: ts.Symbol): void | MapResult;
+  getSymbol(symbol: ts.Symbol): void | TypeRewrite;
 
   getQualifiedSymbol(
     qualifierSymbol: ts.Symbol,
     name: string,
-  ): void | MapResult;
+  ): void | TypeRewrite;
 
-  getTypeName(typeName: ts.EntityNameOrEntityNameExpression): void | MapResult;
+  getTypeName(
+    typeName: ts.EntityNameOrEntityNameExpression,
+  ): void | TypeRewrite;
 }
 
 export function createMapper(program: ts.Program, targetFilenames: string[]) {
@@ -35,8 +37,11 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
   const seenSymbols: Set<ts.Symbol> = new Set();
   let hadRenames = false;
 
-  const mappedSymbols: Map<ts.Symbol, MapResult> = new Map();
-  const mappedModuleSymbols: Map<ts.Symbol, Map<string, MapResult>> = new Map();
+  const mappedSymbols: Map<ts.Symbol, TypeRewrite> = new Map();
+  const mappedModuleSymbols: Map<
+    ts.Symbol,
+    Map<string, TypeRewrite>
+  > = new Map();
 
   const mapper: Mapper = {
     getSymbol: (symbol) => mappedSymbols.get(symbol),
@@ -182,7 +187,7 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
 
       function visitGlobalAugmentation(
         node: ts.ModuleDeclaration,
-        rewrites: Map<string, RecursiveMapResult>,
+        rewrites: Map<string, TypeOrNamespaceRewrite>,
       ) {
         if (!node.body || !ts.isModuleBlock(node.body)) {
           // TODO(error): should be invalid TS
@@ -193,7 +198,7 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
 
       function visitModuleBlock(
         node: ts.ModuleBlock,
-        rewrites: Map<string, RecursiveMapResult>,
+        rewrites: Map<string, TypeOrNamespaceRewrite>,
       ) {
         for (const statement of node.statements) {
           if (ts.isModuleDeclaration(statement)) {
