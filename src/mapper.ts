@@ -96,7 +96,7 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
     for (const sourceFile of sourceFiles) {
       const isTarget = targetSet.has(path.resolve(sourceFile.fileName));
       if (program.isSourceFileDefaultLibrary(sourceFile)) {
-        findRewritesInDefaultLibrary(sourceFile);
+        ts.transform(sourceFile, [findRewritesInDefaultLibrary]);
         if (isTarget) {
           warn(`attempted to target default library: ${sourceFile.fileName}`);
         }
@@ -172,19 +172,14 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
     }
   }
 
-  function findRewritesInDefaultLibrary(sourceFile: ts.SourceFile) {
-    ts.transform(sourceFile, [visitorFactory]);
-    return;
+  function findRewritesInDefaultLibrary(_context: ts.TransformationContext) {
+    return visitSourceFile;
 
-    function visitorFactory(_context: ts.TransformationContext) {
-      return visitSourceFile;
-
-      function visitSourceFile(node: ts.SourceFile): ts.SourceFile {
-        for (const statement of node.statements) {
-          visitStatement(statement);
-        }
-        return node;
+    function visitSourceFile(sourceFile: ts.SourceFile): ts.SourceFile {
+      for (const statement of sourceFile.statements) {
+        visitStatement(statement);
       }
+      return sourceFile;
 
       function visitStatement(node: ts.Statement) {
         if (ts.isModuleDeclaration(node)) {
