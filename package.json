@@ -21,6 +21,7 @@
   "devDependencies": {
     "@types/node": "^17.0.27",
     "@types/react": "^18.0.8",
+    "eslint": "^8.15.0",
     "flow-bin": "^0.176.3",
     "prettier": "^2.6.2",
     "react": "^18.1.0",
