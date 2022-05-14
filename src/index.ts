@@ -6,11 +6,7 @@ import { convertSourceFile } from './convert';
 import { createMapper } from './mapper';
 
 export function convertFileToString(file: string): string {
-  const program = ts.createProgram({
-    rootNames: [file],
-    options: {},
-  });
-  program.getTypeChecker(); // causes the binder to run, and set parent pointers
+  const program = createProgram([file]);
 
   const mapper = createMapper(program, [file]);
 
@@ -28,11 +24,7 @@ export function convertFileTree(src: string, dest: string) {
   // TODO(error): nicer error output if src doesn't exist (or other I/O error?)
   const { inputs, outputs } = collectInputsFromTree(src, dest);
 
-  const program = ts.createProgram({
-    rootNames: inputs,
-    options: {},
-  });
-  program.getTypeChecker(); // causes the binder to run, and set parent pointers
+  const program = createProgram(inputs);
 
   const mapper = createMapper(program, inputs);
 
@@ -54,6 +46,12 @@ export function convertFileTree(src: string, dest: string) {
     fs.mkdirSync(path.dirname(output), { recursive: true });
     fs.writeFileSync(output, convertedText);
   }
+}
+
+function createProgram(rootNames: readonly string[]) {
+  const program = ts.createProgram({ rootNames, options: {} });
+  program.getTypeChecker(); // causes the binder to run, and set parent pointers
+  return program;
 }
 
 function collectInputsFromTree(
