@@ -6,7 +6,7 @@ import {
   globalRewrites,
   libraryRewrites,
   TypeRewrite,
-  TypeOrNamespaceRewrite,
+  NamespaceRewrite,
 } from "./rewrite";
 import { ensureUnreachable } from "./generics";
 
@@ -187,7 +187,7 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
 
       function visitGlobalAugmentation(
         node: ts.ModuleDeclaration,
-        rewrites: Map<string, TypeOrNamespaceRewrite>,
+        rewrites: NamespaceRewrite,
       ) {
         if (!node.body || !ts.isModuleBlock(node.body)) {
           // TODO(error): should be invalid TS
@@ -198,16 +198,12 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
 
       function visitModuleBlock(
         node: ts.ModuleBlock,
-        rewrites: Map<string, TypeOrNamespaceRewrite>,
+        rewrites: NamespaceRewrite,
       ) {
         for (const statement of node.statements) {
           if (ts.isModuleDeclaration(statement)) {
-            const subRewrites = rewrites.get(statement.name.text);
+            const subRewrites = rewrites.namespaces?.get(statement.name.text);
             if (!subRewrites) continue;
-            if (!(subRewrites instanceof Map)) {
-              // TODO(error): expected type, found namespace
-              continue;
-            }
             if (!statement.body) continue; // TODO(error): invalid TS
             if (ts.isModuleBlock(statement.body)) {
               visitModuleBlock(statement.body, subRewrites);
@@ -220,12 +216,8 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
           }
 
           if (ts.isInterfaceDeclaration(statement)) {
-            const rewrite = rewrites.get(statement.name.text);
+            const rewrite = rewrites.types?.get(statement.name.text);
             if (!rewrite) continue;
-            if (rewrite instanceof Map) {
-              // TODO(error): expected namespace, found type
-              continue;
-            }
             const symbol = checker.getSymbolAtLocation(statement.name);
             if (!symbol) {
               // TODO(error): missing symbol

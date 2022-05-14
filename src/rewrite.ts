@@ -33,10 +33,10 @@ export type TypeRewrite =
       }>;
     };
 
-export type TypeOrNamespaceRewrite =
-  | TypeRewrite
-  // for a namespace, keyed by names within it
-  | Map<string, TypeOrNamespaceRewrite>;
+export type NamespaceRewrite = {
+  types?: Map<string, TypeRewrite>;
+  namespaces?: Map<string, NamespaceRewrite>;
+};
 
 export const defaultLibraryRewrites: Map<string, TypeRewrite> = new Map([
   ["Readonly", { kind: "FixedName", name: "$ReadOnly" }],
@@ -44,16 +44,23 @@ export const defaultLibraryRewrites: Map<string, TypeRewrite> = new Map([
   ["Omit", { kind: "TypeReferenceMacro", convert: convertOmit }],
 ]);
 
-export const globalRewrites: Map<string, TypeOrNamespaceRewrite> = new Map([
+export const globalRewrites: NamespaceRewrite = {
   // If adding to this: note the unimplemented cases in findGlobalRewrites,
   // where we use this map.
-  [
-    "JSX",
-    new Map([
-      ["Element", { kind: "TypeReferenceMacro", convert: convertJsxElement }],
-    ]),
-  ],
-]);
+  namespaces: new Map([
+    [
+      "JSX",
+      {
+        types: new Map([
+          [
+            "Element",
+            { kind: "TypeReferenceMacro", convert: convertJsxElement },
+          ],
+        ]),
+      },
+    ],
+  ]),
+};
 
 export const libraryRewrites: Map<string, Map<string, TypeRewrite>> = new Map([
   [
