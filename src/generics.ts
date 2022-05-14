@@ -29,3 +29,29 @@
  * TS will report a type error at the `ensureUnreachable` call.
  */
 export function ensureUnreachable(_x: never) {}
+
+/**
+ * Like `ensureUnreachable`, but if the impossible happens, throw.
+ *
+ * If `description` is a function, it will be called with the impossible
+ * value.  This, and the use there of `any`, is a workaround for TS
+ * responding (illogically) to a pattern like:
+ *
+ *     switch (foo.kind) {
+ *       // … cases …
+ *       default:
+ *         assertUnreachable(foo, `Foo kind: ${foo.kind}`);
+ *     }
+ *
+ * with the complaint that `foo` has no property `kind`.  Instead, to use
+ * the workaround, write:
+ *
+ *         assertUnreachable(foo, (foo) => `Foo kind: ${foo.kind}`);
+ */
+export function assertUnreachable(
+  x: never,
+  description: string | ((x: any) => string),
+): never {
+  const d = typeof description === "string" ? description : description(x);
+  throw new Error(`internal error: unexpected ${d}`);
+}
