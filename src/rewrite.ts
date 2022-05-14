@@ -27,6 +27,22 @@ export type TypeRewrite =
    * and the value name is a real fact about that actual runtime JS.
    */
   | { kind: "RenameType"; name: string }
+  /**
+   * Substitute this type, with a definition of our own.
+   *
+   * The substitute will define a type alias of the stated name (and
+   * possibly additional definitions for its own internal use).  This will
+   * accept exactly the same type arguments, or none, as the original.
+   *
+   * The name (and the names of any auxiliary definitions) must be distinct
+   * from any other substitution, and prefixed to avoid collision with user
+   * code.
+   */
+  | {
+      kind: "SubstituteType";
+      name: string;
+      substitute: () => K.StatementKind[];
+    }
   | {
       kind: "TypeReferenceMacro";
       convert(

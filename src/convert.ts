@@ -58,6 +58,9 @@ export function convertSourceFile(
   // Elements are local names.
   const importTypeImports: Set<string> = new Set();
 
+  // Elements are names from SubstituteType rewrites.
+  const substituteTypes: Set<string> = new Set();
+
   const preambleStatements: K.StatementKind[] = [];
 
   const converter: Converter = {
@@ -476,6 +479,7 @@ export function convertSourceFile(
           name = mapped.name;
           break;
         case "FixedName":
+        case "SubstituteType":
         case "TypeReferenceMacro":
           break;
         default:
@@ -947,6 +951,14 @@ export function convertSourceFile(
     const mapped = mapper.getTypeName(typeName);
     if (mapped)
       switch (mapped.kind) {
+        // @ts-expect-error fallthrough
+        case "SubstituteType":
+          if (!substituteTypes.has(mapped.name)) {
+            substituteTypes.add(mapped.name);
+            preambleStatements.push(...mapped.substitute());
+          }
+        // fallthrough
+
         case "FixedName":
         case "RenameType":
           return mkSuccess({
