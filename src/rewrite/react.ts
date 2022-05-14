@@ -122,7 +122,7 @@ const substituteReactRefAttributes = mkSubstituteType(
     const text = `
     type ${prefix}RefAttributes<T> = {
       key?: string | number | void | null,
-      ref?: void | ${prefix}Ref<T>,
+      ref?: void | ${substituteReactRef.name}<T>,
       ...
     }`.replace(/^\s*\/\/.*\n?/gm, "");
     return recast.parse(text, { parser: flowParser }).program.body;
