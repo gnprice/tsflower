@@ -7,6 +7,8 @@
 // history) are copyright Microsoft Corporation.  But they have the same
 // Apache-2.0 license as the rest of TsFlower.
 
+/* eslint-disable spaced-comment */
+
 import ts from "typescript";
 import { isGeneratedIdentifier } from "./tsutil";
 import { map } from "./util";
@@ -60,6 +62,7 @@ export function formatEnum(value = 0, enumObject: any, isFlags?: boolean) {
 function getEnumMembers(enumObject: any) {
   const result: [number, string][] = [];
   const known: Set<number> = new Set();
+  /* eslint-disable-next-line guard-for-in */ // it's an enum, no prototype
   for (const name in enumObject) {
     const value = enumObject[name];
     if (typeof value === "number" && !known.has(value)) {
