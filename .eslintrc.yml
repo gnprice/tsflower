@@ -49,9 +49,6 @@ rules:
   # But not enough to fight Prettier over it.
   indent: off
 
-  # Rules we may want but require tweaking details and/or migrating code
-  no-throw-literal: off
-
   # Rules we don't want
   require-jsdoc: off
   valid-jsdoc: off

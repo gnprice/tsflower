@@ -15,13 +15,17 @@ export function convertFileToString(file: string): string {
   const mapper = createMapper(program, [file]);
 
   const sourceFile = program.getSourceFile(file);
-  if (!sourceFile) throw 0;
+  if (!sourceFile) {
+    // This happens if the given file doesn't exist.
+    // TODO(error): nicer CLI error
+    throw new Error(`source file not found: ${file}`);
+  }
   const convertedFile = convertSourceFile(sourceFile, mapper, program);
   return recast.print(convertedFile).code + '\n';
 }
 
 export function convertFileTree(src: string, dest: string) {
-  // TODO: nicer error output if src doesn't exist (or other I/O error?)
+  // TODO(error): nicer error output if src doesn't exist (or other I/O error?)
   const { inputs, outputs } = collectInputsFromTree(src, dest);
 
   const program = ts.createProgram({
@@ -37,7 +41,13 @@ export function convertFileTree(src: string, dest: string) {
     const output = outputs[i];
 
     const sourceFile = program.getSourceFile(input);
-    if (!sourceFile) throw 0;
+    if (!sourceFile) {
+      // This happens if the given file doesn't exist.  It's a file we just
+      // found by walking the tree, but this could still happen if something
+      // concurrently deleted it.
+      // TODO(error): nicer CLI error
+      throw new Error(`source file not found: ${input}`);
+    }
     const convertedFile = convertSourceFile(sourceFile, mapper, program);
     const convertedText = recast.print(convertedFile).code + '\n';
 
