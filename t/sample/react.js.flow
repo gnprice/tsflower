@@ -32,4 +32,5 @@ var reactElement: {|
     c3: React$Element<"div">,
 |};
 
+var reactNode: React$Node;
 var jsx: {| element: React$Element<any> |};

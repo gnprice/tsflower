@@ -41,6 +41,8 @@ var reactElement: {
   c3: React2.ReactElement<AProps, "div">;
 };
 
+var reactNode: React.ReactNode;
+
 var jsx: {
   element: JSX.Element;
 };

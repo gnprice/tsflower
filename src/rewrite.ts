@@ -82,9 +82,13 @@ export const libraryRewrites: Map<string, NamespaceRewrite> = mapOfObject({
   // If adding to this: note that currently any namespace rewrites within a
   // given library are ignored!  That is, the `namespaces` property of one
   // of these NamespaceRewrite values is never consulted.  See use sites.
+
+  // All from `@types/react/index.d.ts`.
   react: mkNamespaceRewrite({
     Component: mkTypeReferenceMacro(convertReactComponent),
     ReactElement: mkTypeReferenceMacro(convertReactElement),
+    // type ReactNode = ReactElement | string | number | …
+    ReactNode: mkFixedName("React$Node"), // TODO use import
   }),
 });
 
