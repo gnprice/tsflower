@@ -50,7 +50,9 @@ rules:
   # But not enough to fight Prettier over it.
   indent: off
 
-  # Rules we may want, but need tweaking options and/or migrating code
+  # `no-redeclare` fires, wrongly, on TS function overloads, and on merged
+  # declarations like a `class` and an `interface`.  TS already catches all
+  # the useful cases of this except multiple `var`... and we have `no-var`.
   no-redeclare: off
 
   # Rules we don't want
