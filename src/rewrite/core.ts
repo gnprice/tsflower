@@ -44,6 +44,7 @@ export interface SubstituteType extends TypeRewriteBase {
   readonly kind: "SubstituteType";
   readonly name: string;
   readonly substitute: () => K.StatementKind[];
+  readonly dependencies?: SubstituteType[];
 }
 
 export interface TypeReferenceMacro extends TypeRewriteBase {
@@ -79,8 +80,9 @@ export function mkFixedName(name: string): FixedName {
 export function mkSubstituteType(
   name: string,
   substitute: () => K.StatementKind[],
+  dependencies?: SubstituteType[],
 ): SubstituteType {
-  return { kind: "SubstituteType", name, substitute };
+  return { kind: "SubstituteType", name, substitute, dependencies };
 }
 
 export function mkTypeReferenceMacro(

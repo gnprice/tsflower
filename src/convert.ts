@@ -1,7 +1,7 @@
 import ts from "typescript";
 import { builders as b, namedTypes as n } from "ast-types";
 import K from "ast-types/gen/kinds";
-import { map, some } from "./util";
+import { forEach, map, some } from "./util";
 import { Mapper } from "./mapper";
 import {
   getModuleSpecifier,
@@ -11,6 +11,7 @@ import {
 import { ensureUnreachable } from "./generics";
 import { escapeNamesAsIdentifierWithPrefix } from "./names";
 import { formatSyntaxKind } from "./tsdebug";
+import { SubstituteType } from "./rewrite/core";
 
 export type ErrorDescription = {
   kind: "unimplemented" | "error";
@@ -953,10 +954,7 @@ export function convertSourceFile(
       switch (mapped.kind) {
         // @ts-expect-error fallthrough
         case "SubstituteType":
-          if (!substituteTypes.has(mapped.name)) {
-            substituteTypes.add(mapped.name);
-            preambleStatements.push(...mapped.substitute());
-          }
+          ensureEmittedSubstitute(mapped);
         // fallthrough
 
         case "FixedName":
@@ -982,6 +980,13 @@ export function convertSourceFile(
         typeArguments,
       ),
     });
+
+    function ensureEmittedSubstitute(rewrite: SubstituteType) {
+      if (substituteTypes.has(rewrite.name)) return;
+      substituteTypes.add(rewrite.name);
+      forEach(rewrite.dependencies, ensureEmittedSubstitute);
+      preambleStatements.push(...rewrite.substitute());
+    }
   }
 
   function convertEntityNameAsType(
