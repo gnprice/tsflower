@@ -700,7 +700,6 @@ export function convertSourceFile(
       case ts.SyntaxKind.ConditionalType:
       case ts.SyntaxKind.InferType:
       case ts.SyntaxKind.MappedType:
-      case ts.SyntaxKind.LiteralType:
       case ts.SyntaxKind.TemplateLiteralType:
       case ts.SyntaxKind.TemplateLiteralTypeSpan:
         return unimplementedType(node, formatSyntaxKind(node.kind));
