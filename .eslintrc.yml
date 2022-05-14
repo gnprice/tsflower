@@ -1,3 +1,22 @@
+# Tips for developing on this file:
+#
+#  * To see what config currently applies, try a command like:
+#
+#      $ npx eslint --print-config src/convert.ts | less
+#
+#    or for a specific rule:
+#
+#      $ npx eslint --print-config src/convert.ts | jq '.rules["indent"]'
+#
+#    Especially handy for seeing the default or base setting, when we don't
+#    configure a rule ourselves.
+#
+#  * A variation to canonicalize the config output for comparison:
+#
+#     $ npx eslint --print-config src/foo.ts | jq . --sorted >/tmp/foo.json
+#     $ npx eslint --print-config src/bar.ts | jq . --sorted >/tmp/bar.json
+#     $ git diff --no-index /tmp/{foo,bar}.json
+
 env:
   browser: true
   es2021: true
