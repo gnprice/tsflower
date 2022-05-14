@@ -1042,7 +1042,15 @@ export function convertSourceFile(
     typeParameters: n.TypeParameterInstantiation | null;
   }> {
     const mapped = mapper.getTypeName(typeName);
-    if (mapped) {
+    if (!mapped) {
+      return mkSuccess({
+        id: convertEntityNameAsType(typeName),
+        typeParameters: convertTypeArguments(
+          checker.getSymbolAtLocation(typeName),
+          typeArguments,
+        ),
+      });
+    } else {
       switch (mapped.kind) {
         case 'SubstituteType':
           ensureEmittedSubstitute(mapped);
@@ -1065,13 +1073,6 @@ export function convertSourceFile(
           assertUnreachable(mapped, (m) => `TypeRewrite kind: ${m.kind}`);
       }
     }
-    return mkSuccess({
-      id: convertEntityNameAsType(typeName),
-      typeParameters: convertTypeArguments(
-        checker.getSymbolAtLocation(typeName),
-        typeArguments,
-      ),
-    });
 
     function ensureEmittedSubstitute(rewrite: SubstituteType) {
       if (substituteTypes.has(rewrite.name)) return;
