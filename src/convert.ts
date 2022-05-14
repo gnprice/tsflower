@@ -10,7 +10,7 @@ import {
 } from './tsutil';
 import { assertUnreachable, ensureUnreachable } from './generics';
 import { escapeNamesAsIdentifierWithPrefix } from './names';
-import { formatSyntaxKind } from './tsdebug';
+import { formatEntityNameExpression, formatSyntaxKind } from './tsdebug';
 import { SubstituteType } from './rewrite/core';
 
 export type ErrorDescription = {
@@ -532,6 +532,7 @@ export function convertSourceFile(
           break;
         case 'FixedName':
         case 'SubstituteType':
+        case 'TypeMacro':
         case 'TypeReferenceMacro':
           break;
         default:
@@ -683,6 +684,24 @@ export function convertSourceFile(
                 typeArguments,
               ),
             };
+
+          case 'TypeMacro':
+            // This rewrite's converter would return some arbitrary type
+            // that presumably doesn't look like a type reference (if it
+            // did, we'd have made it a TypeReferenceMacro.)  If we tried to
+            // stuff that into the heritage, it'd be invalid syntax (except
+            // for class-extends, but even then only without `declare`.)
+            // Probably this means we found the wrong rewrite somehow.
+            // TODO(error): emit the original, but with a warning
+            return [
+              errorStatement(
+                node,
+                // eslint-disable-next-line max-len
+                `${description} would translate as invalid base: ${formatEntityNameExpression(
+                  typeName,
+                )}`,
+              ),
+            ];
 
           case 'TypeReferenceMacro': {
             const result = mapped.convert(converter, typeName, typeArguments);
@@ -1082,6 +1101,14 @@ export function convertSourceFile(
               typeArguments,
             ),
           });
+
+        case 'TypeMacro': {
+          const result = mapped.convert(converter, typeArguments);
+          if (result.kind !== 'success') {
+            return typeOfError(node, result);
+          }
+          return result.result;
+        }
 
         case 'TypeReferenceMacro': {
           const result = mapped.convert(converter, typeName, typeArguments);

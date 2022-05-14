@@ -47,6 +47,17 @@ export interface SubstituteType extends TypeRewriteBase {
   readonly dependencies?: SubstituteType[];
 }
 
+/**
+ * Translate each reference to this type using the type arguments.
+ */
+export interface TypeMacro extends TypeRewriteBase {
+  readonly kind: 'TypeMacro';
+  readonly convert: (
+    converter: Converter,
+    typeArguments: ts.NodeArray<ts.TypeNode> | void,
+  ) => ErrorOr<K.FlowTypeKind>;
+}
+
 export interface TypeReferenceMacro extends TypeRewriteBase {
   readonly kind: 'TypeReferenceMacro';
   readonly convert: (
@@ -66,6 +77,7 @@ export type TypeRewrite =
   | FixedName
   | RenameType
   | SubstituteType
+  | TypeMacro
   | TypeReferenceMacro;
 
 export type NamespaceRewrite = {
@@ -83,6 +95,10 @@ export function mkSubstituteType(
   dependencies?: SubstituteType[],
 ): SubstituteType {
   return { kind: 'SubstituteType', name, substitute, dependencies };
+}
+
+export function mkTypeMacro(convert: TypeMacro['convert']): TypeMacro {
+  return { kind: 'TypeMacro', convert };
 }
 
 export function mkTypeReferenceMacro(
