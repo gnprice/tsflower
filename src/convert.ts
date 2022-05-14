@@ -8,7 +8,7 @@ import {
   hasModifier,
   isEntityNameOrEntityNameExpression,
 } from "./tsutil";
-import { ensureUnreachable } from "./generics";
+import { assertUnreachable, ensureUnreachable } from "./generics";
 import { escapeNamesAsIdentifierWithPrefix } from "./names";
 import { formatSyntaxKind } from "./tsdebug";
 import { SubstituteType } from "./rewrite/core";
@@ -484,7 +484,7 @@ export function convertSourceFile(
         case "TypeReferenceMacro":
           break;
         default:
-          ensureUnreachable(mapped);
+          assertUnreachable(mapped, (m) => `TypeRewrite kind: ${m.kind}`);
       }
     }
 
@@ -971,7 +971,7 @@ export function convertSourceFile(
           return mapped.convert(converter, typeName, typeArguments);
 
         default:
-          ensureUnreachable(mapped);
+          assertUnreachable(mapped, (m) => `TypeRewrite kind: ${m.kind}`);
       }
     return mkSuccess({
       id: convertEntityNameAsType(typeName),
@@ -1409,7 +1409,10 @@ export function convertSourceFile(
                 break;
 
               default:
-                ensureUnreachable(node);
+                assertUnreachable(
+                  node,
+                  (n) => `node in convertMembers: ${formatSyntaxKind(n.kind)}`,
+                );
             }
           }
 

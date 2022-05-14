@@ -7,7 +7,7 @@
  */
 import fs from "fs";
 import process from "process";
-import { ensureUnreachable } from "./generics";
+import { assertUnreachable } from "./generics";
 import { convertFileToString, convertFileTree } from "./index";
 
 class CliError extends Error {
@@ -51,9 +51,7 @@ function main() {
     }
 
     default:
-      ensureUnreachable(command);
-      // @ts-expect-error yes, the types say this is unreachable
-      throw new Error(`internal error: unexpected subcommand: ${command.kind}`);
+      assertUnreachable(command, (c) => `unexpected subcommand: ${c.kind}`);
   }
 }
 

@@ -8,7 +8,8 @@ import {
   TypeRewrite,
   NamespaceRewrite,
 } from "./rewrite";
-import { ensureUnreachable } from "./generics";
+import { assertUnreachable } from "./generics";
+import { formatSyntaxKind } from "./tsdebug";
 
 /*
  * See docs/notes/mapper.md for some scratch notes on the background
@@ -303,7 +304,10 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
             );
             break;
           default:
-            ensureUnreachable(node.body);
+            assertUnreachable(
+              node.body,
+              (b) => `ModuleBody kind: ${formatSyntaxKind(b.kind)}`,
+            );
         }
       }
 
