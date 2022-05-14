@@ -18,7 +18,7 @@
 #     $ git diff --no-index /tmp/{foo,bar}.json
 
 env:
-  browser: true
+  node: true
   es2021: true
 extends:
   - eslint:recommended
