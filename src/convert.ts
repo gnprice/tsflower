@@ -281,13 +281,13 @@ export function convertSourceFile(
             if (importClause.isTypeOnly) {
               // It's an `import type`.  Use the type's name, but don't say
               // `type` (the redundancy is invalid in both Flow and TS.)
-              add('value', mapped.name, mappedLocal.name);
+              addImportSpecifier('value', mapped.name, mappedLocal.name);
             } else {
               // Not an `import type`.  Import the type with `type`…
-              add('type', mapped.name, mappedLocal.name);
+              addImportSpecifier('type', mapped.name, mappedLocal.name);
               // … and then the value, unless this was `import { type Foo }`.
               if (!binding.isTypeOnly) {
-                add('value', propertyName.text, name.text);
+                addImportSpecifier('value', propertyName.text, name.text);
               }
             }
             continue;
@@ -305,26 +305,11 @@ export function convertSourceFile(
               // (which would be a syntax error.)
               !importClause.isTypeOnly);
 
-          add(isTypeOnly ? 'type' : 'value', propertyName.text, name.text);
-
-          function add(
-            importKind: 'value' | 'type' | 'typeof',
-            importedText: string,
-            localText: string,
-          ): void {
-            const imported = b.identifier(importedText);
-            const local = b.identifier(localText);
-            specifiers.push(buildImportSpecifier(imported, local, importKind));
-          }
-
-          // TODO(ast-types): b.importSpecifier should take importKind, like this
-          function buildImportSpecifier(
-            imported: K.IdentifierKind,
-            local?: K.IdentifierKind | null | undefined,
-            importKind?: 'value' | 'type' | 'typeof' | undefined,
-          ): n.ImportSpecifier {
-            return b.importSpecifier.from({ imported, local, importKind });
-          }
+          addImportSpecifier(
+            isTypeOnly ? 'type' : 'value',
+            propertyName.text,
+            name.text,
+          );
         }
       } else {
         specifiers.push(
@@ -343,6 +328,25 @@ export function convertSourceFile(
         : 'value';
 
     return b.importDeclaration(specifiers, source, importKind);
+
+    function addImportSpecifier(
+      importKind: 'value' | 'type' | 'typeof',
+      importedText: string,
+      localText: string,
+    ): void {
+      const imported = b.identifier(importedText);
+      const local = b.identifier(localText);
+      specifiers.push(buildImportSpecifier(imported, local, importKind));
+    }
+
+    // TODO(ast-types): b.importSpecifier should take importKind, like this
+    function buildImportSpecifier(
+      imported: K.IdentifierKind,
+      local?: K.IdentifierKind | null | undefined,
+      importKind?: 'value' | 'type' | 'typeof' | undefined,
+    ): n.ImportSpecifier {
+      return b.importSpecifier.from({ imported, local, importKind });
+    }
   }
 
   function convertExportDeclaration(
