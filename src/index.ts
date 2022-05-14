@@ -50,7 +50,33 @@ export function convertFileTree(src: string, dest: string) {
 
 function createProgram(rootNames: readonly string[]) {
   const program = ts.createProgram({ rootNames, options: {} });
+
   program.getTypeChecker(); // causes the binder to run, and set parent pointers
+
+  const errors = [];
+  for (const diag of program.getConfigFileParsingDiagnostics()) {
+    if (diag.category === ts.DiagnosticCategory.Error) errors.push(diag);
+  }
+  for (const diag of program.getOptionsDiagnostics()) {
+    // If one of the `rootNames` files didn't exist, this is where the error appears.
+    if (diag.category === ts.DiagnosticCategory.Error) errors.push(diag);
+  }
+  if (errors.length) {
+    // TODO(error): nicer CLI error
+    throw new Error(
+      `There were TS errors:\n${errors
+        .map((d) => ts.flattenDiagnosticMessageText(d.messageText, '\n', 2))
+        .join('\n')}`,
+    );
+  }
+
+  // Other kinds of TS diagnostics:
+  //   program.getGlobalDiagnostics()
+  //   program.getSyntacticDiagnostics()
+  //   program.getSemanticDiagnostics()
+  //   program.getDeclarationDiagnostics()
+  // Perhaps warn on those?
+
   return program;
 }
 
