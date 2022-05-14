@@ -24,11 +24,11 @@ export function escapeNamesAsIdentifierWithPrefix(
 
   // Then we delimit the escaped names with `$`, which lacks `ID_Continue`
   // and therefore cannot appear in the escaped names…
-  const escapedNamesString = escapedNamesList.join("$");
+  const escapedNamesString = escapedNamesList.join('$');
 
   // … and we delimit the prefix from that with `$_$`, which cannot appear
   // in the combined escaped-names string because no escaped name is `_`.
-  return prefix + "$_$" + escapedNamesString;
+  return prefix + '$_$' + escapedNamesString;
 }
 
 /**

@@ -1,15 +1,15 @@
-import path from "path";
-import ts from "typescript";
-import { getModuleSpecifier, isNamedDeclaration } from "./tsutil";
+import path from 'path';
+import ts from 'typescript';
+import { getModuleSpecifier, isNamedDeclaration } from './tsutil';
 import {
   defaultLibraryRewrites,
   globalRewrites,
   libraryRewrites,
   TypeRewrite,
   NamespaceRewrite,
-} from "./rewrite";
-import { assertUnreachable } from "./generics";
-import { formatSyntaxKind } from "./tsdebug";
+} from './rewrite';
+import { assertUnreachable } from './generics';
+import { formatSyntaxKind } from './tsdebug';
 
 /*
  * See docs/notes/mapper.md for some scratch notes on the background
@@ -129,7 +129,7 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
           // TODO don't attempt if defined in non-target lib, like React
           // TODO pick non-colliding name
           const name = `${symbol.name}T`;
-          mappedSymbols.set(symbol, { kind: "RenameType", name });
+          mappedSymbols.set(symbol, { kind: 'RenameType', name });
           hadRenames = true;
           return;
         }
@@ -327,13 +327,13 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
 
         const importedSymbol = checker.getImmediateAliasedSymbol(localSymbol);
         const mapped = importedSymbol && mapper.getSymbol(importedSymbol);
-        if (!mapped || mapped.kind !== "RenameType") {
+        if (!mapped || mapped.kind !== 'RenameType') {
           return;
         }
 
         // TODO pick non-colliding name
         const name = `${localSymbol.name}T`;
-        mappedSymbols.set(localSymbol, { kind: "RenameType", name });
+        mappedSymbols.set(localSymbol, { kind: 'RenameType', name });
         hadRenames = true;
       }
     }

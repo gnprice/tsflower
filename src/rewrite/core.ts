@@ -1,14 +1,14 @@
-import ts from "typescript";
-import { namedTypes as n } from "ast-types";
-import K from "ast-types/gen/kinds";
-import { Converter, ErrorOr } from "../convert";
+import ts from 'typescript';
+import { namedTypes as n } from 'ast-types';
+import K from 'ast-types/gen/kinds';
+import { Converter, ErrorOr } from '../convert';
 
 interface TypeRewriteBase {
   readonly kind: string;
 }
 
 export interface FixedName extends TypeRewriteBase {
-  readonly kind: "FixedName";
+  readonly kind: 'FixedName';
   readonly name: string;
 }
 
@@ -25,7 +25,7 @@ export interface FixedName extends TypeRewriteBase {
  * and the value name is a real fact about that actual runtime JS.
  */
 export interface RenameType extends TypeRewriteBase {
-  readonly kind: "RenameType";
+  readonly kind: 'RenameType';
   readonly name: string;
 }
 
@@ -41,14 +41,14 @@ export interface RenameType extends TypeRewriteBase {
  * code.
  */
 export interface SubstituteType extends TypeRewriteBase {
-  readonly kind: "SubstituteType";
+  readonly kind: 'SubstituteType';
   readonly name: string;
   readonly substitute: () => K.StatementKind[];
   readonly dependencies?: SubstituteType[];
 }
 
 export interface TypeReferenceMacro extends TypeRewriteBase {
-  readonly kind: "TypeReferenceMacro";
+  readonly kind: 'TypeReferenceMacro';
   readonly convert: (
     converter: Converter,
     typeName: ts.EntityNameOrEntityNameExpression,
@@ -74,7 +74,7 @@ export type NamespaceRewrite = {
 };
 
 export function mkFixedName(name: string): FixedName {
-  return { kind: "FixedName", name };
+  return { kind: 'FixedName', name };
 }
 
 export function mkSubstituteType(
@@ -82,13 +82,13 @@ export function mkSubstituteType(
   substitute: () => K.StatementKind[],
   dependencies?: SubstituteType[],
 ): SubstituteType {
-  return { kind: "SubstituteType", name, substitute, dependencies };
+  return { kind: 'SubstituteType', name, substitute, dependencies };
 }
 
 export function mkTypeReferenceMacro(
-  convert: TypeReferenceMacro["convert"],
+  convert: TypeReferenceMacro['convert'],
 ): TypeReferenceMacro {
-  return { kind: "TypeReferenceMacro", convert };
+  return { kind: 'TypeReferenceMacro', convert };
 }
 
 export function mapOfObject<T>(obj: {

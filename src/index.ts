@@ -1,9 +1,9 @@
-import fs from "fs";
-import path from "path";
-import ts from "typescript";
-import * as recast from "recast";
-import { convertSourceFile } from "./convert";
-import { createMapper } from "./mapper";
+import fs from 'fs';
+import path from 'path';
+import ts from 'typescript';
+import * as recast from 'recast';
+import { convertSourceFile } from './convert';
+import { createMapper } from './mapper';
 
 export function convertFileToString(file: string): string {
   const program = ts.createProgram({
@@ -17,7 +17,7 @@ export function convertFileToString(file: string): string {
   const sourceFile = program.getSourceFile(file);
   if (!sourceFile) throw 0;
   const convertedFile = convertSourceFile(sourceFile, mapper, program);
-  return recast.print(convertedFile).code + "\n";
+  return recast.print(convertedFile).code + '\n';
 }
 
 export function convertFileTree(src: string, dest: string) {
@@ -39,7 +39,7 @@ export function convertFileTree(src: string, dest: string) {
     const sourceFile = program.getSourceFile(input);
     if (!sourceFile) throw 0;
     const convertedFile = convertSourceFile(sourceFile, mapper, program);
-    const convertedText = recast.print(convertedFile).code + "\n";
+    const convertedText = recast.print(convertedFile).code + '\n';
 
     fs.mkdirSync(path.dirname(output), { recursive: true });
     fs.writeFileSync(output, convertedText);
@@ -53,7 +53,7 @@ function collectInputsFromTree(
   const inputs: string[] = [];
   const outputs: string[] = [];
 
-  walk(fs.opendirSync(src), "");
+  walk(fs.opendirSync(src), '');
 
   return { inputs, outputs };
 
@@ -61,8 +61,8 @@ function collectInputsFromTree(
     let dirent;
     while ((dirent = dir.readSync())) {
       if (dirent.isFile()) {
-        if (dirent.name.endsWith(".d.ts")) {
-          const outputName = dirent.name.replace(/\.d\.ts$/, ".js.flow");
+        if (dirent.name.endsWith('.d.ts')) {
+          const outputName = dirent.name.replace(/\.d\.ts$/, '.js.flow');
           inputs.push(path.join(src, dirName, dirent.name));
           outputs.push(path.join(dest, dirName, outputName));
         }

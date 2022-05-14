@@ -2,8 +2,8 @@ import React, {
   Component,
   Component as Component2,
   //  ReactElement // TODO rewrite imports, too
-} from "react";
-import * as React2 from "react";
+} from 'react';
+import * as React2 from 'react';
 
 // `React.Component` in Flow requires its first argument.
 // Test that we rewrite references that lack that.
@@ -37,8 +37,8 @@ var reactElement: {
   b2: React.ReactElement<AProps>;
   b3: React2.ReactElement<AProps>;
   // c1: ReactElement<AProps, "div">;
-  c2: React.ReactElement<AProps, "div">;
-  c3: React2.ReactElement<AProps, "div">;
+  c2: React.ReactElement<AProps, 'div'>;
+  c3: React2.ReactElement<AProps, 'div'>;
 };
 
 var reactNode: React.ReactNode;

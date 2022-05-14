@@ -6,8 +6,8 @@
  * there.
  */
 
-import ts from "typescript";
-import { some } from "./util";
+import ts from 'typescript';
+import { some } from './util';
 
 export function hasModifier(
   node: ts.Node,

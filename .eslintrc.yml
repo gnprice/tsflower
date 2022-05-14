@@ -22,12 +22,12 @@ env:
   es2021: true
 extends:
   - google
-parser: "@typescript-eslint/parser"
+parser: '@typescript-eslint/parser'
 parserOptions:
   ecmaVersion: latest
   sourceType: module
 plugins:
-  - "@typescript-eslint"
+  - '@typescript-eslint'
 
 rules:
   # Google has code: 80.  We have Prettier target 80 columns,
@@ -40,11 +40,11 @@ rules:
 
   # Formatting that we let Prettier handle
   object-curly-spacing: off # Google has no spaces here
+  quotes: off # Prettier wants `"it 'will'"`, not `'it \'will\''`.  Whatever.
 
   # Rules we may want but require tweaking details and/or migrating code
   indent: off
   curly: off
-  quotes: off
   operator-linebreak: off
   no-throw-literal: off
 
@@ -53,7 +53,7 @@ rules:
   valid-jsdoc: off
 
 overrides:
-  - files: "t/**/*.d.ts"
+  - files: 't/**/*.d.ts'
     rules:
       # Allow some things in our test inputs that we don't in normal code.
       no-unused-vars: off

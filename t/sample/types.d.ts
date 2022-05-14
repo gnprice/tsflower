@@ -42,7 +42,7 @@ var literalTypes: {
     expNIN: -1e-2;
     expNFN: -1.2e-3;
   };
-  str: "x";
+  str: 'x';
 };
 
 // type references covered in generics.d.ts
@@ -55,9 +55,9 @@ var typeOperations: {
     ln: typeof literalTypes.n;
   };
   keys: keyof typeof literalTypes;
-  union: "a" | 3;
-  intersection: { a: "a" | "b" } & { a: "b" | "c" };
-  indexedAccess: { a: string }["a"];
+  union: 'a' | 3;
+  intersection: { a: 'a' | 'b' } & { a: 'b' | 'c' };
+  indexedAccess: { a: string }['a'];
   array: boolean[];
   tuple: {
     zero: [];

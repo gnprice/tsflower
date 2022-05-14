@@ -9,12 +9,12 @@
 
 /* eslint-disable spaced-comment */
 
-import ts from "typescript";
-import { isGeneratedIdentifier } from "./tsutil";
-import { map } from "./util";
+import ts from 'typescript';
+import { isGeneratedIdentifier } from './tsutil';
+import { map } from './util';
 
 export function formatSymbol(symbol: void | ts.Symbol): string {
-  if (!symbol) return "undefined";
+  if (!symbol) return 'undefined';
   return `{ name: ${ts.unescapeLeadingUnderscores(
     symbol.escapedName,
   )}; flags: ${formatSymbolFlags(symbol.flags)}; declarations: ${map(
@@ -29,17 +29,17 @@ export function formatSymbol(symbol: void | ts.Symbol): string {
 export function formatEnum(value = 0, enumObject: any, isFlags?: boolean) {
   const members = getEnumMembers(enumObject);
   if (value === 0) {
-    return members.length > 0 && members[0][0] === 0 ? members[0][1] : "0";
+    return members.length > 0 && members[0][0] === 0 ? members[0][1] : '0';
   }
   if (isFlags) {
-    let result = "";
+    let result = '';
     let remainingFlags = value;
     for (const [enumValue, enumName] of members) {
       if (enumValue > value) {
         break;
       }
       if (enumValue !== 0 && enumValue & value) {
-        result = `${result}${result ? "|" : ""}${enumName}`;
+        result = `${result}${result ? '|' : ''}${enumName}`;
         remainingFlags &= ~enumValue;
       }
     }
@@ -65,7 +65,7 @@ function getEnumMembers(enumObject: any) {
   /* eslint-disable-next-line guard-for-in */ // it's an enum, no prototype
   for (const name in enumObject) {
     const value = enumObject[name];
-    if (typeof value === "number" && !known.has(value)) {
+    if (typeof value === 'number' && !known.has(value)) {
       known.add(value);
       result.push([value, name]);
     }
@@ -113,46 +113,46 @@ export function formatFlowFlags(flags: ts.FlowFlags | undefined): string {
 export function debugFormatNode(node: ts.Node): string {
   // prettier-ignore
   const nodeHeader =
-    isGeneratedIdentifier(node) ? "GeneratedIdentifier" :
+    isGeneratedIdentifier(node) ? 'GeneratedIdentifier' :
     ts.isIdentifier(node) ? `Identifier '${ts.idText(node)}'` :
     ts.isPrivateIdentifier(node) ? `PrivateIdentifier '${ts.idText(node)}'` :
     ts.isStringLiteral(node) ? `StringLiteral ${
-      JSON.stringify(node.text.length < 10 ? node.text : node.text.slice(10) + "...")
+      JSON.stringify(node.text.length < 10 ? node.text : node.text.slice(10) + '...')
     }` :
     ts.isNumericLiteral(node) ? `NumericLiteral ${node.text}` :
     ts.isBigIntLiteral(node) ? `BigIntLiteral ${node.text}n` :
-    ts.isTypeParameterDeclaration(node) ? "TypeParameterDeclaration" :
-    ts.isParameter(node) ? "ParameterDeclaration" :
-    ts.isConstructorDeclaration(node) ? "ConstructorDeclaration" :
-    ts.isGetAccessorDeclaration(node) ? "GetAccessorDeclaration" :
-    ts.isSetAccessorDeclaration(node) ? "SetAccessorDeclaration" :
-    ts.isCallSignatureDeclaration(node) ? "CallSignatureDeclaration" :
-    ts.isConstructSignatureDeclaration(node) ? "ConstructSignatureDeclaration" :
-    ts.isIndexSignatureDeclaration(node) ? "IndexSignatureDeclaration" :
-    ts.isTypePredicateNode(node) ? "TypePredicateNode" :
-    ts.isTypeReferenceNode(node) ? "TypeReferenceNode" :
-    ts.isFunctionTypeNode(node) ? "FunctionTypeNode" :
-    ts.isConstructorTypeNode(node) ? "ConstructorTypeNode" :
-    ts.isTypeQueryNode(node) ? "TypeQueryNode" :
-    ts.isTypeLiteralNode(node) ? "TypeLiteralNode" :
-    ts.isArrayTypeNode(node) ? "ArrayTypeNode" :
-    ts.isTupleTypeNode(node) ? "TupleTypeNode" :
-    ts.isOptionalTypeNode(node) ? "OptionalTypeNode" :
-    ts.isRestTypeNode(node) ? "RestTypeNode" :
-    ts.isUnionTypeNode(node) ? "UnionTypeNode" :
-    ts.isIntersectionTypeNode(node) ? "IntersectionTypeNode" :
-    ts.isConditionalTypeNode(node) ? "ConditionalTypeNode" :
-    ts.isInferTypeNode(node) ? "InferTypeNode" :
-    ts.isParenthesizedTypeNode(node) ? "ParenthesizedTypeNode" :
-    ts.isThisTypeNode(node) ? "ThisTypeNode" :
-    ts.isTypeOperatorNode(node) ? "TypeOperatorNode" :
-    ts.isIndexedAccessTypeNode(node) ? "IndexedAccessTypeNode" :
-    ts.isMappedTypeNode(node) ? "MappedTypeNode" :
-    ts.isLiteralTypeNode(node) ? "LiteralTypeNode" :
-    ts.isNamedTupleMember(node) ? "NamedTupleMember" :
-    ts.isImportTypeNode(node) ? "ImportTypeNode" :
+    ts.isTypeParameterDeclaration(node) ? 'TypeParameterDeclaration' :
+    ts.isParameter(node) ? 'ParameterDeclaration' :
+    ts.isConstructorDeclaration(node) ? 'ConstructorDeclaration' :
+    ts.isGetAccessorDeclaration(node) ? 'GetAccessorDeclaration' :
+    ts.isSetAccessorDeclaration(node) ? 'SetAccessorDeclaration' :
+    ts.isCallSignatureDeclaration(node) ? 'CallSignatureDeclaration' :
+    ts.isConstructSignatureDeclaration(node) ? 'ConstructSignatureDeclaration' :
+    ts.isIndexSignatureDeclaration(node) ? 'IndexSignatureDeclaration' :
+    ts.isTypePredicateNode(node) ? 'TypePredicateNode' :
+    ts.isTypeReferenceNode(node) ? 'TypeReferenceNode' :
+    ts.isFunctionTypeNode(node) ? 'FunctionTypeNode' :
+    ts.isConstructorTypeNode(node) ? 'ConstructorTypeNode' :
+    ts.isTypeQueryNode(node) ? 'TypeQueryNode' :
+    ts.isTypeLiteralNode(node) ? 'TypeLiteralNode' :
+    ts.isArrayTypeNode(node) ? 'ArrayTypeNode' :
+    ts.isTupleTypeNode(node) ? 'TupleTypeNode' :
+    ts.isOptionalTypeNode(node) ? 'OptionalTypeNode' :
+    ts.isRestTypeNode(node) ? 'RestTypeNode' :
+    ts.isUnionTypeNode(node) ? 'UnionTypeNode' :
+    ts.isIntersectionTypeNode(node) ? 'IntersectionTypeNode' :
+    ts.isConditionalTypeNode(node) ? 'ConditionalTypeNode' :
+    ts.isInferTypeNode(node) ? 'InferTypeNode' :
+    ts.isParenthesizedTypeNode(node) ? 'ParenthesizedTypeNode' :
+    ts.isThisTypeNode(node) ? 'ThisTypeNode' :
+    ts.isTypeOperatorNode(node) ? 'TypeOperatorNode' :
+    ts.isIndexedAccessTypeNode(node) ? 'IndexedAccessTypeNode' :
+    ts.isMappedTypeNode(node) ? 'MappedTypeNode' :
+    ts.isLiteralTypeNode(node) ? 'LiteralTypeNode' :
+    ts.isNamedTupleMember(node) ? 'NamedTupleMember' :
+    ts.isImportTypeNode(node) ? 'ImportTypeNode' :
   formatSyntaxKind(node.kind);
   return `${nodeHeader}${
-    node.flags ? ` (${formatNodeFlags(node.flags)})` : ""
+    node.flags ? ` (${formatNodeFlags(node.flags)})` : ''
   }`;
 }

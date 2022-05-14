@@ -1,17 +1,17 @@
-import ts from "typescript";
-import { builders as b, namedTypes as n } from "ast-types";
-import K from "ast-types/gen/kinds";
+import ts from 'typescript';
+import { builders as b, namedTypes as n } from 'ast-types';
+import K from 'ast-types/gen/kinds';
 // @ts-expect-error no TS types for flow-parser :-p
-import * as flowParser from "flow-parser";
-import * as recast from "recast";
-import { Converter, ErrorOr, mkError, mkSuccess } from "../convert";
+import * as flowParser from 'flow-parser';
+import * as recast from 'recast';
+import { Converter, ErrorOr, mkError, mkSuccess } from '../convert';
 import {
   mkFixedName,
   mkNamespaceRewrite,
   mkSubstituteType,
   mkTypeReferenceMacro,
   NamespaceRewrite,
-} from "./core";
+} from './core';
 
 function convertReactComponent(
   converter: Converter,
@@ -62,11 +62,11 @@ function convertReactElement(
 
   let args;
   if (!propsType) {
-    args = [b.genericTypeAnnotation(b.identifier("React$ElementType"), null)];
+    args = [b.genericTypeAnnotation(b.identifier('React$ElementType'), null)];
   } else if (!typeType) {
     args = [
       b.genericTypeAnnotation(
-        b.identifier("React$ComponentType"),
+        b.identifier('React$ComponentType'),
         b.typeParameterInstantiation([converter.convertType(propsType)]),
       ),
     ];
@@ -75,7 +75,7 @@ function convertReactElement(
   }
 
   return mkSuccess({
-    id: b.identifier("React$Element"), // TODO use import
+    id: b.identifier('React$Element'), // TODO use import
     typeParameters: b.typeParameterInstantiation(args),
   });
 }
@@ -95,21 +95,21 @@ function convertReactElement(
 // `React$ElementRef` to work out what type the ref should hold.
 //
 // So, just emit a definition of our own.
-const substituteReactRef = mkSubstituteType("$tsflower_subst$React$Ref", () => {
-  const prefix = "$tsflower_subst$React$";
+const substituteReactRef = mkSubstituteType('$tsflower_subst$React$Ref', () => {
+  const prefix = '$tsflower_subst$React$';
   const text = `
   type ${prefix}RefObject<T> = { +current: T | null, ... };
   // NB mixed return, not void; see e.g. flowlib's React$Ref
   type ${prefix}RefCallback<T> = (T | null) => mixed;
   type ${prefix}Ref<T> = ${prefix}RefCallback<T> | ${prefix}RefObject<T> | null;
-`.replace(/^\s*\/\/.*\n?/gm, "");
+`.replace(/^\s*\/\/.*\n?/gm, '');
   return recast.parse(text, { parser: flowParser }).program.body;
 });
 
 const substituteReactRefAttributes = mkSubstituteType(
-  "$tsflower_subst$React$RefAttributes",
+  '$tsflower_subst$React$RefAttributes',
   () => {
-    const prefix = "$tsflower_subst$React$";
+    const prefix = '$tsflower_subst$React$';
     // Definition in @types/react/index.d.ts:
     //   type Key = string | number;
     //   interface Attributes {
@@ -123,7 +123,7 @@ const substituteReactRefAttributes = mkSubstituteType(
       key?: string | number | void | null,
       ref?: void | ${substituteReactRef.name}<T>,
       ...
-    }`.replace(/^\s*\/\/.*\n?/gm, "");
+    }`.replace(/^\s*\/\/.*\n?/gm, '');
     return recast.parse(text, { parser: flowParser }).program.body;
   },
   [substituteReactRef],
@@ -137,7 +137,7 @@ const substituteReactRefAttributes = mkSubstituteType(
 // So do the equivalent of convertReactElement with `any, any`.
 function convertJsxElement() {
   return mkSuccess({
-    id: b.identifier("React$Element"), // TODO use import
+    id: b.identifier('React$Element'), // TODO use import
     typeParameters: b.typeParameterInstantiation([b.anyTypeAnnotation()]),
   });
 }
@@ -152,7 +152,7 @@ export function prepReactRewrites(): NamespaceRewrite {
     Component: mkTypeReferenceMacro(convertReactComponent),
     ReactElement: mkTypeReferenceMacro(convertReactElement),
     // type ReactNode = ReactElement | string | number | …
-    ReactNode: mkFixedName("React$Node"), // TODO use import
+    ReactNode: mkFixedName('React$Node'), // TODO use import
     Ref: substituteReactRef,
     RefAttributes: substituteReactRefAttributes,
 

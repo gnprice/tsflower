@@ -13,9 +13,9 @@ export declare var value: {
 
   destructuringMethod({ x }: { x: number }): void;
 
-  "property keyed by StringLiteral": string;
-  "method StringLiteral"(): void;
-  "": number;
+  'property keyed by StringLiteral': string;
+  'method StringLiteral'(): void;
+  '': number;
   // hmm, Flow rejects with "Get/set properties not yet supported.":
   // get "getter StringLiteral"(): string;
 

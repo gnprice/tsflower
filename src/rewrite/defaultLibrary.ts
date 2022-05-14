@@ -1,14 +1,14 @@
-import ts from "typescript";
-import { builders as b, namedTypes as n } from "ast-types";
-import K from "ast-types/gen/kinds";
+import ts from 'typescript';
+import { builders as b, namedTypes as n } from 'ast-types';
+import K from 'ast-types/gen/kinds';
 import {
   Converter,
   ErrorOr,
   mkError,
   mkSuccess,
   mkUnimplemented,
-} from "../convert";
-import { mkFixedName, mkNamespaceRewrite, mkTypeReferenceMacro } from "./core";
+} from '../convert';
+import { mkFixedName, mkNamespaceRewrite, mkTypeReferenceMacro } from './core';
 
 function convertRecord(
   converter: Converter,
@@ -98,7 +98,7 @@ function convertOmit(
       properties: [],
       indexers: [
         b.objectTypeIndexer(
-          b.identifier("key"),
+          b.identifier('key'),
           converter.convertType(keysType),
           b.mixedTypeAnnotation(),
         ),
@@ -107,7 +107,7 @@ function convertOmit(
   }
 
   return mkSuccess({
-    id: b.identifier("$Diff"),
+    id: b.identifier('$Diff'),
     typeParameters: b.typeParameterInstantiation([
       converter.convertType(objectType),
       subtrahend,
@@ -120,8 +120,8 @@ function convertOmit(
  */
 export function prepDefaultLibraryRewrites() {
   return mkNamespaceRewrite({
-    Readonly: mkFixedName("$ReadOnly"),
-    ReadonlyArray: mkFixedName("$ReadOnlyArray"),
+    Readonly: mkFixedName('$ReadOnly'),
+    ReadonlyArray: mkFixedName('$ReadOnlyArray'),
     Record: mkTypeReferenceMacro(convertRecord),
     Omit: mkTypeReferenceMacro(convertOmit),
     // If adding to this: note that any `namespaces` map is ignored.

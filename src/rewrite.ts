@@ -2,11 +2,11 @@ import {
   mapOfObject,
   mkNamespaceRewrite,
   NamespaceRewrite,
-} from "./rewrite/core";
-import { prepDefaultLibraryRewrites } from "./rewrite/defaultLibrary";
-import { prepGlobalJsxRewrites, prepReactRewrites } from "./rewrite/react";
+} from './rewrite/core';
+import { prepDefaultLibraryRewrites } from './rewrite/defaultLibrary';
+import { prepGlobalJsxRewrites, prepReactRewrites } from './rewrite/react';
 
-export type { NamespaceRewrite, TypeRewrite } from "./rewrite/core";
+export type { NamespaceRewrite, TypeRewrite } from './rewrite/core';
 
 export const defaultLibraryRewrites: NamespaceRewrite =
   prepDefaultLibraryRewrites();

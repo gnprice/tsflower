@@ -5,10 +5,10 @@
  *
  *     $ tsflower --help
  */
-import fs from "fs";
-import process from "process";
-import { assertUnreachable } from "./generics";
-import { convertFileToString, convertFileTree } from "./index";
+import fs from 'fs';
+import process from 'process';
+import { assertUnreachable } from './generics';
+import { convertFileToString, convertFileTree } from './index';
 
 class CliError extends Error {
   readonly exitCode: number;
@@ -19,11 +19,11 @@ class CliError extends Error {
   }
 }
 
-type FilenameOrPipe = string | { kind: "pipe" };
+type FilenameOrPipe = string | { kind: 'pipe' };
 
 type CliCommand =
-  | { kind: "file"; src: string; dest: FilenameOrPipe }
-  | { kind: "tree"; src: string; dest: string | null };
+  | { kind: 'file'; src: string; dest: FilenameOrPipe }
+  | { kind: 'tree'; src: string; dest: string | null };
 
 main();
 
@@ -33,10 +33,10 @@ function main() {
   const command = parseCommandLineOrExit(argv);
 
   switch (command.kind) {
-    case "file": {
+    case 'file': {
       const { src, dest } = command;
       const result = convertFileToString(src);
-      if (typeof dest === "object") {
+      if (typeof dest === 'object') {
         process.stdout.write(result);
       } else {
         fs.writeFileSync(dest, result);
@@ -44,7 +44,7 @@ function main() {
       return;
     }
 
-    case "tree": {
+    case 'tree': {
       const { src, dest } = command;
       convertFileTree(src, dest ?? src);
       return;
@@ -70,15 +70,15 @@ function parseCommandLineOrExit(argv: string[]): CliCommand {
 
 function parseCommandLine(argv: string[]): CliCommand {
   if (argv.length < 1) {
-    usageError("subcommand required");
+    usageError('subcommand required');
   }
 
   switch (argv[0]) {
-    case "--help":
+    case '--help':
       throw new CliError(getUsage(), 0);
-    case "file":
+    case 'file':
       return parseFileCommandLine(argv.slice(1));
-    case "tree":
+    case 'tree':
       return parseTreeCommandLine(argv.slice(1));
     default:
       usageError(`invalid subcommand: ${argv[0]}`);
@@ -107,9 +107,9 @@ For details on any subcommand, pass \`--help\` to the subcommand.
 
 function parseFileCommandLine(argv: string[]): CliCommand {
   if (argv.length < 1) {
-    usageError("input filename required");
+    usageError('input filename required');
   }
-  if (argv[0] === "--help") {
+  if (argv[0] === '--help') {
     throw new CliError(getUsage(), 0);
   }
   if (argv.length > 2) {
@@ -119,9 +119,9 @@ function parseFileCommandLine(argv: string[]): CliCommand {
   const [inputFilename, outputFilename] = argv;
 
   return {
-    kind: "file",
+    kind: 'file',
     src: inputFilename,
-    dest: outputFilename !== undefined ? outputFilename : { kind: "pipe" },
+    dest: outputFilename !== undefined ? outputFilename : { kind: 'pipe' },
   };
 
   function usageError(message: string): never {
@@ -142,9 +142,9 @@ If OUTPUT is omitted, prints result to stdout.
 
 function parseTreeCommandLine(argv: string[]): CliCommand {
   if (argv.length < 1) {
-    usageError("input filename required");
+    usageError('input filename required');
   }
-  if (argv[0] === "--help") {
+  if (argv[0] === '--help') {
     throw new CliError(getUsage(), 0);
   }
   if (argv.length > 2) {
@@ -154,7 +154,7 @@ function parseTreeCommandLine(argv: string[]): CliCommand {
   const [inputPath, outputPath] = argv;
 
   return {
-    kind: "tree",
+    kind: 'tree',
     src: inputPath,
     dest: outputPath !== undefined ? outputPath : null,
   };

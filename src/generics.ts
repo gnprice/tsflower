@@ -57,6 +57,6 @@ export function assertUnreachable(
   x: never,
   description: string | ((x: any) => string),
 ): never {
-  const d = typeof description === "string" ? description : description(x);
+  const d = typeof description === 'string' ? description : description(x);
   throw new Error(`internal error: unexpected ${d}`);
 }
