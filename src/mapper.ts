@@ -38,15 +38,13 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
   let hadRenames = false;
 
   const mappedSymbols: Map<ts.Symbol, TypeRewrite> = new Map();
-  const mappedModuleSymbols: Map<
-    ts.Symbol,
-    Map<string, TypeRewrite>
-  > = new Map();
+  const mappedModuleSymbols: Map<ts.Symbol, NamespaceRewrite> = new Map();
 
   const mapper: Mapper = {
+    // TODO rename to reflect these are specifically about *type* bindings
     getSymbol: (symbol) => mappedSymbols.get(symbol),
     getQualifiedSymbol: (qualifierSymbol, name) =>
-      mappedModuleSymbols.get(qualifierSymbol)?.get(name),
+      mappedModuleSymbols.get(qualifierSymbol)?.types?.get(name),
     getTypeName: (node) => {
       const symbol = checker.getSymbolAtLocation(node);
       const mapped = symbol && mapper.getSymbol(symbol);
@@ -139,7 +137,8 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
           if (ts.isImportSpecifier(decl)) {
             const module = getModuleSpecifier(decl.parent.parent.parent);
             const name = (decl.propertyName ?? decl.name).text;
-            const rewrite = libraryRewrites.get(module)?.get(name);
+            const rewrite = libraryRewrites.get(module)?.types?.get(name);
+            // TODO rewrite any namespace binding it might have, too
             if (rewrite) mappedSymbols.set(symbol, rewrite);
             return;
           } else if (ts.isImportClause(decl) || ts.isNamespaceImport(decl)) {

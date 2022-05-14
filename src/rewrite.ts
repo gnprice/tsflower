@@ -62,25 +62,30 @@ export const globalRewrites: NamespaceRewrite = {
   ]),
 };
 
-export const libraryRewrites: Map<string, Map<string, TypeRewrite>> = new Map([
+export const libraryRewrites: Map<string, NamespaceRewrite> = new Map([
+  // If adding to this: note that currently any namespace rewrites within a
+  // given library are ignored!  That is, the `namespaces` property of one
+  // of these NamespaceRewrite values is never consulted.  See use sites.
   [
     "react",
-    new Map([
-      [
-        "Component",
-        {
-          kind: "TypeReferenceMacro",
-          convert: convertReactComponent,
-        },
-      ],
-      [
-        "ReactElement",
-        {
-          kind: "TypeReferenceMacro",
-          convert: convertReactElement,
-        },
-      ],
-    ]),
+    {
+      types: new Map([
+        [
+          "Component",
+          {
+            kind: "TypeReferenceMacro",
+            convert: convertReactComponent,
+          },
+        ],
+        [
+          "ReactElement",
+          {
+            kind: "TypeReferenceMacro",
+            convert: convertReactElement,
+          },
+        ],
+      ]),
+    },
   ],
 ]);
 
