@@ -1,7 +1,13 @@
 import ts from "typescript";
 import { builders as b, namedTypes as n } from "ast-types";
 import K from "ast-types/gen/kinds";
-import { Converter, ErrorOr, mkError, mkSuccess } from "./convert";
+import {
+  Converter,
+  ErrorOr,
+  mkError,
+  mkSuccess,
+  mkUnimplemented,
+} from "./convert";
 
 /**
  * What to do to rewrite some type.
@@ -89,6 +95,7 @@ export const libraryRewrites: Map<string, NamespaceRewrite> = mapOfObject({
     ReactElement: mkTypeReferenceMacro(convertReactElement),
     // type ReactNode = ReactElement | string | number | …
     ReactNode: mkFixedName("React$Node"), // TODO use import
+    RefAttributes: mkTypeReferenceMacro(convertReactRefAttributes),
   }),
 });
 
@@ -227,6 +234,28 @@ function convertReactElement(
     id: b.identifier("React$Element"), // TODO use import
     typeParameters: b.typeParameterInstantiation(args),
   });
+}
+
+// Definition in @types/react/index.d.ts:
+//   type Key = string | number;
+//   interface Attributes {
+//     key?: Key | null | undefined;
+//   }
+//   interface RefAttributes<T> extends Attributes {
+//     ref?: Ref<T> | undefined;
+//   }
+//
+// So basically translate to Flow as:
+//   type $$RefAttributes<T> = {
+//     key?: string | number | void | null,
+//     ref?: void | Ref<T>, ... }
+// TODO translate Ref
+function convertReactRefAttributes(
+  _converter: Converter,
+  _typeName: ts.EntityNameOrEntityNameExpression,
+  _typeArguments: ts.NodeArray<ts.TypeNode> | void,
+) {
+  return mkUnimplemented(`React.RefAttributes`);
 }
 
 // // @types/react/index.d.ts

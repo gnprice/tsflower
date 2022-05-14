@@ -33,4 +33,5 @@ var reactElement: {|
 |};
 
 var reactNode: React$Node;
+var refAttributes: {| a: $FlowFixMe/*  React.RefAttributes *//* tsflower-unimplemented: React.RefAttributes */ |};
 var jsx: {| element: React$Element<any> |};

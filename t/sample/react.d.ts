@@ -43,6 +43,10 @@ var reactElement: {
 
 var reactNode: React.ReactNode;
 
+var refAttributes: {
+  a: React.RefAttributes;
+};
+
 var jsx: {
   element: JSX.Element;
 };
