@@ -43,14 +43,7 @@ function mkFixedName(name: string): TypeRewrite {
 }
 
 function mkTypeReferenceMacro(
-  convert: (
-    converter: Converter,
-    typeName: ts.EntityNameOrEntityNameExpression,
-    typeArguments: ts.NodeArray<ts.TypeNode> | void,
-  ) => ErrorOr<{
-    id: K.IdentifierKind | n.QualifiedTypeIdentifier;
-    typeParameters: n.TypeParameterInstantiation | null;
-  }>,
+  convert: (TypeRewrite & { kind: "TypeReferenceMacro" })["convert"],
 ): TypeRewrite {
   return { kind: "TypeReferenceMacro", convert };
 }
