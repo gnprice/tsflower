@@ -38,11 +38,15 @@ export type NamespaceRewrite = {
   namespaces?: Map<string, NamespaceRewrite>;
 };
 
-export const defaultLibraryRewrites: Map<string, TypeRewrite> = new Map([
-  ["Readonly", { kind: "FixedName", name: "$ReadOnly" }],
-  ["ReadonlyArray", { kind: "FixedName", name: "$ReadOnlyArray" }],
-  ["Omit", { kind: "TypeReferenceMacro", convert: convertOmit }],
-]);
+export const defaultLibraryRewrites: NamespaceRewrite = {
+  // If adding to this: note that any `namespaces` map is ignored.
+  // See findRewritesInDefaultLibrary.
+  types: new Map([
+    ["Readonly", { kind: "FixedName", name: "$ReadOnly" }],
+    ["ReadonlyArray", { kind: "FixedName", name: "$ReadOnlyArray" }],
+    ["Omit", { kind: "TypeReferenceMacro", convert: convertOmit }],
+  ]),
+};
 
 export const globalRewrites: NamespaceRewrite = {
   // If adding to this: note the unimplemented cases in findGlobalRewrites,

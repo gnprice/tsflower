@@ -252,7 +252,7 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
           ts.isInterfaceDeclaration(node)
         ) {
           const { name } = node;
-          const rewrite = defaultLibraryRewrites.get(name.text);
+          const rewrite = defaultLibraryRewrites.types?.get(name.text);
           if (rewrite) {
             const symbol = checker.getSymbolAtLocation(name);
             if (!symbol) {
