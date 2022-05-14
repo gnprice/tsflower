@@ -48,7 +48,7 @@ var ref: {
   ref: React.Ref<number>;
   ref2: React.Ref<React.Component<>>;
 
-  refAttributes: React.RefAttributes;
+  refAttributes: React.RefAttributes<React.Component<>>;
 };
 
 var jsx: {

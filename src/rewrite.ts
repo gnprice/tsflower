@@ -4,13 +4,7 @@ import K from "ast-types/gen/kinds";
 // @ts-expect-error no TS types for flow-parser :-p
 import * as flowParser from "flow-parser";
 import * as recast from "recast";
-import {
-  Converter,
-  ErrorOr,
-  mkError,
-  mkSuccess,
-  mkUnimplemented,
-} from "./convert";
+import { Converter, ErrorOr, mkError, mkSuccess } from "./convert";
 
 /**
  * What to do to rewrite some type.
@@ -123,7 +117,10 @@ export const libraryRewrites: Map<string, NamespaceRewrite> = mapOfObject({
     ReactNode: mkFixedName("React$Node"), // TODO use import
     // TODO define substitute's name next to substitute code
     Ref: mkSubstituteType("$tsflower_subst$React$Ref", substituteReactRef),
-    RefAttributes: mkTypeReferenceMacro(convertReactRefAttributes),
+    RefAttributes: mkSubstituteType(
+      "$tsflower_subst$React$RefAttributes",
+      substituteReactRefAttributes,
+    ),
   }),
 });
 
@@ -290,26 +287,30 @@ function substituteReactRef() {
   return recast.parse(text, { parser: flowParser }).program.body;
 }
 
-// Definition in @types/react/index.d.ts:
-//   type Key = string | number;
-//   interface Attributes {
-//     key?: Key | null | undefined;
-//   }
-//   interface RefAttributes<T> extends Attributes {
-//     ref?: Ref<T> | undefined;
-//   }
-//
-// So basically translate to Flow as:
-//   type $$RefAttributes<T> = {
-//     key?: string | number | void | null,
-//     ref?: void | Ref<T>, ... }
-// TODO translate Ref
-function convertReactRefAttributes(
-  _converter: Converter,
-  _typeName: ts.EntityNameOrEntityNameExpression,
-  _typeArguments: ts.NodeArray<ts.TypeNode> | void,
-) {
-  return mkUnimplemented(`React.RefAttributes`);
+function substituteReactRefAttributes() {
+  const prefix = "$tsflower_subst$React$";
+  // Definition in @types/react/index.d.ts:
+  //   type Key = string | number;
+  //   interface Attributes {
+  //     key?: Key | null | undefined;
+  //   }
+  //   interface RefAttributes<T> extends Attributes {
+  //     ref?: Ref<T> | undefined;
+  //   }
+
+  // TODO: express a dependency on React.Ref substitution,
+  //   so we can use this
+  // const text = `
+  // type ${prefix}RefAttributes<T> = {
+  //   key?: string | number | void | null,
+  //   ref?: void | ${prefix}Ref<T>,
+  //   ...
+  // }`.replace(/^\s*\/\/.*\n?/gm, "");
+
+  const text = `\
+  type ${prefix}RefAttributes<T> = $FlowFixMe /* tsflower-unimplemented: React.RefAttributes */;
+  `;
+  return recast.parse(text, { parser: flowParser }).program.body;
 }
 
 // // @types/react/index.d.ts
