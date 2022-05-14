@@ -95,6 +95,7 @@ export const libraryRewrites: Map<string, NamespaceRewrite> = mapOfObject({
     ReactElement: mkTypeReferenceMacro(convertReactElement),
     // type ReactNode = ReactElement | string | number | …
     ReactNode: mkFixedName("React$Node"), // TODO use import
+    Ref: mkTypeReferenceMacro(convertReactRef),
     RefAttributes: mkTypeReferenceMacro(convertReactRefAttributes),
   }),
 });
@@ -234,6 +235,29 @@ function convertReactElement(
     id: b.identifier("React$Element"), // TODO use import
     typeParameters: b.typeParameterInstantiation(args),
   });
+}
+
+// Definition in @types/react/index.d.ts:
+//   interface RefObject<T> {
+//     readonly current: T | null;
+//   }
+//   // Bivariance hack for consistent unsoundness with RefObject
+//   type RefCallback<T> = { bivarianceHack(instance: T | null): void }["bivarianceHack"];
+//   type Ref<T> = RefCallback<T> | RefObject<T> | null;
+//
+// There's no definition in flowlib's react.js that corresponds; the types
+// of `useImperativeHandle` and `forwardRef` spell it out.  There's
+// `React.Ref`, but it's the type of the `ref` pseudoprop; its type
+// parameter is the ElementType of the element, and it passes that to
+// `React$ElementRef` to work out what type the ref should hold.
+//
+// Probably best is to just emit a definition of our own.
+function convertReactRef(
+  _converter: Converter,
+  _typeName: ts.EntityNameOrEntityNameExpression,
+  _typeArguments: ts.NodeArray<ts.TypeNode> | void,
+) {
+  return mkUnimplemented(`React.Ref`); // TODO
 }
 
 // Definition in @types/react/index.d.ts:
