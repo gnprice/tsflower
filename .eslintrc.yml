@@ -41,9 +41,14 @@ rules:
   # Formatting that we let Prettier handle
   object-curly-spacing: off # Google has no spaces here
   quotes: off # Prettier wants `"it 'will'"`, not `'it \'will\''`.  Whatever.
+  # For indent, I think I like the Google style better than Prettier's:
+  #   - Indent function args and params by 4 spaces rather than 2
+  #   - Ditto multi-line method chains
+  #   - No silly bug on comment at the end of a switch case
+  # But not enough to fight Prettier over it.
+  indent: off
 
   # Rules we may want but require tweaking details and/or migrating code
-  indent: off
   curly: off
   operator-linebreak: off
   no-throw-literal: off
