@@ -55,13 +55,17 @@ function mkTypeReferenceMacro(
   return { kind: "TypeReferenceMacro", convert };
 }
 
+function mapOfObject<T>(obj: { readonly [name: string]: T }): Map<string, T> {
+  return new Map(Object.entries(obj));
+}
+
 function mkNamespaceRewrite(
   types: void | { readonly [name: string]: TypeRewrite },
   namespaces?: void | { readonly [name: string]: NamespaceRewrite },
 ): NamespaceRewrite {
   const r: NamespaceRewrite = {};
-  if (types) r.types = new Map(Object.entries(types));
-  if (namespaces) r.namespaces = new Map(Object.entries(namespaces));
+  if (types) r.types = mapOfObject(types);
+  if (namespaces) r.namespaces = mapOfObject(namespaces);
   return r;
 }
 
@@ -81,17 +85,15 @@ export const globalRewrites: NamespaceRewrite = mkNamespaceRewrite(undefined, {
   }),
 });
 
-export const libraryRewrites: Map<string, NamespaceRewrite> = new Map(
+export const libraryRewrites: Map<string, NamespaceRewrite> = mapOfObject({
   // If adding to this: note that currently any namespace rewrites within a
   // given library are ignored!  That is, the `namespaces` property of one
   // of these NamespaceRewrite values is never consulted.  See use sites.
-  Object.entries({
-    react: mkNamespaceRewrite({
-      Component: mkTypeReferenceMacro(convertReactComponent),
-      ReactElement: mkTypeReferenceMacro(convertReactElement),
-    }),
+  react: mkNamespaceRewrite({
+    Component: mkTypeReferenceMacro(convertReactComponent),
+    ReactElement: mkTypeReferenceMacro(convertReactElement),
   }),
-);
+});
 
 function convertOmit(
   converter: Converter,
