@@ -1,6 +1,9 @@
 import ts from "typescript";
 import { builders as b, namedTypes as n } from "ast-types";
 import K from "ast-types/gen/kinds";
+// @ts-expect-error no TS types for flow-parser :-p
+import * as flowParser from "flow-parser";
+import * as recast from "recast";
 import {
   Converter,
   ErrorOr,
@@ -277,71 +280,14 @@ function convertReactElement(
 //
 // So, just emit a definition of our own.
 function substituteReactRef() {
-  // TODO It sure would be nice to just write Flow syntax here and parse it.
-  //   Can't be hard, even.
-  const idRefObject = b.identifier("$tsflower_subst$React$RefObject");
-  const idRefCallback = b.identifier("$tsflower_subst$React$RefCallback");
-  const idRef = b.identifier("$tsflower_subst$React$Ref");
-  return [
-    // type $tsflower_subst$React$RefObject<T> = { +current: T | null, ... };
-    b.typeAlias(
-      idRefObject,
-      b.typeParameterDeclaration([b.typeParameter("T")]),
-      b.objectTypeAnnotation.from({
-        properties: [
-          b.objectTypeProperty.from({
-            variance: "plus",
-            key: b.identifier("current"),
-            optional: false,
-            value: b.unionTypeAnnotation([
-              b.typeParameter("T"),
-              b.nullTypeAnnotation(),
-            ]),
-          }),
-        ],
-        inexact: true,
-      }),
-    ),
-
-    // NB `mixed` return, not void; see e.g. flowlib's React$Ref
-    // type $tsflower_subst$React$RefCallback<T> = (T | null) => mixed
-    b.typeAlias(
-      idRefCallback,
-      b.typeParameterDeclaration([b.typeParameter("T")]),
-      b.functionTypeAnnotation(
-        [
-          b.functionTypeParam(
-            null,
-            b.unionTypeAnnotation([
-              b.typeParameter("T"),
-              b.nullTypeAnnotation(),
-            ]),
-            false,
-          ),
-        ],
-        b.mixedTypeAnnotation(),
-        null,
-        null,
-      ),
-    ),
-
-    // type $tsflower_subst$React$Ref<T> = …RefCallback<T> | …RefObject<T> | null;
-    b.typeAlias(
-      idRef,
-      b.typeParameterDeclaration([b.typeParameter("T")]),
-      b.unionTypeAnnotation([
-        b.genericTypeAnnotation(
-          idRefCallback,
-          b.typeParameterInstantiation([b.typeParameter("T")]),
-        ),
-        b.genericTypeAnnotation(
-          idRefObject,
-          b.typeParameterInstantiation([b.typeParameter("T")]),
-        ),
-        b.nullTypeAnnotation(),
-      ]),
-    ),
-  ];
+  const prefix = "$tsflower_subst$React$";
+  const text = `
+  type ${prefix}RefObject<T> = { +current: T | null, ... };
+  // NB mixed return, not void; see e.g. flowlib's React$Ref
+  type ${prefix}RefCallback<T> = (T | null) => mixed;
+  type ${prefix}Ref<T> = ${prefix}RefCallback<T> | ${prefix}RefObject<T> | null;
+`.replace(/^\s*\/\/.*\n?/gm, "");
+  return recast.parse(text, { parser: flowParser }).program.body;
 }
 
 // Definition in @types/react/index.d.ts:
