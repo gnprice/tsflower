@@ -219,6 +219,7 @@ export function convertSourceFile(
 
       case ts.SyntaxKind.MissingDeclaration:
       // These arise only when the input has a syntax error.
+      // fallthrough
 
       default:
         return errorStatement(
@@ -965,7 +966,6 @@ export function convertSourceFile(
     const mapped = mapper.getTypeName(typeName);
     if (mapped) {
       switch (mapped.kind) {
-        // @ts-expect-error fallthrough
         case 'SubstituteType':
           ensureEmittedSubstitute(mapped);
         // fallthrough

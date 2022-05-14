@@ -51,7 +51,6 @@ rules:
   indent: off
 
   # Rules we may want, but need tweaking options and/or migrating code
-  no-fallthrough: off
   no-inner-declarations: off
   no-duplicate-case: off
   no-undef: off
