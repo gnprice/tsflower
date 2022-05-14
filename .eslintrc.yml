@@ -49,7 +49,6 @@ rules:
   indent: off
 
   # Rules we may want but require tweaking details and/or migrating code
-  curly: off
   operator-linebreak: off
   no-throw-literal: off
 

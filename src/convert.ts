@@ -232,14 +232,16 @@ export function convertSourceFile(
     node: ts.ImportDeclaration,
   ): K.StatementKind {
     const { importClause } = node;
-    if (!importClause)
+    if (!importClause) {
       return unimplementedStatement(
         node,
         'ImportDeclaration with no import clause',
       );
+    }
 
-    if (importClause.modifiers)
+    if (importClause.modifiers) {
       return unimplementedStatement(node, `ImportDeclaration with modifiers`);
+    }
 
     const specifiers: (
       | n.ImportSpecifier
@@ -247,10 +249,11 @@ export function convertSourceFile(
       | n.ImportDefaultSpecifier
     )[] = [];
 
-    if (importClause.name)
+    if (importClause.name) {
       specifiers.push(
         b.importDefaultSpecifier(convertIdentifier(importClause.name)),
       );
+    }
 
     const { namedBindings } = importClause;
     if (namedBindings) {
@@ -282,8 +285,9 @@ export function convertSourceFile(
               // Not an `import type`.  Import the type with `type`…
               add('type', mapped.name, mappedLocal.name);
               // … and then the value, unless this was `import { type Foo }`.
-              if (!binding.isTypeOnly)
+              if (!binding.isTypeOnly) {
                 add('value', propertyName.text, name.text);
+              }
             }
             continue;
           }
@@ -356,8 +360,9 @@ export function convertSourceFile(
         b.stringLiteral((moduleSpecifier as ts.StringLiteral).text);
 
     if (!exportClause) {
-      if (!source)
+      if (!source) {
         return errorStatement(node, 'expected `export *` to have `from`');
+      }
       return b.exportAllDeclaration(source, null);
     } else if (ts.isNamespaceExport(exportClause)) {
       return b.exportNamedDeclaration(
@@ -401,12 +406,13 @@ export function convertSourceFile(
       return unimplementedStatement(node, '"export ="');
     }
 
-    if (!ts.isIdentifier(node.expression))
+    if (!ts.isIdentifier(node.expression)) {
       // TODO(runtime): These don't appear in .d.ts files, but do in TS.
       return unimplementedStatement(
         node,
         `"export default" with non-identifier`,
       );
+    }
 
     return b.exportDefaultDeclaration(convertIdentifier(node.expression));
   }
@@ -563,14 +569,16 @@ export function convertSourceFile(
               )}`,
             );
           }
-          if (!isEntityNameOrEntityNameExpression(expression))
+          if (!isEntityNameOrEntityNameExpression(expression)) {
             return errorStatement(node, `'extends' not an entity name`);
+          }
 
           const result = convertTypeReferenceLike(expression, typeArguments);
-          if (result.kind !== 'success')
+          if (result.kind !== 'success') {
             return result.kind === 'error'
               ? errorStatement(node, result.description)
               : unimplementedStatement(node, result.description);
+          }
           extends_.push(b.interfaceExtends.from(result.result));
         }
       } else {
@@ -580,9 +588,9 @@ export function convertSourceFile(
 
     const members = convertMembers(node);
     if (!Array.isArray(members)) {
-      if (members.kind === 'unimplemented')
+      if (members.kind === 'unimplemented') {
         return unimplementedStatement(node, members.description);
-      else return errorStatement(node, members.description);
+      } else return errorStatement(node, members.description);
     }
     const [properties, indexers, callProperties] = members;
 
@@ -721,20 +729,22 @@ export function convertSourceFile(
 
       case ts.SyntaxKind.PrefixUnaryExpression: {
         const literal = node.literal as ts.PrefixUnaryExpression;
-        if (literal.operator !== ts.SyntaxKind.MinusToken)
+        if (literal.operator !== ts.SyntaxKind.MinusToken) {
           return errorType(
             node,
             `LiteralTypeNode with PrefixUnaryExpression operator ${formatSyntaxKind(
               literal.operator,
             )}; expected MinusToken`,
           );
-        if (!ts.isNumericLiteral(literal.operand))
+        }
+        if (!ts.isNumericLiteral(literal.operand)) {
           return errorType(
             node,
             `LiteralTypeNode with unary-minus of ${formatSyntaxKind(
               literal.operand.kind,
             )}; expected NumericLiteral`,
           );
+        }
         const { text } = literal.operand;
         // TODO: is more conversion needed on these number literals?
         return b.numberLiteralTypeAnnotation(-Number(text), text);
@@ -935,10 +945,11 @@ export function convertSourceFile(
 
   function convertTypeReference(node: ts.TypeReferenceNode): K.FlowTypeKind {
     const result = convertTypeReferenceLike(node.typeName, node.typeArguments);
-    if (result.kind !== 'success')
+    if (result.kind !== 'success') {
       return result.kind === 'error'
         ? errorType(node, result.description)
         : unimplementedType(node, result.description);
+    }
     return b.genericTypeAnnotation.from(result.result);
   }
 
@@ -952,7 +963,7 @@ export function convertSourceFile(
     typeParameters: n.TypeParameterInstantiation | null;
   }> {
     const mapped = mapper.getTypeName(typeName);
-    if (mapped)
+    if (mapped) {
       switch (mapped.kind) {
         // @ts-expect-error fallthrough
         case 'SubstituteType':
@@ -975,6 +986,7 @@ export function convertSourceFile(
         default:
           assertUnreachable(mapped, (m) => `TypeRewrite kind: ${m.kind}`);
       }
+    }
     return mkSuccess({
       id: convertEntityNameAsType(typeName),
       typeParameters: convertTypeArguments(
@@ -995,11 +1007,12 @@ export function convertSourceFile(
     node: ts.EntityNameOrEntityNameExpression,
   ): K.IdentifierKind | K.QualifiedTypeIdentifierKind {
     if (ts.isIdentifier(node)) return convertIdentifier(node);
-    if (ts.isQualifiedName(node))
+    if (ts.isQualifiedName(node)) {
       return b.qualifiedTypeIdentifier(
         convertEntityNameAsType(node.left),
         convertIdentifier(node.right),
       );
+    }
     return b.qualifiedTypeIdentifier(
       convertEntityNameAsType(node.expression),
       convertIdentifier(node.name),
@@ -1107,9 +1120,9 @@ export function convertSourceFile(
   function convertTypeLiteral(node: ts.TypeLiteralNode): K.FlowTypeKind {
     const members = convertMembers(node);
     if (!Array.isArray(members)) {
-      if (members.kind === 'unimplemented')
+      if (members.kind === 'unimplemented') {
         return unimplementedType(node, members.description);
-      else return errorType(node, members.description);
+      } else return errorType(node, members.description);
     }
     const [properties, indexers, callProperties] = members;
 
@@ -1487,8 +1500,9 @@ export function convertSourceFile(
     typeNameSymbol: void | ts.Symbol,
     typeArguments: void | ts.NodeArray<ts.TypeNode>,
   ): null | n.TypeParameterInstantiation {
-    if (typeArguments)
+    if (typeArguments) {
       return b.typeParameterInstantiation(typeArguments.map(convertType));
+    }
 
     // If in TS there was no list of type arguments, that can be either
     // because the type takes no parameters, or because it has defaults for
@@ -1496,8 +1510,9 @@ export function convertSourceFile(
     // latter case, while TS requires it to be spelled with no list, Flow
     // requires it to be spelled with an empty list.
     // @ts-expect-error TODO(tsutil) express "does decl have type parameters"
-    if (some(typeNameSymbol?.declarations, (decl) => !!decl.typeParameters))
+    if (some(typeNameSymbol?.declarations, (decl) => !!decl.typeParameters)) {
       return b.typeParameterInstantiation([]);
+    }
 
     return null;
   }

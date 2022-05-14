@@ -21,13 +21,15 @@ export function isEntityNameOrEntityNameExpression(
   node: ts.Node,
 ): node is ts.EntityNameOrEntityNameExpression {
   if (ts.isIdentifier(node)) return true;
-  if (ts.isQualifiedName(node))
+  if (ts.isQualifiedName(node)) {
     return isEntityNameOrEntityNameExpression(node.left);
-  if (ts.isPropertyAccessExpression(node))
+  }
+  if (ts.isPropertyAccessExpression(node)) {
     return (
       ts.isIdentifier(node.name) &&
       isEntityNameOrEntityNameExpression(node.expression)
     );
+  }
   return false;
 }
 
