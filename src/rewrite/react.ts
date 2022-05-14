@@ -119,21 +119,15 @@ const substituteReactRefAttributes = mkSubstituteType(
     //   interface RefAttributes<T> extends Attributes {
     //     ref?: Ref<T> | undefined;
     //   }
-
-    // TODO: express a dependency on React.Ref substitution,
-    //   so we can use this
-    // const text = `
-    // type ${prefix}RefAttributes<T> = {
-    //   key?: string | number | void | null,
-    //   ref?: void | ${prefix}Ref<T>,
-    //   ...
-    // }`.replace(/^\s*\/\/.*\n?/gm, "");
-
-    const text = `\
-  type ${prefix}RefAttributes<T> = $FlowFixMe /* tsflower-unimplemented: React.RefAttributes */;
-  `;
+    const text = `
+    type ${prefix}RefAttributes<T> = {
+      key?: string | number | void | null,
+      ref?: void | ${prefix}Ref<T>,
+      ...
+    }`.replace(/^\s*\/\/.*\n?/gm, "");
     return recast.parse(text, { parser: flowParser }).program.body;
   },
+  [substituteReactRef],
 );
 
 // // @types/react/index.d.ts

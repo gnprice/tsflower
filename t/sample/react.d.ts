@@ -48,6 +48,9 @@ var ref: {
   ref: React.Ref<number>;
   ref2: React.Ref<React.Component<>>;
 
+  // TODO(test): Add Flow test code to confirm this interoperates with flowlib
+  // TODO(test): Test RefAttributes in separate file from Ref, to exercise
+  //   dependencies
   refAttributes: React.RefAttributes<React.Component<>>;
 };
 

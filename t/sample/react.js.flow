@@ -4,7 +4,11 @@
 type $tsflower_subst$React$RefObject<T> = { +current: T | null, ... };
 type $tsflower_subst$React$RefCallback<T> = (T | null) => mixed;
 type $tsflower_subst$React$Ref<T> = $tsflower_subst$React$RefCallback<T> | $tsflower_subst$React$RefObject<T> | null;
-type $tsflower_subst$React$RefAttributes<T> = $FlowFixMe /* tsflower-unimplemented: React.RefAttributes */;
+type $tsflower_subst$React$RefAttributes<T> = {
+  key?: string | number | void | null,
+  ref?: void | $tsflower_subst$React$Ref<T>,
+  ...
+}
 import React, { Component, Component as Component2 } from "react";
 import * as React2 from "react";
 
