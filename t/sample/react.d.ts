@@ -43,8 +43,12 @@ var reactElement: {
 
 var reactNode: React.ReactNode;
 
-var refAttributes: {
-  a: React.RefAttributes;
+var ref: {
+  // TODO(test): Add Flow test code to confirm this interoperates with flowlib
+  ref: React.Ref<number>;
+  ref2: React.Ref<React.Component<>>;
+
+  refAttributes: React.RefAttributes;
 };
 
 var jsx: {

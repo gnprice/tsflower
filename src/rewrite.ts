@@ -64,6 +64,13 @@ function mkFixedName(name: string): TypeRewrite {
   return { kind: "FixedName", name };
 }
 
+function mkSubstituteType(
+  name: string,
+  substitute: () => K.StatementKind[],
+): TypeRewrite {
+  return { kind: "SubstituteType", name, substitute };
+}
+
 function mkTypeReferenceMacro(
   convert: (TypeRewrite & { kind: "TypeReferenceMacro" })["convert"],
 ): TypeRewrite {
@@ -111,7 +118,8 @@ export const libraryRewrites: Map<string, NamespaceRewrite> = mapOfObject({
     ReactElement: mkTypeReferenceMacro(convertReactElement),
     // type ReactNode = ReactElement | string | number | …
     ReactNode: mkFixedName("React$Node"), // TODO use import
-    Ref: mkTypeReferenceMacro(convertReactRef),
+    // TODO define substitute's name next to substitute code
+    Ref: mkSubstituteType("$tsflower_subst$React$Ref", substituteReactRef),
     RefAttributes: mkTypeReferenceMacro(convertReactRefAttributes),
   }),
 });
@@ -267,13 +275,73 @@ function convertReactElement(
 // parameter is the ElementType of the element, and it passes that to
 // `React$ElementRef` to work out what type the ref should hold.
 //
-// Probably best is to just emit a definition of our own.
-function convertReactRef(
-  _converter: Converter,
-  _typeName: ts.EntityNameOrEntityNameExpression,
-  _typeArguments: ts.NodeArray<ts.TypeNode> | void,
-) {
-  return mkUnimplemented(`React.Ref`); // TODO
+// So, just emit a definition of our own.
+function substituteReactRef() {
+  // TODO It sure would be nice to just write Flow syntax here and parse it.
+  //   Can't be hard, even.
+  const idRefObject = b.identifier("$tsflower_subst$React$RefObject");
+  const idRefCallback = b.identifier("$tsflower_subst$React$RefCallback");
+  const idRef = b.identifier("$tsflower_subst$React$Ref");
+  return [
+    // type $tsflower_subst$React$RefObject<T> = { +current: T | null, ... };
+    b.typeAlias(
+      idRefObject,
+      b.typeParameterDeclaration([b.typeParameter("T")]),
+      b.objectTypeAnnotation.from({
+        properties: [
+          b.objectTypeProperty.from({
+            variance: "plus",
+            key: b.identifier("current"),
+            optional: false,
+            value: b.unionTypeAnnotation([
+              b.typeParameter("T"),
+              b.nullTypeAnnotation(),
+            ]),
+          }),
+        ],
+        inexact: true,
+      }),
+    ),
+
+    // NB `mixed` return, not void; see e.g. flowlib's React$Ref
+    // type $tsflower_subst$React$RefCallback<T> = (T | null) => mixed
+    b.typeAlias(
+      idRefCallback,
+      b.typeParameterDeclaration([b.typeParameter("T")]),
+      b.functionTypeAnnotation(
+        [
+          b.functionTypeParam(
+            null,
+            b.unionTypeAnnotation([
+              b.typeParameter("T"),
+              b.nullTypeAnnotation(),
+            ]),
+            false,
+          ),
+        ],
+        b.mixedTypeAnnotation(),
+        null,
+        null,
+      ),
+    ),
+
+    // type $tsflower_subst$React$Ref<T> = …RefCallback<T> | …RefObject<T> | null;
+    b.typeAlias(
+      idRef,
+      b.typeParameterDeclaration([b.typeParameter("T")]),
+      b.unionTypeAnnotation([
+        b.genericTypeAnnotation(
+          idRefCallback,
+          b.typeParameterInstantiation([b.typeParameter("T")]),
+        ),
+        b.genericTypeAnnotation(
+          idRefObject,
+          b.typeParameterInstantiation([b.typeParameter("T")]),
+        ),
+        b.nullTypeAnnotation(),
+      ]),
+    ),
+  ];
 }
 
 // Definition in @types/react/index.d.ts:
