@@ -38,12 +38,14 @@ rules:
       tabWidth: 2
       ignoreUrls: true
 
+  # Formatting that we let Prettier handle
+  object-curly-spacing: off # Google has no spaces here
+
   # Rules we may want but require tweaking details and/or migrating code
   indent: off
   curly: off
   quotes: off
   operator-linebreak: off
-  object-curly-spacing: off
   no-throw-literal: off
 
   # Rules we don't want
