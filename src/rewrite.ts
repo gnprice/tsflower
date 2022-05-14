@@ -38,13 +38,30 @@ export type NamespaceRewrite = {
   namespaces?: Map<string, NamespaceRewrite>;
 };
 
+function mkFixedName(name: string): TypeRewrite {
+  return { kind: "FixedName", name };
+}
+
+function mkTypeReferenceMacro(
+  convert: (
+    converter: Converter,
+    typeName: ts.EntityNameOrEntityNameExpression,
+    typeArguments: ts.NodeArray<ts.TypeNode> | void,
+  ) => ErrorOr<{
+    id: K.IdentifierKind | n.QualifiedTypeIdentifier;
+    typeParameters: n.TypeParameterInstantiation | null;
+  }>,
+): TypeRewrite {
+  return { kind: "TypeReferenceMacro", convert };
+}
+
 export const defaultLibraryRewrites: NamespaceRewrite = {
   // If adding to this: note that any `namespaces` map is ignored.
   // See findRewritesInDefaultLibrary.
   types: new Map([
-    ["Readonly", { kind: "FixedName", name: "$ReadOnly" }],
-    ["ReadonlyArray", { kind: "FixedName", name: "$ReadOnlyArray" }],
-    ["Omit", { kind: "TypeReferenceMacro", convert: convertOmit }],
+    ["Readonly", mkFixedName("$ReadOnly")],
+    ["ReadonlyArray", mkFixedName("$ReadOnlyArray")],
+    ["Omit", mkTypeReferenceMacro(convertOmit)],
   ]),
 };
 
@@ -55,12 +72,7 @@ export const globalRewrites: NamespaceRewrite = {
     [
       "JSX",
       {
-        types: new Map([
-          [
-            "Element",
-            { kind: "TypeReferenceMacro", convert: convertJsxElement },
-          ],
-        ]),
+        types: new Map([["Element", mkTypeReferenceMacro(convertJsxElement)]]),
       },
     ],
   ]),
@@ -74,20 +86,8 @@ export const libraryRewrites: Map<string, NamespaceRewrite> = new Map([
     "react",
     {
       types: new Map([
-        [
-          "Component",
-          {
-            kind: "TypeReferenceMacro",
-            convert: convertReactComponent,
-          },
-        ],
-        [
-          "ReactElement",
-          {
-            kind: "TypeReferenceMacro",
-            convert: convertReactElement,
-          },
-        ],
+        ["Component", mkTypeReferenceMacro(convertReactComponent)],
+        ["ReactElement", mkTypeReferenceMacro(convertReactElement)],
       ]),
     },
   ],
