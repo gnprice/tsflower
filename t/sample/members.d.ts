@@ -70,7 +70,7 @@ declare const vIndexer: {
 
 declare class CIndexer {
   plainProperty: number[];
-  [key: number]: string;
+  [key: number]: string; // eslint-disable-line no-undef
 }
 
 declare interface IIndexer {

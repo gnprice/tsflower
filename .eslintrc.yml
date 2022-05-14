@@ -51,7 +51,6 @@ rules:
   indent: off
 
   # Rules we may want, but need tweaking options and/or migrating code
-  no-undef: off
   no-redeclare: off
 
   # Rules we don't want
@@ -60,6 +59,8 @@ rules:
 
 overrides:
   - files: 't/**/*.d.ts'
+    globals:
+      JSX: readonly
     rules:
       # Allow some things in our test inputs that we don't in normal code.
       no-unused-vars: off
