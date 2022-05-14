@@ -96,7 +96,7 @@ function convertReactElement(
 // `React$ElementRef` to work out what type the ref should hold.
 //
 // So, just emit a definition of our own.
-function substituteReactRef() {
+const substituteReactRef = mkSubstituteType("$tsflower_subst$React$Ref", () => {
   const prefix = "$tsflower_subst$React$";
   const text = `
   type ${prefix}RefObject<T> = { +current: T | null, ... };
@@ -105,33 +105,36 @@ function substituteReactRef() {
   type ${prefix}Ref<T> = ${prefix}RefCallback<T> | ${prefix}RefObject<T> | null;
 `.replace(/^\s*\/\/.*\n?/gm, "");
   return recast.parse(text, { parser: flowParser }).program.body;
-}
+});
 
-function substituteReactRefAttributes() {
-  const prefix = "$tsflower_subst$React$";
-  // Definition in @types/react/index.d.ts:
-  //   type Key = string | number;
-  //   interface Attributes {
-  //     key?: Key | null | undefined;
-  //   }
-  //   interface RefAttributes<T> extends Attributes {
-  //     ref?: Ref<T> | undefined;
-  //   }
+const substituteReactRefAttributes = mkSubstituteType(
+  "$tsflower_subst$React$RefAttributes",
+  () => {
+    const prefix = "$tsflower_subst$React$";
+    // Definition in @types/react/index.d.ts:
+    //   type Key = string | number;
+    //   interface Attributes {
+    //     key?: Key | null | undefined;
+    //   }
+    //   interface RefAttributes<T> extends Attributes {
+    //     ref?: Ref<T> | undefined;
+    //   }
 
-  // TODO: express a dependency on React.Ref substitution,
-  //   so we can use this
-  // const text = `
-  // type ${prefix}RefAttributes<T> = {
-  //   key?: string | number | void | null,
-  //   ref?: void | ${prefix}Ref<T>,
-  //   ...
-  // }`.replace(/^\s*\/\/.*\n?/gm, "");
+    // TODO: express a dependency on React.Ref substitution,
+    //   so we can use this
+    // const text = `
+    // type ${prefix}RefAttributes<T> = {
+    //   key?: string | number | void | null,
+    //   ref?: void | ${prefix}Ref<T>,
+    //   ...
+    // }`.replace(/^\s*\/\/.*\n?/gm, "");
 
-  const text = `\
+    const text = `\
   type ${prefix}RefAttributes<T> = $FlowFixMe /* tsflower-unimplemented: React.RefAttributes */;
   `;
-  return recast.parse(text, { parser: flowParser }).program.body;
-}
+    return recast.parse(text, { parser: flowParser }).program.body;
+  },
+);
 
 // // @types/react/index.d.ts
 // declare global {
@@ -157,12 +160,8 @@ export function prepReactRewrites(): NamespaceRewrite {
     ReactElement: mkTypeReferenceMacro(convertReactElement),
     // type ReactNode = ReactElement | string | number | …
     ReactNode: mkFixedName("React$Node"), // TODO use import
-    // TODO define substitute's name next to substitute code
-    Ref: mkSubstituteType("$tsflower_subst$React$Ref", substituteReactRef),
-    RefAttributes: mkSubstituteType(
-      "$tsflower_subst$React$RefAttributes",
-      substituteReactRefAttributes,
-    ),
+    Ref: substituteReactRef,
+    RefAttributes: substituteReactRefAttributes,
 
     // If adding to this: note that currently any namespace rewrites within a
     // given library are ignored!  That is, the `namespaces` property of one
