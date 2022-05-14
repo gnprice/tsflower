@@ -885,7 +885,7 @@ export function convertSourceFile(
 
     function ensureImportTypeofWhole(moduleSpecifier: string) {
       const localName = escapeNamesAsIdentifierWithPrefix(
-        "$tsflower$import$typeof",
+        "$tsflower_import_typeof",
         moduleSpecifier,
       );
       if (!importTypeImports.has(localName)) {
@@ -904,7 +904,7 @@ export function convertSourceFile(
 
     function ensureImportTypeIndividual(moduleSpecifier: string, name: string) {
       const localName = escapeNamesAsIdentifierWithPrefix(
-        "$tsflower$import$type",
+        "$tsflower_import_type",
         moduleSpecifier,
         name,
       );
