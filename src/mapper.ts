@@ -300,7 +300,8 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
             // TODO(error): In fact it shouldn't even be possible to get
             //   here, because we don't recurse into JSDoc annotations.
             warn(
-              `unsupported: JSDoc annotation for namespace ${node.name} in ${sourceFile.fileName}`,
+              `unsupported: JSDoc annotation for namespace ` +
+                `${node.name} in ${sourceFile.fileName}`,
             );
             break;
           default:

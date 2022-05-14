@@ -269,7 +269,8 @@ export function convertSourceFile(
               // TODO(error): localize this to the one ts.ImportSpecifier
               return errorStatement(
                 node,
-                `internal error: renamed the imported type \`${propertyName.text}\`, but not its local binding`,
+                `internal error: renamed the imported type \`${propertyName.text}\`, ` +
+                  `but not its local binding`,
               );
             }
 
@@ -350,7 +351,8 @@ export function convertSourceFile(
 
     const source = !moduleSpecifier
       ? null
-      : // Quoth ExportDeclaration jsdoc: "If this is not a StringLiteral it will be a grammar error."
+      : // Quoth ExportDeclaration jsdoc:
+        //   > If this is not a StringLiteral it will be a grammar error.
         b.stringLiteral((moduleSpecifier as ts.StringLiteral).text);
 
     if (!exportClause) {
@@ -416,7 +418,7 @@ export function convertSourceFile(
       node.declarationList.flags & (ts.NodeFlags.Const | ts.NodeFlags.Let);
     const kind =
       flags === ts.NodeFlags.Const
-        ? "var" // TODO(runtime): For .js.flow files, we always declare `var`, not `const`.
+        ? "var" // TODO(runtime): For .js.flow files, we always declare `var`, not `const`
         : flags === ts.NodeFlags.Let
         ? "let"
         : "var";
@@ -1470,7 +1472,8 @@ export function convertSourceFile(
             b.typeParameter(
               param.name.text,
               null,
-              // TODO per param.constraint jsdoc: Consider calling `getEffectiveConstraintOfTypeParameter`
+              // TODO consider calling `getEffectiveConstraintOfTypeParameter`,
+              //   per param.constraint jsdoc
               !param.constraint
                 ? null
                 : b.typeAnnotation(convertType(param.constraint)),

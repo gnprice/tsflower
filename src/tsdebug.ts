@@ -116,7 +116,9 @@ export function debugFormatNode(node: ts.Node): string {
     isGeneratedIdentifier(node) ? "GeneratedIdentifier" :
     ts.isIdentifier(node) ? `Identifier '${ts.idText(node)}'` :
     ts.isPrivateIdentifier(node) ? `PrivateIdentifier '${ts.idText(node)}'` :
-    ts.isStringLiteral(node) ? `StringLiteral ${JSON.stringify(node.text.length < 10 ? node.text : node.text.slice(10) + "...")}` :
+    ts.isStringLiteral(node) ? `StringLiteral ${
+      JSON.stringify(node.text.length < 10 ? node.text : node.text.slice(10) + "...")
+    }` :
     ts.isNumericLiteral(node) ? `NumericLiteral ${node.text}` :
     ts.isBigIntLiteral(node) ? `BigIntLiteral ${node.text}n` :
     ts.isTypeParameterDeclaration(node) ? "TypeParameterDeclaration" :
