@@ -39,6 +39,7 @@ rules:
       ignoreUrls: true
 
   # Formatting that we let Prettier handle
+  operator-linebreak: off
   object-curly-spacing: off # Google has no spaces here
   quotes: off # Prettier wants `"it 'will'"`, not `'it \'will\''`.  Whatever.
   # For indent, I think I like the Google style better than Prettier's:
@@ -49,7 +50,6 @@ rules:
   indent: off
 
   # Rules we may want but require tweaking details and/or migrating code
-  operator-linebreak: off
   no-throw-literal: off
 
   # Rules we don't want
