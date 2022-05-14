@@ -55,43 +55,43 @@ function mkTypeReferenceMacro(
   return { kind: "TypeReferenceMacro", convert };
 }
 
-export const defaultLibraryRewrites: NamespaceRewrite = {
+function mkNamespaceRewrite(
+  types: void | { readonly [name: string]: TypeRewrite },
+  namespaces?: void | { readonly [name: string]: NamespaceRewrite },
+): NamespaceRewrite {
+  const r: NamespaceRewrite = {};
+  if (types) r.types = new Map(Object.entries(types));
+  if (namespaces) r.namespaces = new Map(Object.entries(namespaces));
+  return r;
+}
+
+export const defaultLibraryRewrites: NamespaceRewrite = mkNamespaceRewrite({
+  Readonly: mkFixedName("$ReadOnly"),
+  ReadonlyArray: mkFixedName("$ReadOnlyArray"),
+  Omit: mkTypeReferenceMacro(convertOmit),
   // If adding to this: note that any `namespaces` map is ignored.
   // See findRewritesInDefaultLibrary.
-  types: new Map([
-    ["Readonly", mkFixedName("$ReadOnly")],
-    ["ReadonlyArray", mkFixedName("$ReadOnlyArray")],
-    ["Omit", mkTypeReferenceMacro(convertOmit)],
-  ]),
-};
+});
 
-export const globalRewrites: NamespaceRewrite = {
+export const globalRewrites: NamespaceRewrite = mkNamespaceRewrite(undefined, {
   // If adding to this: note the unimplemented cases in findGlobalRewrites,
   // where we use this map.
-  namespaces: new Map([
-    [
-      "JSX",
-      {
-        types: new Map([["Element", mkTypeReferenceMacro(convertJsxElement)]]),
-      },
-    ],
-  ]),
-};
+  JSX: mkNamespaceRewrite({
+    Element: mkTypeReferenceMacro(convertJsxElement),
+  }),
+});
 
-export const libraryRewrites: Map<string, NamespaceRewrite> = new Map([
+export const libraryRewrites: Map<string, NamespaceRewrite> = new Map(
   // If adding to this: note that currently any namespace rewrites within a
   // given library are ignored!  That is, the `namespaces` property of one
   // of these NamespaceRewrite values is never consulted.  See use sites.
-  [
-    "react",
-    {
-      types: new Map([
-        ["Component", mkTypeReferenceMacro(convertReactComponent)],
-        ["ReactElement", mkTypeReferenceMacro(convertReactElement)],
-      ]),
-    },
-  ],
-]);
+  Object.entries({
+    react: mkNamespaceRewrite({
+      Component: mkTypeReferenceMacro(convertReactComponent),
+      ReactElement: mkTypeReferenceMacro(convertReactElement),
+    }),
+  }),
+);
 
 function convertOmit(
   converter: Converter,
