@@ -161,7 +161,7 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
    *
    * In other words, scan all "global augmentation" declarations.
    */
-  function findGlobalRewrites(_context: ts.TransformationContext) {
+  function findGlobalRewrites(context: ts.TransformationContext) {
     return visitSourceFile;
 
     function visitSourceFile(sourceFile: ts.SourceFile): ts.SourceFile {
@@ -232,7 +232,7 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
     }
   }
 
-  function findRewritesInDefaultLibrary(_context: ts.TransformationContext) {
+  function findRewritesInDefaultLibrary(context: ts.TransformationContext) {
     return visitSourceFile;
 
     function visitSourceFile(sourceFile: ts.SourceFile): ts.SourceFile {
@@ -270,7 +270,7 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
     }
   }
 
-  function findImportRenames(_context: ts.TransformationContext) {
+  function findImportRenames(context: ts.TransformationContext) {
     return visitSourceFile;
 
     function visitSourceFile(sourceFile: ts.SourceFile): ts.SourceFile {

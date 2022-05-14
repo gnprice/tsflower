@@ -42,11 +42,11 @@ rules:
   object-curly-spacing: off
   max-len: off
   no-throw-literal: off
-  no-unused-vars: off
 
 overrides:
   - files: "t/**/*.d.ts"
     rules:
       # Allow some things in our test inputs that we don't in normal code.
+      no-unused-vars: off
       no-var: off
       one-var: off

@@ -11,8 +11,8 @@ import {
 import { mkFixedName, mkNamespaceRewrite, mkTypeReferenceMacro } from "./core";
 
 function convertRecord(
-  _converter: Converter,
-  _typeName: ts.EntityNameOrEntityNameExpression,
+  converter: Converter,
+  typeName: ts.EntityNameOrEntityNameExpression,
   typeArguments: ts.NodeArray<ts.TypeNode> | void,
 ): ErrorOr<{
   id: K.IdentifierKind | n.QualifiedTypeIdentifier;
@@ -49,7 +49,6 @@ function convertRecord(
 
 function convertOmit(
   converter: Converter,
-  // @ts-expect-error yes, this is unused
   typeName: ts.EntityNameOrEntityNameExpression,
   typeArguments: ts.NodeArray<ts.TypeNode> | void,
 ): ErrorOr<{

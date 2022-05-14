@@ -1,5 +1,5 @@
 import ts from "typescript";
-import { builders as _b, namedTypes as n } from "ast-types";
+import { namedTypes as n } from "ast-types";
 import K from "ast-types/gen/kinds";
 import { Converter, ErrorOr } from "../convert";
 

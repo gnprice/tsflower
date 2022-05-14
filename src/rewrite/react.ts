@@ -45,7 +45,6 @@ function convertReactComponent(
 
 function convertReactElement(
   converter: Converter,
-  // @ts-expect-error yes, this is unused
   typeName: ts.EntityNameOrEntityNameExpression,
   typeArguments: ts.NodeArray<ts.TypeNode> | void,
 ) {

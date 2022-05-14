@@ -33,7 +33,7 @@
  * case is somehow reached.  Use that when there isn't an appropriate
  * more-specific way to signal an error.
  */
-export function ensureUnreachable(_x: never) {}
+export function ensureUnreachable(x: never) {}
 
 /**
  * Like `ensureUnreachable`, but if the impossible happens, throw.
