@@ -1,0 +1,4 @@
+// @flow
+
+declare export class C {}
+declare export class B<T = number> extends C {}

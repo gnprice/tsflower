@@ -28,3 +28,8 @@ export declare interface J extends I, I1 {} // should become I, I1<>
 
 export declare class CC1 implements I, I1 {} // should become I, I1<>
 export declare class CC2 extends CC1 implements J {}
+
+// Class extends, where the type and value come apart.
+
+import { B } from '../imported/heritage-external';
+class Derived extends B {}

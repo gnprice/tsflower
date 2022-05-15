@@ -12,3 +12,5 @@ export interface J1 extends I1<string> {};
 export interface J extends I, I1<> {};
 declare export class CC1 implements I, I1<> {};
 declare export class CC2 extends CC1 implements J {};
+import { B } from "../imported/heritage-external";
+declare class Derived extends B {}
