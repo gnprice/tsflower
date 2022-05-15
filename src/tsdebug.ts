@@ -157,6 +157,60 @@ export function debugFormatNode(node: ts.Node): string {
   }`;
 }
 
+// Adapted from the `__tsDebuggerDisplay` definition for types found in TS's
+// `src/compiler/debug.ts`.
+export function debugFormatType(type: ts.Type): string {
+  /* eslint-disable max-len */
+  // prettier-ignore
+  const typeHeader =
+    // type.flags & ts.TypeFlags.Nullable ? "NullableType" :
+    type.flags & (ts.TypeFlags.Null | ts.TypeFlags.Undefined) ? "NullableType" :
+    type.flags & ts.TypeFlags.StringOrNumberLiteral ? `LiteralType ${
+      JSON.stringify((type as ts.LiteralType).value)}` :
+    type.flags & ts.TypeFlags.BigIntLiteral ? `LiteralType ${
+        (type as ts.BigIntLiteralType).value.negative ? "-" : ""
+      }${(type as ts.BigIntLiteralType).value.base10Value}n` :
+    type.flags & ts.TypeFlags.UniqueESSymbol ? "UniqueESSymbolType" :
+    type.flags & ts.TypeFlags.Enum ? "EnumType" :
+    // type.flags & ts.TypeFlags.Intrinsic ? `IntrinsicType ${
+    //   (type as ts.IntrinsicType).intrinsicName}` :
+    type.flags & ts.TypeFlags.Union ? "UnionType" :
+    type.flags & ts.TypeFlags.Intersection ? "IntersectionType" :
+    type.flags & ts.TypeFlags.Index ? "IndexType" :
+    type.flags & ts.TypeFlags.IndexedAccess ? "IndexedAccessType" :
+    type.flags & ts.TypeFlags.Conditional ? "ConditionalType" :
+    type.flags & ts.TypeFlags.Substitution ? "SubstitutionType" :
+    type.flags & ts.TypeFlags.TypeParameter ? "TypeParameter" :
+    type.flags & ts.TypeFlags.Object ?
+        (type as ts.ObjectType).objectFlags & ts.ObjectFlags.ClassOrInterface ? "InterfaceType" :
+        (type as ts.ObjectType).objectFlags & ts.ObjectFlags.Reference ? "TypeReference" :
+        (type as ts.ObjectType).objectFlags & ts.ObjectFlags.Tuple ? "TupleType" :
+        (type as ts.ObjectType).objectFlags & ts.ObjectFlags.Anonymous ? "AnonymousType" :
+        (type as ts.ObjectType).objectFlags & ts.ObjectFlags.Mapped ? "MappedType" :
+        (type as ts.ObjectType).objectFlags & ts.ObjectFlags.ReverseMapped ? "ReverseMappedType" :
+        (type as ts.ObjectType).objectFlags & ts.ObjectFlags.EvolvingArray ? "EvolvingArrayType" :
+        "ObjectType" :
+    "Type";
+  /* eslint-enable max-len */
+  const kObjectTypeKindMask = // ts.ObjectFlags.ObjectTypeKindMask
+    ts.ObjectFlags.ClassOrInterface |
+    ts.ObjectFlags.Reference |
+    ts.ObjectFlags.Tuple |
+    ts.ObjectFlags.Anonymous |
+    ts.ObjectFlags.Mapped |
+    ts.ObjectFlags.ReverseMapped |
+    ts.ObjectFlags.EvolvingArray;
+  const remainingObjectFlags =
+    type.flags & ts.TypeFlags.Object
+      ? (type as ts.ObjectType).objectFlags & ~kObjectTypeKindMask
+      : 0;
+  return `${typeHeader}${
+    type.symbol ? ` '${ts.symbolName(type.symbol)}'` : ''
+  }${
+    remainingObjectFlags ? ` (${formatObjectFlags(remainingObjectFlags)})` : ''
+  }`;
+}
+
 // This isn't copied from anything in the TS implementation, but has a
 // similar flavor to the other helpers in this file.
 export function formatEntityNameExpression(
