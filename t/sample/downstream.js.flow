@@ -20,7 +20,7 @@ export { Num as Nummm } from "./upstream";
 export * from "./upstream";
 export type NumArray = Array<upstream.Num>;
 
-var importType: {|
+declare var importType: {|
     whole: $tsflower_import_typeof$_$_2e__2f_upstream,
     value: $ElementType<$tsflower_import_typeof$_$_2e__2f_upstream, "x">,
     subvalue: $ElementType<$ElementType<$ElementType<$tsflower_import_typeof$_$_2e__2f_upstream, "xx">, "y">, "z">,
@@ -30,7 +30,9 @@ var importType: {|
 |};
 
 type TupleArray<T, S: T> = [S, T[]][];
-export var xx: 3, y: "a", z: string;
+declare export var xx: 3;
+declare export var y: "a";
+declare export var z: string;
 declare export class C<T> {};
 declare function ff(x: boolean): void;
 export {};

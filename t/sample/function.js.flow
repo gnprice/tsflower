@@ -6,7 +6,7 @@ var vOptionalParam: (a: string, b?: number) => void;
 var vGeneric: <T>(x: T) => T[];
 var vDestructuring: destructuringArgs => void;
 
-export var value: {|
+declare export var value: {|
     pGeneric: <T>(x: T) => T[],
     pDestructuring: {| x: number |} => number,
 |};

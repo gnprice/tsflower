@@ -3,4 +3,4 @@
  */
 import { type ThingT, type Other } from "./defs";
 import type { ThingT as ThingAgainT } from "./defs";
-export var TT: ThingT;
+declare export var TT: ThingT;

@@ -13,7 +13,7 @@ export declare var latticeTypes: {
   nevr: never;
 };
 
-var keywordTypes: {
+declare var keywordTypes: {
   undef: undefined;
   void_: void;
   bool: boolean;
@@ -24,7 +24,7 @@ var keywordTypes: {
   // for `this`, see members.d.ts
 };
 
-var literalTypes: {
+declare var literalTypes: {
   n: null;
   t: true;
   f: false;
@@ -47,7 +47,7 @@ var literalTypes: {
 
 // type references covered in generics.d.ts
 
-var typeOperations: {
+declare var typeOperations: {
   // prettier-ignore
   parens: (number); // The TS parser has a node for parens around a type.
   query: {

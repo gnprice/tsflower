@@ -28,9 +28,9 @@ declare const importType: {
 
 declare type TupleArray<T, S extends T> = [S, T[]][];
 
-export declare const xx = 3,
-  y = 'a',
-  z: string = 'b';
+export declare const xx = 3;
+export declare const y = 'a';
+export declare const z: string = 'b';
 
 export declare class C<T> {}
 // export default class {} // TODO implement

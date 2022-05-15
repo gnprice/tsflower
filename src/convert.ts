@@ -105,7 +105,11 @@ export function convertSourceFile(
     inner: K.StatementKind,
     node: ts.Statement,
   ): K.StatementKind {
-    if (n.DeclareFunction.check(inner) || n.DeclareClass.check(inner)) {
+    if (
+      n.DeclareVariable.check(inner) ||
+      n.DeclareFunction.check(inner) ||
+      n.DeclareClass.check(inner)
+    ) {
       // TODO are there more cases that should go this way?
       return b.declareExportDeclaration(
         hasModifier(node, ts.SyntaxKind.DefaultKeyword),
@@ -425,25 +429,59 @@ export function convertSourceFile(
   function convertVariableStatement(
     node: ts.VariableStatement,
   ): K.StatementKind {
-    const flags =
-      node.declarationList.flags & (ts.NodeFlags.Const | ts.NodeFlags.Let);
-    const kind =
-      flags === ts.NodeFlags.Const
-        ? 'var' // TODO(runtime): For .js.flow files, we always declare `var`, not `const`
-        : flags === ts.NodeFlags.Let
-        ? 'let'
-        : 'var';
+    if (!hasModifier(node, ts.SyntaxKind.DeclareKeyword)) {
+      const flags =
+        node.declarationList.flags & (ts.NodeFlags.Const | ts.NodeFlags.Let);
+      /* prettier-ignore */ // Prettier fails to indent nested ternary
+      const kind =
+        flags === ts.NodeFlags.Const
+          ? 'const'
+          : flags === ts.NodeFlags.Let
+            ? 'let'
+            : 'var';
 
-    return b.variableDeclaration(
-      kind,
-      map(node.declarationList.declarations, convertVariableDeclaration),
-    );
+      return b.variableDeclaration(
+        kind,
+        map(node.declarationList.declarations, convertVariableDeclaration),
+      );
+    } else {
+      // A `declare` version.  TS gives these much the same syntax as an
+      // ordinary runtime VariableStatement: they can say const or let or
+      // var, and can declare several names.  But Flow makes it only `var`,
+      // and requires separate statements for separate names.
+      if (node.declarationList.declarations.length > 1) {
+        return unimplementedStatement(
+          node,
+          `'declare var' (or let or const) with multiple names`,
+        );
+      }
+      const declaration = node.declarationList.declarations[0];
 
-    function convertVariableDeclaration(declaration: ts.VariableDeclaration) {
-      const name = declaration.name /* TODO */ as ts.Identifier;
+      if (!ts.isIdentifier(declaration.name)) {
+        // TS actually does allow this, at least in plain .ts files.  E.g.:
+        //   export declare var { toString }: number;
+        // But then for the .d.ts file it turns that to:
+        //   export declare var toString: (radix?: number | undefined) => string;
+        // So at least it doesn't occur in TS-generated .d.ts files.
+        return unimplementedStatement(
+          node,
+          `'declare var' (or let or const) with binding pattern`,
+        );
+      }
+
+      const name = declaration.name;
       const type = declaration.type
         ? convertType(declaration.type)
         : convertInitializerToType(declaration.initializer);
+      return b.declareVariable(convertIdentifier(name, type));
+    }
+
+    function convertVariableDeclaration(declaration: ts.VariableDeclaration) {
+      const name = declaration.name /* TODO(error) */ as ts.Identifier;
+      const type = declaration.type
+        ? convertType(declaration.type)
+        : convertInitializerToType(declaration.initializer);
+      // TODO(runtime): convert initializer
       return b.variableDeclarator(convertIdentifier(name, type));
     }
 
