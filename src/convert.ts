@@ -585,12 +585,13 @@ export function convertSourceFile(
       return statementOfError(node, members);
     }
     const [properties, indexers, callProperties] = members;
+    const body = b.objectTypeAnnotation(properties, indexers, callProperties);
 
     const params = {
       id: convertIdentifier(node.name),
       typeParameters,
       extends: extends_,
-      body: b.objectTypeAnnotation(properties, indexers, callProperties),
+      body,
     };
 
     if (ts.isInterfaceDeclaration(node)) {
