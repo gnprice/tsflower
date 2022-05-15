@@ -77,6 +77,8 @@ function createProgram(rootNames: readonly string[]) {
   //   program.getDeclarationDiagnostics()
   // Perhaps warn on those?
 
+  // console.log(program.getSourceFiles().map((f) => f.fileName));
+
   return program;
 }
 

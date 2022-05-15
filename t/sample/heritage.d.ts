@@ -32,9 +32,24 @@ import * as React from 'react';
 
 // Class extends, where the base isn't declared as a class.
 
-export declare class CC3 extends React.Component {}
-export declare var NN: { O: { P: typeof React.Component } };
-// export declare class CC4 extends NN.O.P {} // TODO: should become NN.O.P<{ ... }>
+// export declare class CC3 extends React.Component {}
+// export const NN: { O: { P: typeof React.Component } } = {
+//   O: { P: React.Component },
+// };
+// // export declare class CC4 extends NN.O.P {} // TODO: should become NN.O.P<{ ... }>
+// NN.O.P;
+// React.Component;
+
+interface Component<P = {}, S = {}, SS = any> {}
+class Component<P, S> {}
+
+// export declare class CC1 extends Component {}
+export const NN: { O: { P: typeof Component } } = {
+  O: { P: Component },
+};
+export declare class CC3 extends NN.O.P {}
+NN.O.P;
+// Component;
 
 // Class extends, where the type and value come apart.
 
