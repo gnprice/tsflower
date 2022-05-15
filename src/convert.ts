@@ -563,22 +563,10 @@ export function convertSourceFile(
       if (token === ts.SyntaxKind.ExtendsKeyword) {
         for (const base of types) {
           const { expression, typeArguments } = base;
-          if (
-            !ts.isIdentifier(expression) &&
-            !ts.isPropertyAccessExpression(expression)
-          ) {
-            return errorStatement(
-              node,
-              `unexpected 'extends' base kind: ${formatSyntaxKind(
-                expression.kind,
-              )}`,
-            );
-          }
-          if (!isEntityNameOrEntityNameExpression(expression)) {
-            return errorStatement(node, `'extends' not an entity name`);
-          }
+          const name = ensureEntityNameExpression(expression, "'extends'");
+          if (Array.isArray(name)) return name[0];
 
-          const result = convertTypeReferenceLike(expression, typeArguments);
+          const result = convertTypeReferenceLike(name, typeArguments);
           if (result.kind !== 'success') {
             return statementOfError(node, result);
           }
@@ -606,6 +594,29 @@ export function convertSourceFile(
       return b.declareInterface.from(params);
     } else {
       return b.declareClass.from(params);
+    }
+
+    function ensureEntityNameExpression(
+      expression: ts.LeftHandSideExpression,
+      desc: string,
+    ): ts.EntityNameExpression | [K.StatementKind] {
+      if (
+        !ts.isIdentifier(expression) &&
+        !ts.isPropertyAccessExpression(expression)
+      ) {
+        return [
+          errorStatement(
+            node,
+            `unexpected ${desc} base kind: ${formatSyntaxKind(
+              expression.kind,
+            )}`,
+          ),
+        ];
+      }
+      if (!isEntityNameOrEntityNameExpression(expression)) {
+        return [errorStatement(node, `${desc} not an entity name`)];
+      }
+      return expression;
     }
   }
 
