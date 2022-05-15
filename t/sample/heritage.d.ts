@@ -9,26 +9,26 @@ import * as React from 'react';
 
 // Class extends.
 
-export declare class C {}
-export declare class C1<T = number> {}
+// export declare class C {}
+// export declare class C1<T = number> {}
 
-export declare class D1 extends C1<string> {}
+// export declare class D1 extends C1<string> {}
 
-export declare class D0 extends C1 {} // should become C1<>
-export declare class D extends C {} // … while this stays just C
+// export declare class D0 extends C1 {} // should become C1<>
+// export declare class D extends C {} // … while this stays just C
 
-// Interface extends.
+// // Interface extends.
 
-export declare interface I {}
-export declare interface I1<T = number> {}
+// export declare interface I {}
+// export declare interface I1<T = number> {}
 
-export declare interface J1 extends I1<string> {}
-export declare interface J extends I, I1 {} // should become I, I1<>
+// export declare interface J1 extends I1<string> {}
+// export declare interface J extends I, I1 {} // should become I, I1<>
 
-// Class implements.
+// // Class implements.
 
-export declare class CC1 implements I, I1 {} // should become I, I1<>
-export declare class CC2 extends CC1 implements J {}
+// export declare class CC1 implements I, I1 {} // should become I, I1<>
+// export declare class CC2 extends CC1 implements J {}
 
 // Class extends, where the base isn't declared as a class.
 
@@ -38,5 +38,5 @@ export declare var NN: { O: { P: typeof React.Component } };
 
 // Class extends, where the type and value come apart.
 
-import { B } from '../imported/heritage-external';
-class Derived extends B {}
+// import { B } from '../imported/heritage-external';
+// class Derived extends B {}

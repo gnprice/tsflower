@@ -686,6 +686,15 @@ export function convertSourceFile(
           //
         } else {
           // Class extends; a hybrid type/value reference.
+          const baseType = checker.getTypeAtLocation(base.expression);
+          console.log(checker.getTypeAtLocation(base.expression));
+          console.log(checker.getTypeAtLocation(base));
+          // console.log(checker.getContextualType(base.expression));
+          // console.log(checker.getContextualType(base));
+          // console.log(checker.getTypeFromTypeNode(base.expression));
+          // console.log(checker.getTypeFromTypeNode(base));
+          // checker.getApparentType()
+
           // TODO this logic is wrong, as if for a pure type reference.
           const result = convertTypeHeritage(base, `class 'extends'`);
           if (Array.isArray(result)) return result[0];
@@ -712,6 +721,7 @@ export function convertSourceFile(
       return b.declareClass.from({
         id: convertIdentifier(node.name),
         typeParameters,
+
         extends: extends_,
         implements: implements_,
         body,
