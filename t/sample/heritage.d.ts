@@ -40,15 +40,18 @@ import * as React from 'react';
 // NN.O.P;
 // React.Component;
 
-interface Component<P = {}, S = {}, SS = any> {}
-class Component<P, S> {}
+interface Component<P extends {} = {}, S = {}, SS = any> {}
+class Component<P extends {}, S> {}
 
 // export declare class CC1 extends Component {}
 export const NN: { O: { P: typeof Component } } = {
   O: { P: Component },
 };
-export declare class CC3 extends NN.O.P {}
-NN.O.P;
+// export declare class CC3 extends NN.O.P<string, number, null, boolean> {}
+// … Why does TS give no error here?
+export declare class CC3 extends Component<'a', number, null, boolean> {}
+const x: number = 'a'; // or for that matter here, hmm.
+// NN.O.P;
 // Component;
 
 // Class extends, where the type and value come apart.

@@ -11,7 +11,6 @@ import {
 import { assertUnreachable, ensureUnreachable } from './generics';
 import { escapeNamesAsIdentifierWithPrefix } from './names';
 import { formatEntityNameExpression, formatSyntaxKind } from './tsdebug';
-import { debugFormatType } from './tsdebug';
 import { NamespaceRewrite, SubstituteType } from './rewrite/core';
 
 export type ErrorDescription = {
@@ -185,20 +184,20 @@ export function convertSourceFile(
         return unimplementedStatement(node, formatSyntaxKind(node.kind));
 
       case ts.SyntaxKind.ExpressionStatement:
-        var ttype = checker.getTypeAtLocation(
-          (node as ts.ExpressionStatement).expression,
-        );
-        // ttype = checker.getTypeOfSymbol(
-        //   checker.getSymbolAtLocation(node.expression),
-        // );
-        console.log(
-          // node,
-          ttype,
-          formatSyntaxKind(node.kind),
-          formatSyntaxKind(node.expression.kind),
-          debugFormatType(ttype),
-          checker.getSymbolAtLocation(node.expression.expression),
-        );
+      // var ttype = checker.getTypeAtLocation(
+      //   (node as ts.ExpressionStatement).expression,
+      // );
+      // // ttype = checker.getTypeOfSymbol(
+      // //   checker.getSymbolAtLocation(node.expression),
+      // // );
+      // console.log(
+      //   // node,
+      //   ttype,
+      //   formatSyntaxKind(node.kind),
+      //   formatSyntaxKind(node.expression.kind),
+      //   debugFormatType(ttype),
+      //   checker.getSymbolAtLocation(node.expression.expression),
+      // );
       // fallthrough
 
       case ts.SyntaxKind.IfStatement:
@@ -703,7 +702,7 @@ export function convertSourceFile(
           //
         } else {
           // Class extends; a hybrid type/value reference.
-          const baseType = checker.getTypeAtLocation(base.expression);
+          // const baseType = checker.getTypeAtLocation(base.expression);
           console.log(checker.getTypeAtLocation(base.expression));
           console.log(checker.getTypeAtLocation(base));
           // console.log(checker.getContextualType(base.expression));
