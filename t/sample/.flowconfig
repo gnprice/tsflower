@@ -1,2 +1,5 @@
 [include]
 ../imported/
+
+[lints]
+untyped-import=error
