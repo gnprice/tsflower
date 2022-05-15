@@ -32,7 +32,6 @@ var importType: {|
 type TupleArray<T, S: T> = [S, T[]][];
 export var xx: 3, y: "a", z: string;
 declare export class C<T> {};
-declare export class D extends C<string> {};
 declare function ff(x: boolean): void;
 export {};
 export { ff as fff, C as CC };

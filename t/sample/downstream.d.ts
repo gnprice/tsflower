@@ -33,8 +33,6 @@ export declare const xx = 3,
   z: string = 'b';
 
 export declare class C<T> {}
-export declare class D extends C<string> {}
-
 // export default class {} // TODO implement
 
 declare function ff(x: boolean): void;
