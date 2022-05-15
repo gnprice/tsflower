@@ -5,6 +5,7 @@
  * In particular default-lib.d.ts and react.d.ts test their interaction
  * with our rewriting (of references with external translation).
  */
+import * as React from 'react';
 
 // Class extends.
 
@@ -28,6 +29,12 @@ export declare interface J extends I, I1 {} // should become I, I1<>
 
 export declare class CC1 implements I, I1 {} // should become I, I1<>
 export declare class CC2 extends CC1 implements J {}
+
+// Class extends, where the base isn't declared as a class.
+
+export declare class CC3 extends React.Component {}
+export declare var NN: { O: { P: typeof React.Component } };
+// export declare class CC4 extends NN.O.P {} // TODO: should become NN.O.P<{ ... }>
 
 // Class extends, where the type and value come apart.
 

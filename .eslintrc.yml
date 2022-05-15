@@ -70,6 +70,7 @@ overrides:
       one-var: off
       no-octal: off
       no-loss-of-precision: off
+      camelcase: off
 
       max-len:
         - error
