@@ -562,15 +562,11 @@ export function convertSourceFile(
       const { token, types } = heritageClause;
       if (token === ts.SyntaxKind.ExtendsKeyword) {
         for (const base of types) {
-          const { expression, typeArguments } = base;
-          const name = ensureEntityNameExpression(expression, "'extends'");
-          if (Array.isArray(name)) return name[0];
-
-          const result = convertTypeReferenceLike(name, typeArguments);
-          if (result.kind !== 'success') {
-            return statementOfError(node, result);
-          }
-          extends_.push(b.interfaceExtends.from(result.result));
+          // TODO: This isn't right for class-extends, which is a hybrid
+          //   type/value reference and not a pure type reference.
+          const result = prepareTypeHeritage(base, "'extends'");
+          if (Array.isArray(result)) return result[0];
+          extends_.push(b.interfaceExtends.from(result));
         }
       } else {
         return unimplementedStatement(node, `class 'implements'`);
@@ -594,6 +590,26 @@ export function convertSourceFile(
       return b.declareInterface.from(params);
     } else {
       return b.declareClass.from(params);
+    }
+
+    function prepareTypeHeritage(
+      base: ts.ExpressionWithTypeArguments,
+      description: string,
+    ):
+      | [K.StatementKind]
+      | {
+          id: K.IdentifierKind | n.QualifiedTypeIdentifier;
+          typeParameters: n.TypeParameterInstantiation | null;
+        } {
+      const { expression, typeArguments } = base;
+      const name = ensureEntityNameExpression(expression, description);
+      if (Array.isArray(name)) return name;
+
+      const result = convertTypeReferenceLike(name, typeArguments);
+      if (result.kind !== 'success') {
+        return [statementOfError(node, result)];
+      }
+      return result.result;
     }
 
     function ensureEntityNameExpression(
