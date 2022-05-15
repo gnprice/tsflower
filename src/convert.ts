@@ -1042,8 +1042,9 @@ export function convertSourceFile(
     typeParameters: n.TypeParameterInstantiation | null;
   }> {
     const mapped = mapper.getTypeName(typeName);
+    let result;
     if (!mapped) {
-      return mkSuccess({
+      result = mkSuccess({
         id: convertEntityNameAsType(typeName),
         typeParameters: convertTypeArguments(
           checker.getSymbolAtLocation(typeName),
@@ -1058,21 +1059,24 @@ export function convertSourceFile(
 
         case 'FixedName':
         case 'RenameType':
-          return mkSuccess({
+          result = mkSuccess({
             id: b.identifier(mapped.name),
             typeParameters: convertTypeArguments(
               checker.getSymbolAtLocation(typeName),
               typeArguments,
             ),
           });
+          break;
 
         case 'TypeReferenceMacro':
-          return mapped.convert(converter, typeName, typeArguments);
+          result = mapped.convert(converter, typeName, typeArguments);
+          break;
 
         default:
           assertUnreachable(mapped, (m) => `TypeRewrite kind: ${m.kind}`);
       }
     }
+    return result;
 
     function ensureEmittedSubstitute(rewrite: SubstituteType) {
       if (substituteTypes.has(rewrite.name)) return;
