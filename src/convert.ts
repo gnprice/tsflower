@@ -659,7 +659,43 @@ export function convertSourceFile(
       const name = ensureEntityNameExpression(expression, description);
       if (Array.isArray(name)) return name;
 
-      const result = convertTypeReferenceLike(name, typeArguments);
+      const typeName = name;
+      const mapped = mapper.getTypeName(typeName);
+      let result;
+      if (!mapped) {
+        result = mkSuccess({
+          id: convertEntityNameAsType(typeName),
+          typeParameters: convertTypeArguments(
+            checker.getSymbolAtLocation(typeName),
+            typeArguments,
+          ),
+        });
+      } else {
+        switch (mapped.kind) {
+          case 'SubstituteType':
+            ensureEmittedSubstitute(mapped);
+          // fallthrough
+
+          case 'FixedName':
+          case 'RenameType':
+            result = mkSuccess({
+              id: b.identifier(mapped.name),
+              typeParameters: convertTypeArguments(
+                checker.getSymbolAtLocation(typeName),
+                typeArguments,
+              ),
+            });
+            break;
+
+          case 'TypeReferenceMacro':
+            result = mapped.convert(converter, typeName, typeArguments);
+            break;
+
+          default:
+            assertUnreachable(mapped, (m) => `TypeRewrite kind: ${m.kind}`);
+        }
+      }
+
       if (result.kind !== 'success') {
         return [statementOfError(node, result)];
       }
@@ -1025,22 +1061,7 @@ export function convertSourceFile(
   }
 
   function convertTypeReference(node: ts.TypeReferenceNode): K.FlowTypeKind {
-    const result = convertTypeReferenceLike(node.typeName, node.typeArguments);
-    if (result.kind !== 'success') {
-      return typeOfError(node, result);
-    }
-    return b.genericTypeAnnotation.from(result.result);
-  }
-
-  /** (This calls `mapper.getSymbol`.  Each call site should therefore have
-   * a corresponding case in the visitor in `createMapper`.) */
-  function convertTypeReferenceLike(
-    typeName: ts.EntityNameOrEntityNameExpression,
-    typeArguments: ts.NodeArray<ts.TypeNode> | void,
-  ): ErrorOr<{
-    id: K.IdentifierKind | n.QualifiedTypeIdentifier;
-    typeParameters: n.TypeParameterInstantiation | null;
-  }> {
+    const { typeName, typeArguments } = node;
     const mapped = mapper.getTypeName(typeName);
     let result;
     if (!mapped) {
@@ -1076,14 +1097,18 @@ export function convertSourceFile(
           assertUnreachable(mapped, (m) => `TypeRewrite kind: ${m.kind}`);
       }
     }
-    return result;
 
-    function ensureEmittedSubstitute(rewrite: SubstituteType) {
-      if (substituteTypes.has(rewrite.name)) return;
-      substituteTypes.add(rewrite.name);
-      forEach(rewrite.dependencies, ensureEmittedSubstitute);
-      preambleStatements.push(...rewrite.substitute());
+    if (result.kind !== 'success') {
+      return typeOfError(node, result);
     }
+    return b.genericTypeAnnotation.from(result.result);
+  }
+
+  function ensureEmittedSubstitute(rewrite: SubstituteType) {
+    if (substituteTypes.has(rewrite.name)) return;
+    substituteTypes.add(rewrite.name);
+    forEach(rewrite.dependencies, ensureEmittedSubstitute);
+    preambleStatements.push(...rewrite.substitute());
   }
 
   function convertEntityNameAsType(

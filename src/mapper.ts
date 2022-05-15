@@ -22,11 +22,17 @@ export interface Mapper {
    * investigate that symbol.) */
   getSymbol(symbol: ts.Symbol): void | TypeRewrite;
 
+  /** (Each call to this in the converter should have a corresponding case
+   * in the visitor in `createMapper`, to ensure that we find and
+   * investigate that symbol.) */
   getQualifiedSymbol(
     qualifierSymbol: ts.Symbol,
     name: string,
   ): void | TypeRewrite;
 
+  /** (Each call to this in the converter should have a corresponding case
+   * in the visitor in `createMapper`, to ensure that we find and
+   * investigate that symbol.) */
   getTypeName(
     typeName: ts.EntityNameOrEntityNameExpression,
   ): void | TypeRewrite;
