@@ -559,17 +559,24 @@ export function convertSourceFile(
 
     const extends_: n.InterfaceExtends[] = [];
     for (const heritageClause of node.heritageClauses ?? []) {
-      const { token, types } = heritageClause;
-      if (token === ts.SyntaxKind.ExtendsKeyword) {
-        for (const base of types) {
-          // TODO: This isn't right for class-extends, which is a hybrid
-          //   type/value reference and not a pure type reference.
+      for (const base of heritageClause.types) {
+        if (heritageClause.token === ts.SyntaxKind.ImplementsKeyword) {
+          // Class implements; a pure type reference.
+          return unimplementedStatement(node, `class 'implements'`);
+          //
+        } else if (ts.isInterfaceDeclaration(node)) {
+          // Interface extends; a pure type reference.
+          const result = prepareTypeHeritage(base, "'extends'");
+          if (Array.isArray(result)) return result[0];
+          extends_.push(b.interfaceExtends.from(result));
+          //
+        } else {
+          // Class extends; a hybrid type/value reference.
+          // TODO this logic is wrong, as if for a pure type reference.
           const result = prepareTypeHeritage(base, "'extends'");
           if (Array.isArray(result)) return result[0];
           extends_.push(b.interfaceExtends.from(result));
         }
-      } else {
-        return unimplementedStatement(node, `class 'implements'`);
       }
     }
 
