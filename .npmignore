@@ -1,4 +1,5 @@
 # Files in Git tree, for use at dev time:
+.eslintignore
 .eslintrc.yml
 .prettierignore
 .prettierrc
