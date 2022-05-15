@@ -558,22 +558,26 @@ export function convertSourceFile(
     const typeParameters = convertTypeParameterDeclaration(node.typeParameters);
 
     const extends_: n.InterfaceExtends[] = [];
+    const implements_: n.ClassImplements[] = [];
     for (const heritageClause of node.heritageClauses ?? []) {
       for (const base of heritageClause.types) {
         if (heritageClause.token === ts.SyntaxKind.ImplementsKeyword) {
           // Class implements; a pure type reference.
-          return unimplementedStatement(node, `class 'implements'`);
+          const result = prepareTypeHeritage(base, `class 'implements'`);
+          if (Array.isArray(result)) return result[0];
+          // @ts-expect-error TODO(ast-types) fix `id` type to accept qualified name
+          implements_.push(b.classImplements.from(result));
           //
         } else if (ts.isInterfaceDeclaration(node)) {
           // Interface extends; a pure type reference.
-          const result = prepareTypeHeritage(base, "'extends'");
+          const result = prepareTypeHeritage(base, `interface 'extends'`);
           if (Array.isArray(result)) return result[0];
           extends_.push(b.interfaceExtends.from(result));
           //
         } else {
           // Class extends; a hybrid type/value reference.
           // TODO this logic is wrong, as if for a pure type reference.
-          const result = prepareTypeHeritage(base, "'extends'");
+          const result = prepareTypeHeritage(base, `class 'extends'`);
           if (Array.isArray(result)) return result[0];
           extends_.push(b.interfaceExtends.from(result));
         }
@@ -587,17 +591,21 @@ export function convertSourceFile(
     const [properties, indexers, callProperties] = members;
     const body = b.objectTypeAnnotation(properties, indexers, callProperties);
 
-    const params = {
-      id: convertIdentifier(node.name),
-      typeParameters,
-      extends: extends_,
-      body,
-    };
-
     if (ts.isInterfaceDeclaration(node)) {
-      return b.declareInterface.from(params);
+      return b.declareInterface.from({
+        id: convertIdentifier(node.name),
+        typeParameters,
+        extends: extends_,
+        body,
+      });
     } else {
-      return b.declareClass.from(params);
+      return b.declareClass.from({
+        id: convertIdentifier(node.name),
+        typeParameters,
+        extends: extends_,
+        implements: implements_,
+        body,
+      });
     }
 
     function prepareTypeHeritage(

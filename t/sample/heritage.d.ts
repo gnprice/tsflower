@@ -23,3 +23,8 @@ export declare interface I1<T = number> {}
 
 export declare interface J1 extends I1<string> {}
 export declare interface J extends I, I1 {} // should become I, I1<>
+
+// Class implements.
+
+export declare class CC1 implements I, I1 {} // should become I, I1<>
+export declare class CC2 extends CC1 implements J {}

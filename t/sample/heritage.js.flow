@@ -10,3 +10,5 @@ export interface I {};
 export interface I1<T=number> {};
 export interface J1 extends I1<string> {};
 export interface J extends I, I1<> {};
+declare export class CC1 implements I, I1<> {};
+declare export class CC2 extends CC1 implements J {};

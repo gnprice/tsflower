@@ -40,4 +40,18 @@ var omit: {
 
 // Test that rewrites apply in `extends`, as well as TypeReference
 interface I extends ReadonlyArray<string> {}
-// class C implements ReadonlyArray<string> {} // TODO class implements
+// Though that's not much use when the base isn't itself an interface:
+// Flow distinguishes interfaces from other types, and doesn't allow
+// `implements` on non-interfaces.
+//
+// So although this would get rewritten, the result is still a Flow error:
+//   class C implements ReadonlyArray<string> {}
+// And even though interface-extends is allowed, if you then try to use
+// that interface:
+//   class C implements I {}
+// you get the same `cannot-implement` error, referring back to
+// $ReadOnlyArray.
+//
+// TODO(test): Add a better example, once we have a translation to something
+//   flowlib does call an interface.  Perhaps Iterable/$Iterable,
+//   or IterableIterator/$Iterator?  Or something in the DOM.
