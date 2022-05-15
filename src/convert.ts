@@ -580,9 +580,7 @@ export function convertSourceFile(
 
           const result = convertTypeReferenceLike(expression, typeArguments);
           if (result.kind !== 'success') {
-            return result.kind === 'error'
-              ? errorStatement(node, result.description)
-              : unimplementedStatement(node, result.description);
+            return statementOfError(node, result);
           }
           extends_.push(b.interfaceExtends.from(result.result));
         }
@@ -593,9 +591,7 @@ export function convertSourceFile(
 
     const members = convertMembers(node);
     if (!Array.isArray(members)) {
-      if (members.kind === 'unimplemented') {
-        return unimplementedStatement(node, members.description);
-      } else return errorStatement(node, members.description);
+      return statementOfError(node, members);
     }
     const [properties, indexers, callProperties] = members;
 
@@ -950,9 +946,7 @@ export function convertSourceFile(
   function convertTypeReference(node: ts.TypeReferenceNode): K.FlowTypeKind {
     const result = convertTypeReferenceLike(node.typeName, node.typeArguments);
     if (result.kind !== 'success') {
-      return result.kind === 'error'
-        ? errorType(node, result.description)
-        : unimplementedType(node, result.description);
+      return typeOfError(node, result);
     }
     return b.genericTypeAnnotation.from(result.result);
   }
@@ -1123,9 +1117,7 @@ export function convertSourceFile(
   function convertTypeLiteral(node: ts.TypeLiteralNode): K.FlowTypeKind {
     const members = convertMembers(node);
     if (!Array.isArray(members)) {
-      if (members.kind === 'unimplemented') {
-        return unimplementedType(node, members.description);
-      } else return errorType(node, members.description);
+      return typeOfError(node, members);
     }
     const [properties, indexers, callProperties] = members;
 
@@ -1469,10 +1461,7 @@ export function convertSourceFile(
     ): n.ObjectTypeProperty {
       return b.objectTypeProperty.from({
         key: b.identifier(`$tsflower$property$${properties.length}`),
-        value:
-          desc.kind === 'error'
-            ? errorType(node, desc.description)
-            : unimplementedType(node, desc.description),
+        value: typeOfError(node, desc),
         optional: false,
       });
     }
@@ -1544,6 +1533,15 @@ export function convertSourceFile(
     );
   }
 
+  function statementOfError(
+    node: ts.Statement,
+    desc: ErrorDescription,
+  ): K.StatementKind {
+    return desc.kind === 'error'
+      ? errorStatement(node, desc.description)
+      : unimplementedStatement(node, desc.description);
+  }
+
   function warningStatement(
     outNode: K.StatementKind,
     node: ts.Statement,
@@ -1576,6 +1574,12 @@ export function convertSourceFile(
     return b.emptyStatement.from({
       comments: [b.commentBlock(msg, true, false), quotedStatement(node)],
     });
+  }
+
+  function typeOfError(node: ts.Node, desc: ErrorDescription): K.FlowTypeKind {
+    return desc.kind === 'error'
+      ? errorType(node, desc.description)
+      : unimplementedType(node, desc.description);
   }
 
   function warningType(
