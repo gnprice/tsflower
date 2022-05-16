@@ -31,11 +31,14 @@ plugins:
   - '@typescript-eslint'
 
 rules:
-  # Google has code: 80.  We have Prettier target 80 columns,
-  # but allow an occasional line to go wider.
+  # Google has code: 80 (and lets `comments` default to match it.)
+  # We have Prettier target 80 columns, but allow an occasional line to go
+  # wider.  The lines that Prettier lets get really long tend to be template
+  # literals for user-facing messages.
   max-len:
     - error
-    - code: 90
+    - comments: 90
+      code: 120
       tabWidth: 2
       ignoreUrls: true
 
