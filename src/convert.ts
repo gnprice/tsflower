@@ -264,72 +264,8 @@ export function convertSourceFile(
     if (namedBindings) {
       if (ts.isNamedImports(namedBindings)) {
         for (const binding of namedBindings.elements) {
-          const { name } = binding;
-          const propertyName = binding.propertyName ?? name;
-          const localSymbol = checker.getSymbolAtLocation(name);
-          const importedSymbol =
-            localSymbol && checker.getImmediateAliasedSymbol(localSymbol);
-
-          const mapped = importedSymbol && mapper.getSymbol(importedSymbol);
-          if (mapped) {
-            switch (mapped.kind) {
-              case 'RenameType': {
-                const mappedLocal = mapper.getSymbol(localSymbol);
-                if (!mappedLocal || mappedLocal.kind !== 'RenameType') {
-                  // TODO(error): localize this to the one ts.ImportSpecifier
-                  return errorStatement(
-                    node,
-                    `internal error: renamed the imported type \`${propertyName.text}\`, ` +
-                      `but not its local binding`,
-                  );
-                }
-
-                if (importClause.isTypeOnly) {
-                  // It's an `import type`.  Use the type's name, but don't say
-                  // `type` (the redundancy is invalid in both Flow and TS.)
-                  addImportSpecifier('value', mapped.name, mappedLocal.name);
-                } else {
-                  // Not an `import type`.  Import the type with `type`…
-                  addImportSpecifier('type', mapped.name, mappedLocal.name);
-                  // … and then the value, unless this was `import { type Foo }`.
-                  if (!binding.isTypeOnly) {
-                    addImportSpecifier('value', propertyName.text, name.text);
-                  }
-                }
-                continue;
-              }
-
-              case 'FixedName':
-              case 'SubstituteType':
-              case 'TypeMacro':
-              case 'TypeReferenceMacro':
-                // Handle these as if the mapper hadn't said anything.
-                // TODO: perhaps drop the imports instead.  Or can these
-                //   cases even happen?
-                break;
-
-              default:
-                assertUnreachable(mapped, (m) => `TypeRewrite kind: ${m.kind}`);
-            }
-          }
-
-          const isTypeOnly =
-            binding.isTypeOnly ||
-            // If the symbol is declared only as a type, not a value, then in
-            // Flow we need to say "type" on the import.  (It might have both:
-            // for example, both an interface and class declaration, like
-            // React.Component does.)
-            (importedSymbol &&
-              !(importedSymbol.flags & ts.SymbolFlags.Value) &&
-              // But if it's already an `import type`, avoid redundancy
-              // (which would be a syntax error.)
-              !importClause.isTypeOnly);
-
-          addImportSpecifier(
-            isTypeOnly ? 'type' : 'value',
-            propertyName.text,
-            name.text,
-          );
+          const err = convertImportSpecifier(binding, importClause);
+          if (err) return err;
         }
       } else {
         specifiers.push(
@@ -348,6 +284,78 @@ export function convertSourceFile(
         : 'value';
 
     return b.importDeclaration(specifiers, source, importKind);
+
+    function convertImportSpecifier(
+      binding: ts.ImportSpecifier,
+      importClause: ts.ImportClause,
+    ): void | K.StatementKind {
+      const { name } = binding;
+      const propertyName = binding.propertyName ?? name;
+      const localSymbol = checker.getSymbolAtLocation(name);
+      const importedSymbol =
+        localSymbol && checker.getImmediateAliasedSymbol(localSymbol);
+
+      const mapped = importedSymbol && mapper.getSymbol(importedSymbol);
+      if (mapped) {
+        switch (mapped.kind) {
+          case 'RenameType': {
+            const mappedLocal = mapper.getSymbol(localSymbol);
+            if (!mappedLocal || mappedLocal.kind !== 'RenameType') {
+              // TODO(error): localize this to the one ts.ImportSpecifier
+              return errorStatement(
+                node,
+                `internal error: renamed the imported type \`${propertyName.text}\`, ` +
+                  `but not its local binding`,
+              );
+            }
+
+            if (importClause.isTypeOnly) {
+              // It's an `import type`.  Use the type's name, but don't say
+              // `type` (the redundancy is invalid in both Flow and TS.)
+              addImportSpecifier('value', mapped.name, mappedLocal.name);
+            } else {
+              // Not an `import type`.  Import the type with `type`…
+              addImportSpecifier('type', mapped.name, mappedLocal.name);
+              // … and then the value, unless this was `import { type Foo }`.
+              if (!binding.isTypeOnly) {
+                addImportSpecifier('value', propertyName.text, name.text);
+              }
+            }
+            return;
+          }
+
+          case 'FixedName':
+          case 'SubstituteType':
+          case 'TypeMacro':
+          case 'TypeReferenceMacro':
+            // Handle these as if the mapper hadn't said anything.
+            // TODO: perhaps drop the imports instead.  Or can these
+            //   cases even happen?
+            break;
+
+          default:
+            assertUnreachable(mapped, (m) => `TypeRewrite kind: ${m.kind}`);
+        }
+      }
+
+      const isTypeOnly =
+        binding.isTypeOnly ||
+        // If the symbol is declared only as a type, not a value, then in
+        // Flow we need to say "type" on the import.  (It might have both:
+        // for example, both an interface and class declaration, like
+        // React.Component does.)
+        (importedSymbol &&
+          !(importedSymbol.flags & ts.SymbolFlags.Value) &&
+          // But if it's already an `import type`, avoid redundancy
+          // (which would be a syntax error.)
+          !importClause.isTypeOnly);
+
+      addImportSpecifier(
+        isTypeOnly ? 'type' : 'value',
+        propertyName.text,
+        name.text,
+      );
+    }
 
     function addImportSpecifier(
       importKind: 'value' | 'type' | 'typeof',
