@@ -1,6 +1,9 @@
 import ts from 'typescript';
 import { builders as b, namedTypes as n } from 'ast-types';
 import K from 'ast-types/gen/kinds';
+// @ts-expect-error no TS types for flow-parser :-p
+import * as flowParser from 'flow-parser';
+import * as recast from 'recast';
 import {
   Converter,
   ErrorOr,
@@ -11,10 +14,23 @@ import {
 import {
   mkFixedName,
   mkNamespaceRewrite,
+  mkSubstituteType,
   mkTypeMacro,
   mkTypeReferenceMacro,
 } from './core';
 import { formatSyntaxKind } from '../tsdebug';
+
+// From lib.es5.d.ts:
+//   type Partial<T> = { [P in keyof T]?: T[P]; };
+// No need to munge the name; the input code won't have had to import it, so
+// won't have a chance to pick a different name.  Keep TS's name for it, and
+// just supply a Flow definition.
+const substitutePartial = mkSubstituteType('Partial', () => {
+  const text = `
+  type Partial<T> = $Rest<T, { ... }>;
+  `;
+  return recast.parse(text, { parser: flowParser }).program.body;
+});
 
 function convertRecord(
   converter: Converter,
@@ -166,6 +182,7 @@ export function prepDefaultLibraryRewrites() {
   return mkNamespaceRewrite({
     Readonly: mkFixedName('$ReadOnly'),
     ReadonlyArray: mkFixedName('$ReadOnlyArray'),
+    Partial: substitutePartial,
     Record: mkTypeMacro(convertRecord),
     Omit: mkTypeReferenceMacro(convertOmit),
     // If adding to this: note that any `namespaces` map is ignored.

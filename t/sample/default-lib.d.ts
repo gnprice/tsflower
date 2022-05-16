@@ -8,6 +8,11 @@ var readonlyArray: {
   a: ReadonlyArray<number>;
 };
 
+var partial: {
+  a: Partial<{ x: number; y?: string }>;
+  b: Partial<{}>;
+};
+
 var record: {
   stringLiteral: Record<'a', number>;
   // TODO(test): more forms of number
