@@ -271,30 +271,46 @@ export function convertSourceFile(
             localSymbol && checker.getImmediateAliasedSymbol(localSymbol);
 
           const mapped = importedSymbol && mapper.getSymbol(importedSymbol);
-          if (mapped && mapped.kind === 'RenameType') {
-            const mappedLocal = mapper.getSymbol(localSymbol);
-            if (!mappedLocal || mappedLocal.kind !== 'RenameType') {
-              // TODO(error): localize this to the one ts.ImportSpecifier
-              return errorStatement(
-                node,
-                `internal error: renamed the imported type \`${propertyName.text}\`, ` +
-                  `but not its local binding`,
-              );
-            }
+          if (mapped) {
+            switch (mapped.kind) {
+              case 'RenameType': {
+                const mappedLocal = mapper.getSymbol(localSymbol);
+                if (!mappedLocal || mappedLocal.kind !== 'RenameType') {
+                  // TODO(error): localize this to the one ts.ImportSpecifier
+                  return errorStatement(
+                    node,
+                    `internal error: renamed the imported type \`${propertyName.text}\`, ` +
+                      `but not its local binding`,
+                  );
+                }
 
-            if (importClause.isTypeOnly) {
-              // It's an `import type`.  Use the type's name, but don't say
-              // `type` (the redundancy is invalid in both Flow and TS.)
-              addImportSpecifier('value', mapped.name, mappedLocal.name);
-            } else {
-              // Not an `import type`.  Import the type with `type`…
-              addImportSpecifier('type', mapped.name, mappedLocal.name);
-              // … and then the value, unless this was `import { type Foo }`.
-              if (!binding.isTypeOnly) {
-                addImportSpecifier('value', propertyName.text, name.text);
+                if (importClause.isTypeOnly) {
+                  // It's an `import type`.  Use the type's name, but don't say
+                  // `type` (the redundancy is invalid in both Flow and TS.)
+                  addImportSpecifier('value', mapped.name, mappedLocal.name);
+                } else {
+                  // Not an `import type`.  Import the type with `type`…
+                  addImportSpecifier('type', mapped.name, mappedLocal.name);
+                  // … and then the value, unless this was `import { type Foo }`.
+                  if (!binding.isTypeOnly) {
+                    addImportSpecifier('value', propertyName.text, name.text);
+                  }
+                }
+                continue;
               }
+
+              case 'FixedName':
+              case 'SubstituteType':
+              case 'TypeMacro':
+              case 'TypeReferenceMacro':
+                // Handle these as if the mapper hadn't said anything.
+                // TODO: perhaps drop the imports instead.  Or can these
+                //   cases even happen?
+                break;
+
+              default:
+                assertUnreachable(mapped, (m) => `TypeRewrite kind: ${m.kind}`);
             }
-            continue;
           }
 
           const isTypeOnly =
