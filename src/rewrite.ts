@@ -5,6 +5,7 @@ import {
 } from './rewrite/core';
 import { prepDefaultLibraryRewrites } from './rewrite/defaultLibrary';
 import { prepGlobalJsxRewrites, prepReactRewrites } from './rewrite/react';
+import { prepReactNativeRewrites } from './rewrite/reactNative';
 
 export type { NamespaceRewrite, TypeRewrite } from './rewrite/core';
 
@@ -24,4 +25,6 @@ export const libraryRewrites: Map<string, NamespaceRewrite> = mapOfObject({
 
   // All from `@types/react/index.d.ts`.
   react: prepReactRewrites(),
+
+  'react-native': prepReactNativeRewrites(),
 });

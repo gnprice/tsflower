@@ -1,5 +1,15 @@
 [include]
 ../imported/
+../../node_modules/react-native/
 
 [lints]
 untyped-import=error
+
+[options]
+
+; The RN template app has:
+; module.name_mapper='^react-native/\(.*\)$' -> '<PROJECT_ROOT>/node_modules/react-native/\1'
+; We make that:
+module.name_mapper='^react-native/\(.*\)$' -> '<PROJECT_ROOT>/../../node_modules/react-native/\1'
+; and add:
+module.name_mapper='^react-native$' -> '<PROJECT_ROOT>/../../node_modules/react-native'
