@@ -28,7 +28,8 @@
     "eslint-config-google": "^0.14.0",
     "flow-bin": "^0.176.3",
     "prettier": "^2.6.2",
-    "react": "^18.1.0",
+    "react": "17.0.2",
+    "react-native": "^0.67.4",
     "yarn-deduplicate": "^5.0.0"
   },
   "main": "lib/index.js",
