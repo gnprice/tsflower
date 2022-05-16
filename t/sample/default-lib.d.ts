@@ -10,6 +10,7 @@ var readonlyArray: {
 
 var record: {
   stringLiteral: Record<'a', number>;
+  // TODO(test): more forms of number
   numberLiteral: Record<1, number>;
 
   string: Record<string, number>;

@@ -5,15 +5,25 @@ var readonly: {| a: $ReadOnly<{| a: string |}> |};
 var readonlyArray: {| a: $ReadOnlyArray<number> |};
 
 var record: {|
-    stringLiteral: $FlowFixMe/*  Record<'a', number> *//* tsflower-unimplemented: Record */,
-    numberLiteral: $FlowFixMe/*  Record<1, number> *//* tsflower-unimplemented: Record */,
-    string: $FlowFixMe/*  Record<string, number> *//* tsflower-unimplemented: Record */,
-    number: $FlowFixMe/*  Record<number, number> *//* tsflower-unimplemented: Record */,
-    unionStrings: $FlowFixMe/*  Record<'a' | 'b', number> *//* tsflower-unimplemented: Record */,
-    unionNumbers: $FlowFixMe/*  Record<1 | 2 | 3, number> *//* tsflower-unimplemented: Record */,
-    unionMixedAtoms: $FlowFixMe/*  Record<'a' | 2, number> *//* tsflower-unimplemented: Record */,
-    unionAtomAndCategory: $FlowFixMe/*  Record<'a' | number, number> *//* tsflower-unimplemented: Record */,
-    unionCategories: $FlowFixMe/*  Record<string | number, number> *//* tsflower-unimplemented: Record */,
+    stringLiteral: { "a": number },
+    numberLiteral: { "1": number },
+    string: { [key: string]: number },
+    number: { [key: number]: number },
+    unionStrings: {
+        "a": number,
+        "b": number,
+    },
+    unionNumbers: {
+        "1": number,
+        "2": number,
+        "3": number,
+    },
+    unionMixedAtoms: {
+        "a": number,
+        "2": number,
+    },
+    unionAtomAndCategory: $FlowFixMe/*  Record<'a' | number, number> *//* tsflower-unimplemented: Record with union member NumberKeyword */,
+    unionCategories: $FlowFixMe/*  Record<string | number, number> *//* tsflower-unimplemented: Record with union member StringKeyword */,
 |};
 
 var omit: {|
