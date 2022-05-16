@@ -11,7 +11,7 @@ import {
 import { assertUnreachable, ensureUnreachable } from './generics';
 import { escapeNamesAsIdentifierWithPrefix } from './names';
 import { formatEntityNameExpression, formatSyntaxKind } from './tsdebug';
-import { SubstituteType } from './rewrite/core';
+import { NamespaceRewrite, SubstituteType } from './rewrite/core';
 
 export type ErrorDescription = {
   kind: 'unimplemented' | 'error';
@@ -263,8 +263,13 @@ export function convertSourceFile(
     const { namedBindings } = importClause;
     if (namedBindings) {
       if (ts.isNamedImports(namedBindings)) {
+        const mappedModule = mapper.getModule(getModuleSpecifier(node));
         for (const binding of namedBindings.elements) {
-          const err = convertImportSpecifier(binding, importClause);
+          const err = convertImportSpecifier(
+            binding,
+            importClause,
+            mappedModule,
+          );
           if (err) return err;
         }
       } else {
@@ -288,9 +293,51 @@ export function convertSourceFile(
     function convertImportSpecifier(
       binding: ts.ImportSpecifier,
       importClause: ts.ImportClause,
+      mappedModule: void | NamespaceRewrite,
     ): void | K.StatementKind {
       const { name } = binding;
       const propertyName = binding.propertyName ?? name;
+
+      const mappedViaModule = mappedModule?.types?.get(propertyName.text);
+      if (mappedViaModule) {
+        switch (mappedViaModule.kind) {
+          case 'SubstituteType':
+            // We're going to rewrite references to this type to do
+            // something else instead; this type may not even exist in the
+            // Flow version of the imported module.  Drop this import.
+            // TODO: Keep the import if it binds not only a type but a value.
+            return;
+
+          case 'FixedName':
+          case 'TypeMacro':
+          case 'TypeReferenceMacro':
+            // In principle these should be just like SubstituteType: type
+            // references will be rewritten to do something else, so we
+            // don't need this import, and it may be invalid.
+            //
+            // But just like SubstituteType, we should keep the import if
+            // it's also there for a value binding.  And in particular
+            // classes like React.Component are both type and value
+            // bindings, and we handle those here.  So until we add the
+            // logic to tell the difference, have this case keep the import.
+            //
+            // TODO: Determine if the import is a pure type; if so, drop it.
+            break;
+
+          case 'RenameType':
+            // This case should be covered by the logic below.
+            // TODO: handle it here instead?  That seems cleaner but will
+            //   require resolving the module reference for the mapper.
+            break;
+
+          default:
+            assertUnreachable(
+              mappedViaModule,
+              (m) => `TypeRewrite kind: ${m.kind}`,
+            );
+        }
+      }
+
       const localSymbol = checker.getSymbolAtLocation(name);
       const importedSymbol =
         localSymbol && checker.getImmediateAliasedSymbol(localSymbol);
