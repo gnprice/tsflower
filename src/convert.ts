@@ -563,21 +563,21 @@ export function convertSourceFile(
       for (const base of heritageClause.types) {
         if (heritageClause.token === ts.SyntaxKind.ImplementsKeyword) {
           // Class implements; a pure type reference.
-          const result = prepareTypeHeritage(base, `class 'implements'`);
+          const result = convertTypeHeritage(base, `class 'implements'`);
           if (Array.isArray(result)) return result[0];
           // @ts-expect-error TODO(ast-types) fix `id` type to accept qualified name
           implements_.push(b.classImplements.from(result));
           //
         } else if (ts.isInterfaceDeclaration(node)) {
           // Interface extends; a pure type reference.
-          const result = prepareTypeHeritage(base, `interface 'extends'`);
+          const result = convertTypeHeritage(base, `interface 'extends'`);
           if (Array.isArray(result)) return result[0];
           extends_.push(b.interfaceExtends.from(result));
           //
         } else {
           // Class extends; a hybrid type/value reference.
           // TODO this logic is wrong, as if for a pure type reference.
-          const result = prepareTypeHeritage(base, `class 'extends'`);
+          const result = convertTypeHeritage(base, `class 'extends'`);
           if (Array.isArray(result)) return result[0];
           extends_.push(b.interfaceExtends.from(result));
         }
@@ -608,7 +608,7 @@ export function convertSourceFile(
       });
     }
 
-    function prepareTypeHeritage(
+    function convertTypeHeritage(
       base: ts.ExpressionWithTypeArguments,
       description: string,
     ):
