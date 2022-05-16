@@ -156,3 +156,12 @@ export function debugFormatNode(node: ts.Node): string {
     node.flags ? ` (${formatNodeFlags(node.flags)})` : ''
   }`;
 }
+
+// This isn't copied from anything in the TS implementation, but has a
+// similar flavor to the other helpers in this file.
+export function formatEntityNameExpression(
+  name: ts.EntityNameExpression,
+): string {
+  if (ts.isIdentifier(name)) return name.text;
+  return `${formatEntityNameExpression(name.expression)}.${name.name.text}`;
+}
