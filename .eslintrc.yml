@@ -46,6 +46,10 @@ rules:
   operator-linebreak: off
   object-curly-spacing: off # Google has no spaces here
   quotes: off # Prettier wants `"it 'will'"`, not `'it \'will\''`.  Whatever.
+  # Google enables quote-props in "consistent" mode.  I actually quite like
+  # that idea; but Prettier doesn't notice the inconsistency and insists on
+  # inconsistently removing some quotes, and it's not worth fighting.
+  quote-props: off
   # For indent, I think I like the Google style better than Prettier's:
   #   - Indent function args and params by 4 spaces rather than 2
   #   - Ditto multi-line method chains
