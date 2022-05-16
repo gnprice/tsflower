@@ -52,6 +52,11 @@ var ref: {
   // TODO(test): Test RefAttributes in separate file from Ref, to exercise
   //   dependencies
   refAttributes: React.RefAttributes<React.Component<>>;
+
+  // TODO(test): Add Flow test code to confirm this interoperates with flowlib
+  forwardRefExoticComponent: React.ForwardRefExoticComponent<
+    { x: string } & React.RefAttributes<React.Component<>>
+  >;
 };
 
 var jsx: {

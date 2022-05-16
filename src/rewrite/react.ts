@@ -156,6 +156,14 @@ export function prepReactRewrites(): NamespaceRewrite {
     Ref: substituteReactRef,
     RefAttributes: substituteReactRefAttributes,
 
+    // The `@types/react` definition of ForwardRefExoticComponent has
+    // various hair on it, but ultimately its job is to model the return
+    // type of React.forwardRef.  In flowlib, that returns a certain
+    // React$AbstractComponent.  The second ("Instance") type parameter
+    // seems hard to recover, so just approximate it as `mixed`… and that's
+    // what React$ComponentType does.
+    ForwardRefExoticComponent: mkFixedName('React$ComponentType'), // TODO use import
+
     // If adding to this: note that currently any namespace rewrites within a
     // given library are ignored!  That is, the `namespaces` property of one
     // of these NamespaceRewrite values is never consulted.  See use sites.
