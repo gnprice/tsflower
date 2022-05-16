@@ -870,15 +870,7 @@ export function convertSourceFile(
       }
 
       case ts.SyntaxKind.IndexedAccessType:
-        // TODO?: Look for `Foo[keyof Foo]` (including `Foo` an expression,
-        //   in particular `typeof bar`), and make that `$Values<Foo>`.
-        //   Seems a Flow bug that that's any different; but it works better
-        //   on npm:react-native-gesture-handler/State, cutting 75 errors
-        //   from its rdeps.
-        return buildElementType(
-          convertType((node as ts.IndexedAccessTypeNode).objectType),
-          convertType((node as ts.IndexedAccessTypeNode).indexType),
-        );
+        return convertIndexedAccessType(node as ts.IndexedAccessTypeNode);
 
       case ts.SyntaxKind.ArrayType:
         return b.arrayTypeAnnotation(
@@ -1220,6 +1212,20 @@ export function convertSourceFile(
 
   function convertUnionType(node: ts.UnionTypeNode): K.FlowTypeKind {
     return b.unionTypeAnnotation(node.types.map(convertType));
+  }
+
+  function convertIndexedAccessType(
+    node: ts.IndexedAccessTypeNode,
+  ): K.FlowTypeKind {
+    // TODO?: Look for `Foo[keyof Foo]` (including `Foo` an expression,
+    //   in particular `typeof bar`), and make that `$Values<Foo>`.
+    //   Seems a Flow bug that that's any different; but it works better
+    //   on npm:react-native-gesture-handler/State, cutting 75 errors
+    //   from its rdeps.
+    return buildElementType(
+      convertType(node.objectType),
+      convertType(node.indexType),
+    );
   }
 
   function convertTupleType(node: ts.TupleTypeNode): K.FlowTypeKind {
