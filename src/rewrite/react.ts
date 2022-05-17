@@ -116,6 +116,18 @@ function convertReactElement(
   });
 }
 
+// In @types/react:
+//   interface MutableRefObject<T> { current: T; }
+const substituteMutableRefObject = mkSubstituteType(
+  `${prefix}MutableRefObject`,
+  () => {
+    const text = `
+    type ${prefix}MutableRefObject<T> = { current: T, ... };
+    `;
+    return recast.parse(text, { parser: flowParser }).program.body;
+  },
+);
+
 // See comment on substituteReactRef.
 const substituteReactRefObject = mkSubstituteType(`${prefix}RefObject`, () => {
   const text = `
@@ -202,6 +214,7 @@ export function prepReactRewrites(): NamespaceRewrite {
     // type ReactNode = ReactElement | string | number | …
     ReactNode: mkFixedName('React$Node'), // TODO use import
 
+    MutableRefObject: substituteMutableRefObject,
     RefObject: substituteReactRefObject,
     Ref: substituteReactRef,
     RefAttributes: substituteReactRefAttributes,

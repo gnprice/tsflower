@@ -57,6 +57,7 @@ var miscComponents: {
 var reactNode: React.ReactNode;
 
 var ref: {
+  mutableRefObject: React.MutableRefObject<number>;
   refObject: React.RefObject<number>;
 
   // TODO(test): Add Flow test code to confirm this interoperates with flowlib
