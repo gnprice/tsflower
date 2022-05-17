@@ -53,6 +53,19 @@ declare var typeOperations: {
     union: "a" | 3,
     intersection: { a: "a" | "b", ... } & { a: "b" | "c", ... },
     indexedAccess: $ElementType<{ a: string, ... }, "a">,
+    indexedKeys: {
+        typeof_: $Values<typeof literalTypes>,
+        typeofMismatch1: $ElementType<typeof literalTypes, $Keys<typeof literalTypes.n>>,
+        typeofMismatch2: $ElementType<typeof literalTypes, $Keys<typeof keywordTypes>>,
+        tparam: <T>(o: T) => $Values<T>,
+        tparam2: <T, S>(o: T, p: S) => $Values<T>,
+        tparamMismatch: <T, S>(o: T, p: S) => $ElementType<T, $Keys<S>>,
+        obj1: $Values<{ a: string, ... }>,
+        obj2: $Values<{ a(): string, ... }>,
+        objMismatch1: $ElementType<{ a: string, ... }, $Keys<{ b: string, ... }>>,
+        objMismatch2: $ElementType<{ a: string, ... }, $Keys<{ a(): string, ... }>>,
+        ...
+    },
     array: boolean[],
     tuple: {
         zero: [],

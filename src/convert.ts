@@ -4,6 +4,7 @@ import K from 'ast-types/gen/kinds';
 import { forEach, map, some } from './util';
 import { Mapper } from './mapper';
 import {
+  equivalentNodes,
   getModuleSpecifier,
   hasModifier,
   isEntityNameOrEntityNameExpression,
@@ -1217,15 +1218,26 @@ export function convertSourceFile(
   function convertIndexedAccessType(
     node: ts.IndexedAccessTypeNode,
   ): K.FlowTypeKind {
-    // TODO?: Look for `Foo[keyof Foo]` (including `Foo` an expression,
-    //   in particular `typeof bar`), and make that `$Values<Foo>`.
-    //   Seems a Flow bug that that's any different; but it works better
-    //   on npm:react-native-gesture-handler/State, cutting 75 errors
-    //   from its rdeps.
-    return buildElementType(
-      convertType(node.objectType),
-      convertType(node.indexType),
-    );
+    const { objectType, indexType } = node;
+    if (
+      ts.isTypeOperatorNode(indexType) &&
+      indexType.operator === ts.SyntaxKind.KeyOfKeyword
+    ) {
+      // We have `Foo[keyof Foo1]`.  Check if Foo and Foo1 are identical.
+      // so that it's `Foo[keyof Foo]`.
+      if (equivalentNodes(objectType, indexType.type)) {
+        // We have `Foo[keyof Foo]`.  Emit `$Values<Foo>` instead of the
+        // usual.  Seems a Flow bug that that's any different; but on e.g.
+        // npm:react-native-gesture-handler/State it works better, cutting
+        // 75 errors from its rdeps.
+        return b.genericTypeAnnotation(
+          b.identifier('$Values'),
+          b.typeParameterInstantiation([convertType(objectType)]),
+        );
+      }
+    }
+
+    return buildElementType(convertType(objectType), convertType(indexType));
   }
 
   function convertTupleType(node: ts.TupleTypeNode): K.FlowTypeKind {

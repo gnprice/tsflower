@@ -58,6 +58,19 @@ declare var typeOperations: {
   union: 'a' | 3;
   intersection: { a: 'a' | 'b' } & { a: 'b' | 'c' };
   indexedAccess: { a: string }['a'];
+  indexedKeys: {
+    // These should become `$Values` calls, except those named "…Mismatch".
+    typeof_: typeof literalTypes[keyof typeof literalTypes];
+    typeofMismatch1: typeof literalTypes[keyof typeof literalTypes.n];
+    typeofMismatch2: typeof literalTypes[keyof typeof keywordTypes];
+    tparam: <T>(o: T) => T[keyof T];
+    tparam2: <T, S>(o: T, p: S) => T[keyof T];
+    tparamMismatch: <T, S>(o: T, p: S) => T[keyof S];
+    obj1: { a: string }[keyof { a: string }];
+    obj2: { a(): string }[keyof { a(): string }];
+    objMismatch1: { a: string }[keyof { b: string }];
+    objMismatch2: { a: string }[keyof { a(): string }];
+  };
   array: boolean[];
   tuple: {
     zero: [];
