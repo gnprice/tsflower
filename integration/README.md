@@ -24,7 +24,8 @@ To see TsFlower errors in the generated output:
     $ npx flow integration/ --json | jq '.errors | length'
 
       # See a summary of error messages
-    $ npx flow integration/ --json | jq '.errors[] | .message[0].descr' -r | sort | uniq -c
+    $ npx flow integration/ --json | jq '.errors[] | .message[0].descr' -r \
+      | perl -pe 's/(.*?)(?: \[([a-z-]*)\])?$/[$2] $1/' | sort | uniq -c
       # Or drop `| uniq -c` if it's not too long.
       # Make your terminal wide, or add `| less -SFX`.
 
