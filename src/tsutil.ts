@@ -7,7 +7,7 @@
  */
 
 import ts from 'typescript';
-import { some } from './util';
+import { isArray, some } from './util';
 
 export function hasModifier(
   node: ts.Node,
@@ -60,4 +60,94 @@ export function isGeneratedIdentifier(
   };
   const kind = autoGenerateFlags! & KindMask;
   return kind > ts.GeneratedIdentifierFlags.None;
+}
+
+/**
+ * Compare the nodes as pure ASTs, without location or checker/binder metadata.
+ */
+// This is written from scratch; there doesn't appear to be anything in the
+// TS implementation to do a similar sort of job.  Inspired loosely by
+// `ts.forEachChild`, which it also calls, and `forEachChildRecursively`.
+export function equivalentNodes(nodeA: ts.Node, nodeB: ts.Node) {
+  // Equivalent nodes must have the same kind.
+  if (nodeA.kind !== nodeB.kind) return false;
+
+  // We'll use ts.forEachChild to do most of the work.  But there are some
+  // properties it doesn't cover, because they aren't themselves `ts.Node`s:
+  //  * values of identifiers and literals
+  //  * tokens represented directly by SyntaxKind values
+  //
+  // For a list of most of the latter:
+  //   $ grep -PB3 '^\s*(readonly\s+)?(?!kind)\w+: SyntaxKind' src/compiler/types.ts
+  // That list misses some like PrefixUnaryExpression#operator that use aliases.
+  // Found some more like this:
+  //   $ grep -iPB3 '^\s*(readonly\s+)?\w*(operator|token)\w*: ' src/compiler/types.ts
+  // TODO: Audit more completely.
+  if (ts.isLiteralExpression(nodeA)) {
+    return nodeA.text === (nodeB as ts.LiteralExpression).text;
+  }
+  switch (nodeA.kind) {
+    // TODO TemplateHead, TemplateMiddle, TemplateTail
+
+    case ts.SyntaxKind.Identifier:
+    case ts.SyntaxKind.PrivateIdentifier:
+      return (
+        (nodeA as ts.Identifier | ts.PrivateIdentifier).text ===
+        (nodeB as ts.Identifier | ts.PrivateIdentifier).text
+      );
+    case ts.SyntaxKind.TypeOperator:
+    case ts.SyntaxKind.PrefixUnaryExpression:
+    case ts.SyntaxKind.PostfixUnaryExpression:
+      return (
+        // prettier-ignore
+        (nodeA as ts.TypeOperatorNode | ts.PrefixUnaryExpression | ts.PostfixUnaryExpression).operator ===
+          (nodeB as ts.TypeOperatorNode | ts.PrefixUnaryExpression | ts.PostfixUnaryExpression).operator &&
+        equivalentChildren()
+      );
+    case ts.SyntaxKind.MetaProperty:
+      return (
+        (nodeA as ts.MetaProperty).keywordToken ===
+          (nodeB as ts.MetaProperty).keywordToken && equivalentChildren()
+      );
+    case ts.SyntaxKind.HeritageClause:
+      return (
+        (nodeA as ts.HeritageClause).token ===
+          (nodeB as ts.HeritageClause).token && equivalentChildren()
+      );
+    default:
+      return equivalentChildren();
+  }
+
+  function equivalentChildren() {
+    const childrenA = gatherChildren(nodeA);
+    const childrenB = gatherChildren(nodeB);
+    if (childrenA.length !== childrenB.length) return false; // is this even possible?
+    for (let i = 0; i < childrenA.length; i++) {
+      const itemA = childrenA[i];
+      const itemB = childrenB[i];
+      if (itemA === itemB) continue; // both undefined
+      if (!itemA || !itemB) return false; // one undefined
+      if (isArray(itemA)) {
+        if (!isArray(itemB)) return false; // is this even possible?
+        if (itemA.length !== itemB.length) return false;
+        for (let i = 0; i < itemA.length; i++) {
+          if (!equivalentNodes(itemA[i], itemB[i])) return false;
+        }
+      } else {
+        if (isArray(itemB)) return false; // is this even possible?
+        if (!equivalentNodes(itemA, itemB)) return false;
+      }
+    }
+    return true;
+  }
+
+  function gatherChildren(node: ts.Node) {
+    const result: (void | ts.Node | ts.NodeArray<ts.Node>)[] = [];
+    ts.forEachChild(
+      node,
+      (n) => result.push(n),
+      (ns) => result.push(ns),
+    );
+    return result;
+  }
 }
