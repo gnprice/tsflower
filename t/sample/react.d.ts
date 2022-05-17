@@ -46,8 +46,13 @@ var componentProps: {
   a: React.ComponentProps<A>;
 };
 
-var propsWithChildren: {
-  a: React.PropsWithChildren<{ x: number }>;
+var propsManipulation: {
+  propsWithChildren: React.PropsWithChildren<{ x: number }>;
+  propsWithoutRef1: React.PropsWithoutRef<{ x: number; ref: string }>;
+  propsWithoutRef2: React.PropsWithoutRef<{ x: number }>;
+  propsWithoutRef3: React.PropsWithoutRef<
+    { x: number; ref: string } | { y: number }
+  >;
 };
 
 var miscComponents: {

@@ -129,6 +129,21 @@ const substitutePropsWithChildren = mkSubstituteType(
 );
 
 // In @types/react:
+//   /** Ensures that the props do not include ref at all */
+//   type PropsWithoutRef<P> = …
+// The definition is complicated for reasons that seem TS-specific.
+// Make it easy with Flow's `$Rest`.
+const substitutePropsWithoutRef = mkSubstituteType(
+  `${prefix}PropsWithoutRef`,
+  () => {
+    const text = `
+    type ${prefix}PropsWithoutRef<P> = $Rest<P, {| ref: mixed |}>;
+    `;
+    return recast.parse(text, { parser: flowParser }).program.body;
+  },
+);
+
+// In @types/react:
 //   interface MutableRefObject<T> { current: T; }
 const substituteMutableRefObject = mkSubstituteType(
   `${prefix}MutableRefObject`,
@@ -227,6 +242,7 @@ export function prepReactRewrites(): NamespaceRewrite {
     ReactNode: mkFixedName('React$Node'), // TODO use import
 
     PropsWithChildren: substitutePropsWithChildren,
+    PropsWithoutRef: substitutePropsWithoutRef,
 
     MutableRefObject: substituteMutableRefObject,
     RefObject: substituteReactRefObject,
