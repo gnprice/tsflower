@@ -10,6 +10,8 @@ import { type ImageStyle as $tsflower_subst$RN$ImageStyle }
   from 'react-native/Libraries/StyleSheet/StyleSheet';
 import { type ColorValue as $tsflower_subst$RN$ColorValue }
   from 'react-native/Libraries/StyleSheet/StyleSheet';
+import { type ViewProps as $tsflower_subst$RN$ViewProps }
+  from 'react-native/Libraries/Components/View/ViewPropTypes';
 import "react-native";
 import RN from "react-native";
 
@@ -22,3 +24,9 @@ declare var style: {
 };
 
 declare var color: $tsflower_subst$RN$ColorValue;
+
+declare var props: {
+    viewProps: $tsflower_subst$RN$ViewProps,
+    viewPropsPlus: $tsflower_subst$RN$ViewProps & { foo: string, ... },
+    ...
+};

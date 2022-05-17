@@ -4,6 +4,7 @@ import {
   TextStyle,
   ImageStyle,
   ColorValue,
+  ViewProps,
 } from 'react-native';
 import RN from 'react-native';
 
@@ -18,3 +19,11 @@ declare var style: {
 };
 
 declare var color: ColorValue;
+
+declare var props: {
+  viewProps: ViewProps;
+  // TODO: This is a typical idiom in RN-using TS code... but our
+  //   translation actually won't work as intended, because the ViewProps
+  //   type in actual RN is exact.
+  viewPropsPlus: ViewProps & { foo: string };
+};
