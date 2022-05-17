@@ -45,6 +45,40 @@ function convertReactComponent(
   });
 }
 
+// @types/react:
+//   interface FunctionComponent<P = {}> {
+// flowlib:
+//   declare type React$StatelessFunctionalComponent<Props> = {
+// So we need to fill in that default for the type argument.
+function convertFunctionComponent(
+  converter: Converter,
+  typeName: ts.EntityNameOrEntityNameExpression,
+  typeArguments: ts.NodeArray<ts.TypeNode> | void,
+): ErrorOr<{
+  id: K.IdentifierKind | n.QualifiedTypeIdentifier;
+  typeParameters: n.TypeParameterInstantiation | null;
+}> {
+  if ((typeArguments?.length ?? 0) > 1) {
+    return mkError(
+      `bad React.FunctionComponent: ${
+        typeArguments?.length ?? 0
+      } arguments (expected 0-1)`,
+    );
+  }
+  const [propsType] = typeArguments ?? [];
+
+  const args = [
+    propsType
+      ? converter.convertType(propsType)
+      : b.objectTypeAnnotation.from({ properties: [], inexact: true }),
+  ];
+
+  return mkSuccess({
+    id: b.identifier('React$StatelessFunctionalComponent'), // TODO use import
+    typeParameters: b.typeParameterInstantiation(args),
+  });
+}
+
 function convertReactElement(
   converter: Converter,
   typeName: ts.EntityNameOrEntityNameExpression,
@@ -161,6 +195,7 @@ export function prepReactRewrites(): NamespaceRewrite {
 
   return mkNamespaceRewrite({
     Component: mkTypeReferenceMacro(convertReactComponent),
+    FunctionComponent: mkTypeReferenceMacro(convertFunctionComponent),
     ReactElement: mkTypeReferenceMacro(convertReactElement),
     ComponentProps: mkFixedName('React$ElementConfig'), // TODO use import
 

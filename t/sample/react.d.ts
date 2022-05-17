@@ -47,6 +47,8 @@ var componentProps: {
 };
 
 var miscComponents: {
+  functional0: React.FunctionComponent;
+  functional1: React.FunctionComponent<{ x: number }>;
   // TODO(test): Add Flow test code to check this against React.memo etc.
   memo: React.MemoExoticComponent<A>;
   named: React.NamedExoticComponent<{}>;

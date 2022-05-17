@@ -47,6 +47,8 @@ var reactElement: {
 var componentProps: { a: React$ElementConfig<A>, ... };
 
 var miscComponents: {
+    functional0: React$StatelessFunctionalComponent<{...}>,
+    functional1: React$StatelessFunctionalComponent<{ x: number, ... }>,
     memo: $tsflower_subst$React$Nop<A>,
     named: React$ComponentType<{...}>,
     ...
