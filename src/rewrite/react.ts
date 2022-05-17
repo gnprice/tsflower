@@ -13,6 +13,8 @@ import {
   NamespaceRewrite,
 } from './core';
 
+const prefix = '$tsflower_subst$React$';
+
 function convertReactComponent(
   converter: Converter,
   typeName: ts.EntityNameOrEntityNameExpression,
@@ -95,8 +97,7 @@ function convertReactElement(
 // `React$ElementRef` to work out what type the ref should hold.
 //
 // So, just emit a definition of our own.
-const substituteReactRef = mkSubstituteType('$tsflower_subst$React$Ref', () => {
-  const prefix = '$tsflower_subst$React$';
+const substituteReactRef = mkSubstituteType(`${prefix}Ref`, () => {
   const text = `
   type ${prefix}RefObject<T> = { +current: T | null, ... };
   // NB mixed return, not void; see e.g. flowlib's React$Ref
@@ -107,9 +108,8 @@ const substituteReactRef = mkSubstituteType('$tsflower_subst$React$Ref', () => {
 });
 
 const substituteReactRefAttributes = mkSubstituteType(
-  '$tsflower_subst$React$RefAttributes',
+  `${prefix}RefAttributes`,
   () => {
-    const prefix = '$tsflower_subst$React$';
     // Definition in @types/react/index.d.ts:
     //   type Key = string | number;
     //   interface Attributes {
