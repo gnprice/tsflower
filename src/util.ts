@@ -46,3 +46,12 @@ export function map<T, U>(
   if (!array) return undefined;
   return array.map(f);
 }
+
+/** Like `Array.isArray`, but better typed. */
+// Copied from the version in the TS implementation, but simplified to
+// assume we have Array.isArray.
+// Seems like a bug in TS's default lib that Array.isArray doesn't already
+// tell us this information.
+export function isArray(value: unknown): value is readonly unknown[] {
+  return Array.isArray(value);
+}
