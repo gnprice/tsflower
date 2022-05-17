@@ -46,6 +46,12 @@ var componentProps: {
   a: React.ComponentProps<A>;
 };
 
+var miscComponents: {
+  // TODO(test): Add Flow test code to check this against React.memo etc.
+  memo: React.MemoExoticComponent<A>;
+  named: React.NamedExoticComponent<{}>;
+};
+
 var reactNode: React.ReactNode;
 
 var ref: {
