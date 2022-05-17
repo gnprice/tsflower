@@ -19,11 +19,17 @@ For more, see:
 
 ## TODO
 
-- Convert a bunch more kinds of nodes.  There's a fair amount of this,
-  but it's mostly straightforward.  The main value of it at an early
-  stage is in order to get through a wider swath of real-world TS type
-  definitions, in order to have a sample for encountering the other
-  challenges.
+- Convert more kinds of nodes.  Almost everything found in our
+  integration suite (a selection of third-party TS libraries) is
+  covered, but some remain.
+
+  - The most interesting remaining cases are perhaps namespace
+    declarations and enum declarations, discussed below under
+    "renaming and rewriting".
+
+  - There's also some things that it's not clear how to map to Flow:
+    for example, TS's conditional types, particularly with their
+    "distributive" behavior on unions.
 
   - Sometimes this requires fixes to Recast and/or `ast-types`, because
     their support for Flow is incomplete.  E.g. Recast PRs #1089 and #1090,
@@ -36,16 +42,9 @@ For more, see:
     their codemods, and they're all in on Flow -- so surely whatever tool
     they're using does have solid Flow support.
 
-- Do more renaming and rewriting:
-
-  - Type references to things like `ReadonlyArray` in the default lib, which
-    become a constant other identifier.  Use `defaultLibraryRewrites` with
-    `'FixedName'` in the mapper.
-
-  - Type references to things like `Omit` in the default lib, which have to
-    act more like a macro -- rewriting the type reference in place, using
-    its arguments.  Use `defaultLibraryRewrites` with `'TypeReferenceMacro'`
-    in the mapper.
+- Do more renaming and rewriting.  See `src/rewrite/*.ts` for many
+  existing examples, for references to things in the default library,
+  in React, and in React Native.
 
 - Extend the driver and CLI layer:
 
@@ -62,33 +61,53 @@ For more, see:
     See `integration/run` for a way to make the output resolvable for Flow,
     by adding an `index.js.flow` indirection.
 
+  - Have the subcommand that takes an NPM package name accept a list of
+    them, and act on them all as one program, so that rewrites
+    propagate appropriately.
+
+  - Have a subcommand -- and make this the default on running simply
+    `tsflower` -- that gets a list of packages to act on from a config
+    file.
+
+  - Have some automatic inference of what packages to act on: e.g. by
+    taking the root `package.json`'s dependencies (and dev-deps? those
+    are so often not imported, but sometimes are, e.g. for tests and for
+    build scripts), looking for `.types` in those packages'
+    `package.json` as a sign they're TS, and recursing.  If that
+    inference can be made fast, use it as the default that the config
+    file overlays upon; if not, use it for initializing the config
+    file in a `tsflower init`.
+
 - More consistently handle errors as nice and structured:
 
-  - See remaining `TODO(error)` comments, and remaining `throw` statements.
-    (Some of the latter are doing something structured, but some aren't.)
+  - See remaining `TODO(error)` comments.
 
   - In general, always use structured helpers like `errorStatement` and its
     friends; always leave a marker comment in the output.
 
 - Extend the test framework:
 
-  - Have React Native available to import from sample files, too (like we do
-    React.)
+  - For `t/sample` tests, include some Flow code to exercise the
+    output.  Particularly helpful for rewrites of React and
+    react-native references: check that `View` accepts something with
+    our translation of `ViewProps`, that a `MemoExoticComponent` can
+    be used as a JSX element-type, etc.
 
-  - Give the driver an option (`--interlinear`, for "interlinear text"?) to
-    include the original as a comment next to every statement, not only when
-    there's an error.  Then use that when running on sample files, so that
-    they're self-contained to read to look for discrepancies.
+  - Give the driver an option (`--interlinear`, for "interlinear
+    text"?) to include the original as a comment next to every
+    statement, not only when there's an error.  Then use that when
+    running on `t/sample/` files, so that the outputs are
+    self-contained to read to look for discrepancies.
 
-  - Act on some packages in integration directory, much the same as on
-    sample files.  ... Maybe don't keep expected output in version control;
+  - Have `integration/run` check that Flow accepts the output, once
+    we've gotten to the point where it indeed does.
+
+  - Perhaps track changes to output on integration suite, much like
+    sample suite.  ... Maybe don't keep expected output in version control;
     seems big.  ... OTOH it does sound awfully nice to make a change and see
     exactly what it does to the output on a wide sample.  ... Hmm, I think I
     basically want to see those diffs in the development-iteration loop, but
-    don't want to read them in the history.  Well, start by leaving out and
-    just asking if Flow passes.
-
-    See `integration/run` for a start on this.
+    don't want to read them in the history.
 
 - Preserve JSDoc, like `tsc` does when generating `.d.ts` files.
 
@@ -103,35 +122,13 @@ For more, see:
   - Apply rewrites to import types, like `import('react').Component`, just
     like we do for type references like `React.Component`.
 
-  - A possible intermediate category between `'FixedName'` and
-    `'TypeReferenceMacro'` is that some things could be defined
-    as a single (generic) type alias in the Flow type system, but just don't
-    happen to be defined in the Flow stdlib.  For those, we may insert a
-    definition at the top of the file.
-
-  - Type references to things like `React.Component`, in libraries like
-    `react` and `react-native`, which have established Flow definitions but
-    divergent TS definitions that some third-party libraries refer to.
-
-    Here we want to translate those reverse-dependency libraries so that the
-    result works on top of the established Flow versions of the underlying
-    library.  That means we'll rewrite references to those symbols:
-
-    - When the underlying module is imported as a whole, qualified names
-      referring to it will get rewritten, using the same import where
-      possible.
-
-    - When the underlying module is imported as individual properties, we'll
-      adjust the import.  Perhaps keep the original local name -- that will
-      avoid the need to deal with name collisions.
-
-    Some of these just need a different name in the same module.  Others
-    (like `ReactNative.ViewProps`) correspond to something in a different
-    module within the library, or require some macro-like rewriting (like
-    the default lib's `Omit`.)
-
-    When a different module is required, we'll need to insert an `import`
-    statement.
+  - When introducing a name (with a `SubstituteType` rewrite), try to
+    use the original name, rather than our `$tsflower_subst$`-prefixed
+    versions.  This will require identifying when the name would
+    collide with something (and then when each candidate like `Foo_1`,
+    `Foo_2`, … would collide with something.)  Can we use the
+    checker's symbol lookup, rather than attempting to scan the AST
+    for declarations ourselves?
 
   - Type references to enum members, which need a `typeof`.
 
