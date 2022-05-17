@@ -3,6 +3,21 @@ import * as flowParser from 'flow-parser';
 import * as recast from 'recast';
 import { mkNamespaceRewrite, mkSubstituteType, NamespaceRewrite } from './core';
 
+const prefix = '$tsflower_subst$RN$';
+
+const substituteStyleSheetExports = Object.fromEntries(
+  ['ViewStyle'].map((name) => [
+    name,
+    mkSubstituteType(prefix + name, () => {
+      const text = `
+      import { type ${name} as ${prefix}${name} }
+        from 'react-native/Libraries/StyleSheet/StyleSheet';
+    `;
+      return recast.parse(text, { parser: flowParser }).program.body;
+    }),
+  ]),
+);
+
 /**
  * Prepare our static rewrite plans for the 'react-native' module.
  */
@@ -18,12 +33,6 @@ export function prepReactNativeRewrites(): NamespaceRewrite {
       `;
       return recast.parse(text, { parser: flowParser }).program.body;
     }),
-    ViewStyle: mkSubstituteType('$tsflower_subst$RN$ViewStyle', () => {
-      const text = `
-      import { type ViewStyle as $tsflower_subst$RN$ViewStyle }
-        from 'react-native/Libraries/StyleSheet/StyleSheet';
-      `;
-      return recast.parse(text, { parser: flowParser }).program.body;
-    }),
+    ...substituteStyleSheetExports,
   });
 }
