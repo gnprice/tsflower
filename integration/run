@@ -39,3 +39,12 @@ for package in "${packages[@]}"; do
 export * from './${typeref%.d.ts}.js.flow';
 EOF
 done
+
+# Look for Flow errors of kinds we've eliminated.
+# (In particular, syntax errors have empty `.error_codes`.)
+# If any, print them and fail.
+if node_modules/.bin/flow integration/ --strip-root --json |
+  jq '.errors[] | select(.error_codes | length == 0)
+      | .message[0] | "integration/\(.path): \(.descr)"' -r -e; then
+  false
+fi
