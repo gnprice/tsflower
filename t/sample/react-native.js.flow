@@ -10,6 +10,12 @@ import { type ImageStyle as $tsflower_subst$RN$ImageStyle }
   from 'react-native/Libraries/StyleSheet/StyleSheet';
 import { type ColorValue as $tsflower_subst$RN$ColorValue }
   from 'react-native/Libraries/StyleSheet/StyleSheet';
+import { type PressEvent as $tsflower_subst$RN$GestureResponderEvent }
+  from 'react-native/Libraries/Types/CoreEventTypes';
+import { type LayoutEvent as $tsflower_subst$RN$LayoutChangeEvent }
+  from 'react-native/Libraries/Types/CoreEventTypes';
+import { type SyntheticEvent as $tsflower_subst$RN$NativeSyntheticEvent }
+  from 'react-native/Libraries/Types/CoreEventTypes';
 import { typeof DrawerLayoutAndroid as $tsflower_subst$RN$DrawerLayoutAndroid }
   from 'react-native';
 type $tsflower_subst$RN$DrawerLayoutAndroidProps = React$ElementConfig<$tsflower_subst$RN$DrawerLayoutAndroid>;
@@ -58,6 +64,13 @@ declare var style: {
 };
 
 declare var color: $tsflower_subst$RN$ColorValue;
+
+declare var events: {
+    gesture: $tsflower_subst$RN$GestureResponderEvent,
+    layoutChange: $tsflower_subst$RN$LayoutChangeEvent,
+    nativeSynthetic: $tsflower_subst$RN$NativeSyntheticEvent<{ x: number, ... }>,
+    ...
+};
 
 declare var props: {
     drawerLayoutAndroidProps: $tsflower_subst$RN$DrawerLayoutAndroidProps,

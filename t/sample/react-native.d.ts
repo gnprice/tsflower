@@ -5,6 +5,7 @@ import {
   ImageStyle,
   ColorValue,
   ViewProps,
+  GestureResponderEvent,
 } from 'react-native';
 import RN from 'react-native';
 
@@ -19,6 +20,12 @@ declare var style: {
 };
 
 declare var color: ColorValue;
+
+declare var events: {
+  gesture: GestureResponderEvent;
+  layoutChange: RN.LayoutChangeEvent;
+  nativeSynthetic: RN.NativeSyntheticEvent<{ x: number }>;
+};
 
 declare var props: {
   drawerLayoutAndroidProps: RN.DrawerLayoutAndroidProps;

@@ -19,6 +19,25 @@ const substituteStyleSheetExports = Object.fromEntries(
   ]),
 );
 
+const substituteEventTypes = Object.fromEntries(
+  [
+    // TODO: add the rest of the event types defined in `@types/react-native`
+    //   (this is just what came up in one version of the integration suite)
+    ['GestureResponderEvent', 'PressEvent'],
+    ['LayoutChangeEvent', 'LayoutEvent'],
+    ['NativeSyntheticEvent', 'SyntheticEvent'],
+  ].map(([name, propertyName]) => [
+    name,
+    mkSubstituteType(`${prefix}${name}`, () => {
+      const text = `
+      import { type ${propertyName} as ${prefix}${name} }
+        from 'react-native/Libraries/Types/CoreEventTypes';
+      `;
+      return recast.parse(text, { parser: flowParser }).program.body;
+    }),
+  ]),
+);
+
 // TODO: apply substitutions atop import types (`import(…).Foo`), too
 const substituteComponentPropTypes = Object.fromEntries(
   [
@@ -70,6 +89,7 @@ export function prepReactNativeRewrites(): NamespaceRewrite {
       return recast.parse(text, { parser: flowParser }).program.body;
     }),
     ...substituteStyleSheetExports,
+    ...substituteEventTypes,
     ...substituteComponentPropTypes,
   });
 }
