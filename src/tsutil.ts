@@ -121,6 +121,8 @@ export function equivalentNodes(nodeA: ts.Node, nodeB: ts.Node) {
   function equivalentChildren() {
     const childrenA = gatherChildren(nodeA);
     const childrenB = gatherChildren(nodeB);
+    if (childrenA === childrenB) return true; // both undefined
+    if (!childrenA || !childrenB) return false; // is this even possible?
     if (childrenA.length !== childrenB.length) return false; // is this even possible?
     for (let i = 0; i < childrenA.length; i++) {
       const itemA = childrenA[i];
@@ -141,13 +143,17 @@ export function equivalentNodes(nodeA: ts.Node, nodeB: ts.Node) {
     return true;
   }
 
-  function gatherChildren(node: ts.Node) {
-    const result: (void | ts.Node | ts.NodeArray<ts.Node>)[] = [];
-    ts.forEachChild(
-      node,
-      (n) => result.push(n),
-      (ns) => result.push(ns),
-    );
+  function gatherChildren(
+    node: ts.Node,
+    // I don't understand how TS can be so very bad at type inference.
+    // But it is, so we need to say this type three times.
+    // (If e.g. you leave out the return type but have the other two copies,
+    // it infers the return type is `void`.  Which is outright unsound.)
+  ): void | (void | ts.Node | ts.NodeArray<ts.Node>)[] {
+    let result: void | (void | ts.Node | ts.NodeArray<ts.Node>)[] = undefined;
+    const push = (x: void | ts.Node | ts.NodeArray<ts.Node>) =>
+      (result || (result = [])).push(x);
+    ts.forEachChild(node, push, push);
     return result;
   }
 }
