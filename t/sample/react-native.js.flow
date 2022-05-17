@@ -52,6 +52,8 @@ type $tsflower_subst$RN$TouchableWithoutFeedbackProps = React$ElementConfig<$tsf
 import { typeof View as $tsflower_subst$RN$View }
   from 'react-native';
 type $tsflower_subst$RN$ViewProps = React$ElementConfig<$tsflower_subst$RN$View>;
+import { type StatusBarAnimation as $tsflower_subst$RN$StatusBarAnimation }
+  from 'react-native/Libraries/Components/StatusBar/StatusBar';
 import "react-native";
 import RN from "react-native";
 
@@ -88,3 +90,5 @@ declare var props: {
     viewPropsPlus: $tsflower_subst$RN$ViewProps & { foo: string, ... },
     ...
 };
+
+declare var components: { statusBar: { animation: $tsflower_subst$RN$StatusBarAnimation, ... }, ... };

@@ -91,5 +91,12 @@ export function prepReactNativeRewrites(): NamespaceRewrite {
     ...substituteStyleSheetExports,
     ...substituteEventTypes,
     ...substituteComponentPropTypes,
+    StatusBarAnimation: mkSubstituteType(`${prefix}StatusBarAnimation`, () => {
+      const text = `
+      import { type StatusBarAnimation as ${prefix}StatusBarAnimation }
+        from 'react-native/Libraries/Components/StatusBar/StatusBar';
+      `;
+      return recast.parse(text, { parser: flowParser }).program.body;
+    }),
   });
 }

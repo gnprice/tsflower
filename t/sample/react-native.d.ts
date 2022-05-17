@@ -43,3 +43,10 @@ declare var props: {
 
   viewPropsPlus: ViewProps & { foo: string };
 };
+
+// Other than the components' respective props types, which are above.
+declare var components: {
+  statusBar: {
+    animation: RN.StatusBarAnimation;
+  };
+};
