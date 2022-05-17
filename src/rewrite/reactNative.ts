@@ -7,13 +7,13 @@ import {
 const prefix = '$tsflower_subst$RN$';
 
 const substituteStyleSheetExports = Object.fromEntries(
-  ['ColorValue', 'ViewStyle', 'TextStyle', 'ImageStyle'].map((name) => [
-    name,
+  ['ColorValue', 'ViewStyle', 'TextStyle', 'ImageStyle'].map((tsName) => [
+    tsName,
     prepSubstituteType(
-      prefix + name,
       // TODO: It'd be nice to reuse the normal names, when there's no conflict.
-      () => `
-      import { type ${name} as ${prefix}${name} }
+      prefix + tsName,
+      (name) => `
+      import { type ${tsName} as ${name} }
         from 'react-native/Libraries/StyleSheet/StyleSheet';
       `,
     ),
@@ -27,12 +27,12 @@ const substituteEventTypes = Object.fromEntries(
     ['GestureResponderEvent', 'PressEvent'],
     ['LayoutChangeEvent', 'LayoutEvent'],
     ['NativeSyntheticEvent', 'SyntheticEvent'],
-  ].map(([name, propertyName]) => [
-    name,
+  ].map(([tsName, propertyName]) => [
+    tsName,
     prepSubstituteType(
-      `${prefix}${name}`,
-      () => `
-      import { type ${propertyName} as ${prefix}${name} }
+      `${prefix}${tsName}`,
+      (name) => `
+      import { type ${propertyName} as ${name} }
         from 'react-native/Libraries/Types/CoreEventTypes';
       `,
     ),
@@ -65,10 +65,11 @@ const substituteComponentPropTypes = Object.fromEntries(
       // whereas the ones in `@types/react-native` (like all TS object
       // types) are inexact.  And RN-using TS code often relies on that, by
       // making intersections as a way of adding more properties.
-      () => `
+      // TODO(substitute): Give the auxiliary name here its own substitution.
+      (name) => `
       import { typeof ${componentName} as ${prefix}${componentName} }
         from 'react-native';
-      type ${prefix}${componentName}Props = React$ElementConfig<${prefix}${componentName}>;
+      type ${name} = React$ElementConfig<${prefix}${componentName}>;
       `,
     ),
   ]),
@@ -79,22 +80,22 @@ const substituteComponentPropTypes = Object.fromEntries(
  */
 export function prepReactNativeRewrites(): NamespaceRewrite {
   return mkNamespaceRewrite({
-    StyleProp: prepSubstituteType('$tsflower_subst$RN$StyleProp', () => {
+    StyleProp: prepSubstituteType(
+      `${prefix}StyleProp`,
       // Actual RN doesn't export this, but see definition in
       // react-native/Libraries/StyleSheet/StyleSheetTypes.js
       // of GenericStyleProp.
-      const name = '$tsflower_subst$RN$StyleProp';
-      return `
+      (name) => `
       type ${name}<+T> = null | void | T | false | '' | $ReadOnlyArray<${name}<T>>;
-      `;
-    }),
+      `,
+    ),
     ...substituteStyleSheetExports,
     ...substituteEventTypes,
     ...substituteComponentPropTypes,
     StatusBarAnimation: prepSubstituteType(
       `${prefix}StatusBarAnimation`,
-      () => `
-      import { type StatusBarAnimation as ${prefix}StatusBarAnimation }
+      (name) => `
+      import { type StatusBarAnimation as ${name} }
         from 'react-native/Libraries/Components/StatusBar/StatusBar';
       `,
     ),

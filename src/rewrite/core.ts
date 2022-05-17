@@ -126,13 +126,16 @@ export function mkNamespaceRewrite(
   return r;
 }
 
+/** (The substituteText callback should use the name it's passed, even
+ * though at present that's the same as the name passed here.  That'll be
+ * needed when we start having the converter pick a unique name.) */
 export function prepSubstituteType(
   name: string,
-  substituteText: () => string,
+  substituteText: (name: string) => string,
   dependencies?: SubstituteType[],
 ): SubstituteType {
   const substitute = () => {
-    const text = substituteText()
+    const text = substituteText(name)
       .replace(/^\s*\/\/.*\n?/gm, '')
       .replace(/\s*$/, '\n');
     return recast.parse(text, { parser: flowParser }).program.body;

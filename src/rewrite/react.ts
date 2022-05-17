@@ -117,8 +117,7 @@ function convertReactElement(
 //   type PropsWithChildren<P> = P & { children?: ReactNode | undefined };
 const substitutePropsWithChildren = prepSubstituteType(
   `${prefix}PropsWithChildren`,
-  () =>
-    `type ${prefix}PropsWithChildren<+P> = { ...P, children?: React$Node | void, ... };`,
+  (name) => `type ${name}<+P> = { ...P, children?: React$Node | void, ... };`,
 );
 
 // In @types/react:
@@ -128,20 +127,20 @@ const substitutePropsWithChildren = prepSubstituteType(
 // Make it easy with Flow's `$Rest`.
 const substitutePropsWithoutRef = prepSubstituteType(
   `${prefix}PropsWithoutRef`,
-  () => `type ${prefix}PropsWithoutRef<P> = $Rest<P, {| ref: mixed |}>;`,
+  (name) => `type ${name}<P> = $Rest<P, {| ref: mixed |}>;`,
 );
 
 // In @types/react:
 //   interface MutableRefObject<T> { current: T; }
 const substituteMutableRefObject = prepSubstituteType(
   `${prefix}MutableRefObject`,
-  () => `type ${prefix}MutableRefObject<T> = { current: T, ... };`,
+  (name) => `type ${name}<T> = { current: T, ... };`,
 );
 
 // See comment on substituteReactRef.
 const substituteReactRefObject = prepSubstituteType(
   `${prefix}RefObject`,
-  () => `type ${prefix}RefObject<T> = { +current: T | null, ... };`,
+  (name) => `type ${name}<T> = { +current: T | null, ... };`,
 );
 
 // Definition in @types/react/index.d.ts:
@@ -161,10 +160,11 @@ const substituteReactRefObject = prepSubstituteType(
 // So, just emit a definition of our own.
 const substituteReactRef = prepSubstituteType(
   `${prefix}Ref`,
-  () => `
+  // TODO(substitute) Give the auxiliary definition its own substitution
+  (name) => `
     // NB mixed return, not void; see e.g. flowlib's React$Ref
     type ${prefix}RefCallback<T> = (T | null) => mixed;
-    type ${prefix}Ref<T> = ${prefix}RefCallback<T> | ${prefix}RefObject<T> | null;
+    type ${name}<T> = ${prefix}RefCallback<T> | ${substituteReactRefObject.name}<T> | null;
   `,
   [substituteReactRefObject],
 );
@@ -179,8 +179,8 @@ const substituteReactRefAttributes = prepSubstituteType(
   //   interface RefAttributes<T> extends Attributes {
   //     ref?: Ref<T> | undefined;
   //   }
-  () => `
-    type ${prefix}RefAttributes<T> = {
+  (name) => `
+    type ${name}<T> = {
       key?: string | number | void | null,
       ref?: void | ${substituteReactRef.name}<T>,
       ...
@@ -238,7 +238,7 @@ export function prepReactRewrites(): NamespaceRewrite {
     // argument and return types are the same; so it's the identity.
     MemoExoticComponent: prepSubstituteType(
       `${prefix}Nop`,
-      () => `type ${prefix}Nop<+T> = T;`,
+      (name) => `type ${name}<+T> = T;`,
     ),
 
     // And NamedExoticComponent is the base interface of ForwardRefExoticComponent.

@@ -24,7 +24,7 @@ import { formatSyntaxKind } from '../tsdebug';
 // just supply a Flow definition.
 const substitutePartial = prepSubstituteType(
   'Partial',
-  () => `type Partial<T> = $Rest<T, { ... }>;`,
+  (name) => `type ${name}<T> = $Rest<T, { ... }>;`,
 );
 
 function convertRecord(
