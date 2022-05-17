@@ -157,3 +157,12 @@ export function equivalentNodes(nodeA: ts.Node, nodeB: ts.Node) {
     return result;
   }
 }
+
+/** Like checker.getAliasedSymbol, but doesn't barf if there's nothing to do. */
+export function getAliasedSymbol(
+  checker: ts.TypeChecker,
+  symbol: ts.Symbol,
+): ts.Symbol {
+  if (!(symbol.flags & ts.SymbolFlags.Alias)) return symbol;
+  return checker.getAliasedSymbol(symbol);
+}

@@ -5,6 +5,7 @@ import { forEach, map, some } from './util';
 import { Mapper } from './mapper';
 import {
   equivalentNodes,
+  getAliasedSymbol,
   getModuleSpecifier,
   hasModifier,
   isEntityNameOrEntityNameExpression,
@@ -1721,8 +1722,10 @@ export function convertSourceFile(
     // all parameters and this reference is using the defaults.  In the
     // latter case, while TS requires it to be spelled with no list, Flow
     // requires it to be spelled with an empty list.
+    const resolved =
+      typeNameSymbol && getAliasedSymbol(checker, typeNameSymbol);
     // @ts-expect-error TODO(tsutil) express "does decl have type parameters"
-    if (some(typeNameSymbol?.declarations, (decl) => !!decl.typeParameters)) {
+    if (some(resolved?.declarations, (decl) => !!decl.typeParameters)) {
       return b.typeParameterInstantiation([]);
     }
 

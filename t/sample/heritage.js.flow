@@ -16,4 +16,4 @@ declare export class CC2 extends CC1 implements J {};
 declare export class CC3 extends React.Component<{...}> {};
 declare export var NN: { O: { P: typeof React.Component, ... }, ... };
 import { B } from "../imported/heritage-external";
-declare class Derived extends B {}
+declare class Derived extends B<> {}
