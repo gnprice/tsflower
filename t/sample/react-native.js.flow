@@ -4,11 +4,21 @@
 type $tsflower_subst$RN$StyleProp<+T> = null | void | T | false | '' | $ReadOnlyArray<$tsflower_subst$RN$StyleProp<T>>;
 import { type ViewStyle as $tsflower_subst$RN$ViewStyle }
   from 'react-native/Libraries/StyleSheet/StyleSheet';
+import { type TextStyle as $tsflower_subst$RN$TextStyle }
+  from 'react-native/Libraries/StyleSheet/StyleSheet';
+import { type ImageStyle as $tsflower_subst$RN$ImageStyle }
+  from 'react-native/Libraries/StyleSheet/StyleSheet';
+import { type ColorValue as $tsflower_subst$RN$ColorValue }
+  from 'react-native/Libraries/StyleSheet/StyleSheet';
 import "react-native";
 import RN from "react-native";
 
 declare var style: {
     normal: $tsflower_subst$RN$StyleProp<$tsflower_subst$RN$ViewStyle>,
     viaDefault: $tsflower_subst$RN$StyleProp<$tsflower_subst$RN$ViewStyle>,
+    text: $tsflower_subst$RN$StyleProp<$tsflower_subst$RN$TextStyle>,
+    image: $tsflower_subst$RN$StyleProp<$tsflower_subst$RN$ImageStyle>,
     ...
 };
+
+declare var color: $tsflower_subst$RN$ColorValue;

@@ -6,9 +6,10 @@ import { mkNamespaceRewrite, mkSubstituteType, NamespaceRewrite } from './core';
 const prefix = '$tsflower_subst$RN$';
 
 const substituteStyleSheetExports = Object.fromEntries(
-  ['ViewStyle'].map((name) => [
+  ['ColorValue', 'ViewStyle', 'TextStyle', 'ImageStyle'].map((name) => [
     name,
     mkSubstituteType(prefix + name, () => {
+      // TODO: It'd be nice to reuse the normal names, when there's no conflict.
       const text = `
       import { type ${name} as ${prefix}${name} }
         from 'react-native/Libraries/StyleSheet/StyleSheet';
