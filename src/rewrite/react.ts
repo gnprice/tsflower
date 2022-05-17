@@ -117,6 +117,18 @@ function convertReactElement(
 }
 
 // In @types/react:
+//   type PropsWithChildren<P> = P & { children?: ReactNode | undefined };
+const substitutePropsWithChildren = mkSubstituteType(
+  `${prefix}PropsWithChildren`,
+  () => {
+    const text = `
+    type ${prefix}PropsWithChildren<+P> = { ...P, children?: React$Node | void, ... };
+    `;
+    return recast.parse(text, { parser: flowParser }).program.body;
+  },
+);
+
+// In @types/react:
 //   interface MutableRefObject<T> { current: T; }
 const substituteMutableRefObject = mkSubstituteType(
   `${prefix}MutableRefObject`,
@@ -213,6 +225,8 @@ export function prepReactRewrites(): NamespaceRewrite {
 
     // type ReactNode = ReactElement | string | number | …
     ReactNode: mkFixedName('React$Node'), // TODO use import
+
+    PropsWithChildren: substitutePropsWithChildren,
 
     MutableRefObject: substituteMutableRefObject,
     RefObject: substituteReactRefObject,

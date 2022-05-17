@@ -46,6 +46,10 @@ var componentProps: {
   a: React.ComponentProps<A>;
 };
 
+var propsWithChildren: {
+  a: React.PropsWithChildren<{ x: number }>;
+};
+
 var miscComponents: {
   functional0: React.FunctionComponent;
   functional1: React.FunctionComponent<{ x: number }>;
