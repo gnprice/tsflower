@@ -28,6 +28,12 @@ To see TsFlower errors in the generated output:
       # Or drop `| uniq -c` if it's not too long.
       # Make your terminal wide, or add `| less -SFX`.
 
+      # See a summary of missing imports
+    $ npx flow integration/ --json | jq '.errors[] | .message[0].descr' -r \
+      | perl -lne 'print "$2 $1" if (/`(\w+)` is missing in module `(.*?)`/
+                                  || /no `(\w+)` export in `(.*?)`/)
+          ' | LC_ALL=C sort | uniq -c
+
       # See all errors, in a pager
     $ npx flow integration/ --show-all-errors --color=always | less -j3 +G
       # The `+G` works around an annoying Flow CLI bug on broken pipe.
