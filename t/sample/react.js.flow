@@ -43,6 +43,7 @@ var reactElement: {
     ...
 };
 
+var componentProps: { a: React$ElementConfig<A>, ... };
 var reactNode: React$Node;
 
 var ref: {

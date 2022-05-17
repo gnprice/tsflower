@@ -162,8 +162,11 @@ export function prepReactRewrites(): NamespaceRewrite {
   return mkNamespaceRewrite({
     Component: mkTypeReferenceMacro(convertReactComponent),
     ReactElement: mkTypeReferenceMacro(convertReactElement),
+    ComponentProps: mkFixedName('React$ElementConfig'), // TODO use import
+
     // type ReactNode = ReactElement | string | number | …
     ReactNode: mkFixedName('React$Node'), // TODO use import
+
     RefObject: substituteReactRefObject,
     Ref: substituteReactRef,
     RefAttributes: substituteReactRefAttributes,

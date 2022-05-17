@@ -41,6 +41,11 @@ var reactElement: {
   c3: React2.ReactElement<AProps, 'div'>;
 };
 
+var componentProps: {
+  // TODO(test): Add Flow test code to confirm this interoperates
+  a: React.ComponentProps<A>;
+};
+
 var reactNode: React.ReactNode;
 
 var ref: {
