@@ -1,6 +1,9 @@
 import ts from 'typescript';
 import { namedTypes as n } from 'ast-types';
 import K from 'ast-types/gen/kinds';
+// @ts-expect-error no TS types for flow-parser :-p
+import * as flowParser from 'flow-parser';
+import * as recast from 'recast';
 import { Converter, ErrorOr } from '../convert';
 
 interface TypeRewriteBase {
@@ -121,4 +124,18 @@ export function mkNamespaceRewrite(
   if (types) r.types = mapOfObject(types);
   if (namespaces) r.namespaces = mapOfObject(namespaces);
   return r;
+}
+
+export function prepSubstituteType(
+  name: string,
+  substituteText: () => string,
+  dependencies?: SubstituteType[],
+): SubstituteType {
+  const substitute = () => {
+    const text = substituteText()
+      .replace(/^\s*\/\/.*\n?/gm, '')
+      .replace(/\s*$/, '\n');
+    return recast.parse(text, { parser: flowParser }).program.body;
+  };
+  return mkSubstituteType(name, substitute, dependencies);
 }

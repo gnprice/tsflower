@@ -1,21 +1,22 @@
-// @ts-expect-error no TS types for flow-parser :-p
-import * as flowParser from 'flow-parser';
-import * as recast from 'recast';
-import { mkNamespaceRewrite, mkSubstituteType, NamespaceRewrite } from './core';
+import {
+  mkNamespaceRewrite,
+  prepSubstituteType,
+  NamespaceRewrite,
+} from './core';
 
 const prefix = '$tsflower_subst$RN$';
 
 const substituteStyleSheetExports = Object.fromEntries(
   ['ColorValue', 'ViewStyle', 'TextStyle', 'ImageStyle'].map((name) => [
     name,
-    mkSubstituteType(prefix + name, () => {
+    prepSubstituteType(
+      prefix + name,
       // TODO: It'd be nice to reuse the normal names, when there's no conflict.
-      const text = `
+      () => `
       import { type ${name} as ${prefix}${name} }
         from 'react-native/Libraries/StyleSheet/StyleSheet';
-    `;
-      return recast.parse(text, { parser: flowParser }).program.body;
-    }),
+      `,
+    ),
   ]),
 );
 
@@ -28,13 +29,13 @@ const substituteEventTypes = Object.fromEntries(
     ['NativeSyntheticEvent', 'SyntheticEvent'],
   ].map(([name, propertyName]) => [
     name,
-    mkSubstituteType(`${prefix}${name}`, () => {
-      const text = `
+    prepSubstituteType(
+      `${prefix}${name}`,
+      () => `
       import { type ${propertyName} as ${prefix}${name} }
         from 'react-native/Libraries/Types/CoreEventTypes';
-      `;
-      return recast.parse(text, { parser: flowParser }).program.body;
-    }),
+      `,
+    ),
   ]),
 );
 
@@ -57,19 +58,19 @@ const substituteComponentPropTypes = Object.fromEntries(
     'View',
   ].map((componentName) => [
     `${componentName}Props`,
-    mkSubstituteType(`${prefix}${componentName}Props`, () => {
+    prepSubstituteType(
+      `${prefix}${componentName}Props`,
       // Note we don't translate these to refer directly to the
       // corresponding export from RN.  Those are exact object types,
       // whereas the ones in `@types/react-native` (like all TS object
       // types) are inexact.  And RN-using TS code often relies on that, by
       // making intersections as a way of adding more properties.
-      const text = `
+      () => `
       import { typeof ${componentName} as ${prefix}${componentName} }
         from 'react-native';
       type ${prefix}${componentName}Props = React$ElementConfig<${prefix}${componentName}>;
-    `;
-      return recast.parse(text, { parser: flowParser }).program.body;
-    }),
+      `,
+    ),
   ]),
 );
 
@@ -78,25 +79,24 @@ const substituteComponentPropTypes = Object.fromEntries(
  */
 export function prepReactNativeRewrites(): NamespaceRewrite {
   return mkNamespaceRewrite({
-    StyleProp: mkSubstituteType('$tsflower_subst$RN$StyleProp', () => {
+    StyleProp: prepSubstituteType('$tsflower_subst$RN$StyleProp', () => {
       // Actual RN doesn't export this, but see definition in
       // react-native/Libraries/StyleSheet/StyleSheetTypes.js
       // of GenericStyleProp.
       const name = '$tsflower_subst$RN$StyleProp';
-      const text = `
+      return `
       type ${name}<+T> = null | void | T | false | '' | $ReadOnlyArray<${name}<T>>;
       `;
-      return recast.parse(text, { parser: flowParser }).program.body;
     }),
     ...substituteStyleSheetExports,
     ...substituteEventTypes,
     ...substituteComponentPropTypes,
-    StatusBarAnimation: mkSubstituteType(`${prefix}StatusBarAnimation`, () => {
-      const text = `
+    StatusBarAnimation: prepSubstituteType(
+      `${prefix}StatusBarAnimation`,
+      () => `
       import { type StatusBarAnimation as ${prefix}StatusBarAnimation }
         from 'react-native/Libraries/Components/StatusBar/StatusBar';
-      `;
-      return recast.parse(text, { parser: flowParser }).program.body;
-    }),
+      `,
+    ),
   });
 }

@@ -1,16 +1,13 @@
 import ts from 'typescript';
 import { builders as b, namedTypes as n } from 'ast-types';
 import K from 'ast-types/gen/kinds';
-// @ts-expect-error no TS types for flow-parser :-p
-import * as flowParser from 'flow-parser';
-import * as recast from 'recast';
 import { Converter, ErrorOr, mkError, mkSuccess } from '../convert';
 import {
   mkFixedName,
   mkNamespaceRewrite,
-  mkSubstituteType,
   mkTypeReferenceMacro,
   NamespaceRewrite,
+  prepSubstituteType,
 } from './core';
 
 const prefix = '$tsflower_subst$React$';
@@ -118,14 +115,10 @@ function convertReactElement(
 
 // In @types/react:
 //   type PropsWithChildren<P> = P & { children?: ReactNode | undefined };
-const substitutePropsWithChildren = mkSubstituteType(
+const substitutePropsWithChildren = prepSubstituteType(
   `${prefix}PropsWithChildren`,
-  () => {
-    const text = `
-    type ${prefix}PropsWithChildren<+P> = { ...P, children?: React$Node | void, ... };
-    `;
-    return recast.parse(text, { parser: flowParser }).program.body;
-  },
+  () =>
+    `type ${prefix}PropsWithChildren<+P> = { ...P, children?: React$Node | void, ... };`,
 );
 
 // In @types/react:
@@ -133,35 +126,23 @@ const substitutePropsWithChildren = mkSubstituteType(
 //   type PropsWithoutRef<P> = …
 // The definition is complicated for reasons that seem TS-specific.
 // Make it easy with Flow's `$Rest`.
-const substitutePropsWithoutRef = mkSubstituteType(
+const substitutePropsWithoutRef = prepSubstituteType(
   `${prefix}PropsWithoutRef`,
-  () => {
-    const text = `
-    type ${prefix}PropsWithoutRef<P> = $Rest<P, {| ref: mixed |}>;
-    `;
-    return recast.parse(text, { parser: flowParser }).program.body;
-  },
+  () => `type ${prefix}PropsWithoutRef<P> = $Rest<P, {| ref: mixed |}>;`,
 );
 
 // In @types/react:
 //   interface MutableRefObject<T> { current: T; }
-const substituteMutableRefObject = mkSubstituteType(
+const substituteMutableRefObject = prepSubstituteType(
   `${prefix}MutableRefObject`,
-  () => {
-    const text = `
-    type ${prefix}MutableRefObject<T> = { current: T, ... };
-    `;
-    return recast.parse(text, { parser: flowParser }).program.body;
-  },
+  () => `type ${prefix}MutableRefObject<T> = { current: T, ... };`,
 );
 
 // See comment on substituteReactRef.
-const substituteReactRefObject = mkSubstituteType(`${prefix}RefObject`, () => {
-  const text = `
-  type ${prefix}RefObject<T> = { +current: T | null, ... };
-`;
-  return recast.parse(text, { parser: flowParser }).program.body;
-});
+const substituteReactRefObject = prepSubstituteType(
+  `${prefix}RefObject`,
+  () => `type ${prefix}RefObject<T> = { +current: T | null, ... };`,
+);
 
 // Definition in @types/react/index.d.ts:
 //   interface RefObject<T> {
@@ -178,38 +159,32 @@ const substituteReactRefObject = mkSubstituteType(`${prefix}RefObject`, () => {
 // `React$ElementRef` to work out what type the ref should hold.
 //
 // So, just emit a definition of our own.
-const substituteReactRef = mkSubstituteType(
+const substituteReactRef = prepSubstituteType(
   `${prefix}Ref`,
-  () => {
-    const text = `
-  // NB mixed return, not void; see e.g. flowlib's React$Ref
-  type ${prefix}RefCallback<T> = (T | null) => mixed;
-  type ${prefix}Ref<T> = ${prefix}RefCallback<T> | ${prefix}RefObject<T> | null;
-`.replace(/^\s*\/\/.*\n?/gm, '');
-    return recast.parse(text, { parser: flowParser }).program.body;
-  },
+  () => `
+    // NB mixed return, not void; see e.g. flowlib's React$Ref
+    type ${prefix}RefCallback<T> = (T | null) => mixed;
+    type ${prefix}Ref<T> = ${prefix}RefCallback<T> | ${prefix}RefObject<T> | null;
+  `,
   [substituteReactRefObject],
 );
 
-const substituteReactRefAttributes = mkSubstituteType(
+const substituteReactRefAttributes = prepSubstituteType(
   `${prefix}RefAttributes`,
-  () => {
-    // Definition in @types/react/index.d.ts:
-    //   type Key = string | number;
-    //   interface Attributes {
-    //     key?: Key | null | undefined;
-    //   }
-    //   interface RefAttributes<T> extends Attributes {
-    //     ref?: Ref<T> | undefined;
-    //   }
-    const text = `
+  // Definition in @types/react/index.d.ts:
+  //   type Key = string | number;
+  //   interface Attributes {
+  //     key?: Key | null | undefined;
+  //   }
+  //   interface RefAttributes<T> extends Attributes {
+  //     ref?: Ref<T> | undefined;
+  //   }
+  () => `
     type ${prefix}RefAttributes<T> = {
       key?: string | number | void | null,
       ref?: void | ${substituteReactRef.name}<T>,
       ...
-    }`.replace(/^\s*\/\/.*\n?/gm, '');
-    return recast.parse(text, { parser: flowParser }).program.body;
-  },
+    }`,
   [substituteReactRef],
 );
 
@@ -261,10 +236,10 @@ export function prepReactRewrites(): NamespaceRewrite {
     // Here the type argument is actually the component type (the type of
     // the function's first argument), not the props.  In flowlib, the
     // argument and return types are the same; so it's the identity.
-    MemoExoticComponent: mkSubstituteType(`${prefix}Nop`, () => {
-      const text = `type ${prefix}Nop<+T> = T;`;
-      return recast.parse(text, { parser: flowParser }).program.body;
-    }),
+    MemoExoticComponent: prepSubstituteType(
+      `${prefix}Nop`,
+      () => `type ${prefix}Nop<+T> = T;`,
+    ),
 
     // And NamedExoticComponent is the base interface of ForwardRefExoticComponent.
     NamedExoticComponent: mkFixedName('React$ComponentType'), // TODO use import
