@@ -84,6 +84,14 @@ var ref: {
   >;
 };
 
+var context: {
+  providerProps: React.ProviderProps<string>;
+  consumerProps: React.ConsumerProps<string>;
+  provider: React.Provider<string>;
+  consumer: React.Consumer<string>;
+  context: React.Context<string>;
+};
+
 var jsx: {
   element: JSX.Element;
 };

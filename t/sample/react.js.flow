@@ -13,6 +13,10 @@ type $tsflower_subst$React$RefAttributes<T> = {
   ref?: void | $tsflower_subst$React$Ref<T>,
   ...
 }
+type $tsflower_subst$React$Provider<T> = $ElementType<React$Context<T>, 'Provider'>;
+type $tsflower_subst$React$ProviderProps<T> = React$ElementConfig<$tsflower_subst$React$Provider<T>>;
+type $tsflower_subst$React$Consumer<T> = $ElementType<React$Context<T>, 'Consumer'>;
+type $tsflower_subst$React$ConsumerProps<T> = React$ElementConfig<$tsflower_subst$React$Consumer<T>>;
 import React, { Component, Component as Component2 } from "react";
 import * as React2 from "react";
 
@@ -82,6 +86,15 @@ var ref: {
     ref2: $tsflower_subst$React$Ref<React.Component<{...}>>,
     refAttributes: $tsflower_subst$React$RefAttributes<React.Component<{...}>>,
     forwardRefExoticComponent: React$ComponentType<{ x: string, ... } & $tsflower_subst$React$RefAttributes<React.Component<{...}>>>,
+    ...
+};
+
+var context: {
+    providerProps: $tsflower_subst$React$ProviderProps<string>,
+    consumerProps: $tsflower_subst$React$ConsumerProps<string>,
+    provider: $tsflower_subst$React$Provider<string>,
+    consumer: $tsflower_subst$React$Consumer<string>,
+    context: React$Context<string>,
     ...
 };
 
