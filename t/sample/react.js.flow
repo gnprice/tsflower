@@ -46,6 +46,7 @@ var reactElement: {
 var reactNode: React$Node;
 
 var ref: {
+    refObject: $tsflower_subst$React$RefObject<number>,
     ref: $tsflower_subst$React$Ref<number>,
     ref2: $tsflower_subst$React$Ref<React.Component<{...}>>,
     refAttributes: $tsflower_subst$React$RefAttributes<React.Component<{...}>>,

@@ -82,6 +82,14 @@ function convertReactElement(
   });
 }
 
+// See comment on substituteReactRef.
+const substituteReactRefObject = mkSubstituteType(`${prefix}RefObject`, () => {
+  const text = `
+  type ${prefix}RefObject<T> = { +current: T | null, ... };
+`;
+  return recast.parse(text, { parser: flowParser }).program.body;
+});
+
 // Definition in @types/react/index.d.ts:
 //   interface RefObject<T> {
 //     readonly current: T | null;
@@ -97,15 +105,18 @@ function convertReactElement(
 // `React$ElementRef` to work out what type the ref should hold.
 //
 // So, just emit a definition of our own.
-const substituteReactRef = mkSubstituteType(`${prefix}Ref`, () => {
-  const text = `
-  type ${prefix}RefObject<T> = { +current: T | null, ... };
+const substituteReactRef = mkSubstituteType(
+  `${prefix}Ref`,
+  () => {
+    const text = `
   // NB mixed return, not void; see e.g. flowlib's React$Ref
   type ${prefix}RefCallback<T> = (T | null) => mixed;
   type ${prefix}Ref<T> = ${prefix}RefCallback<T> | ${prefix}RefObject<T> | null;
 `.replace(/^\s*\/\/.*\n?/gm, '');
-  return recast.parse(text, { parser: flowParser }).program.body;
-});
+    return recast.parse(text, { parser: flowParser }).program.body;
+  },
+  [substituteReactRefObject],
+);
 
 const substituteReactRefAttributes = mkSubstituteType(
   `${prefix}RefAttributes`,
@@ -153,6 +164,7 @@ export function prepReactRewrites(): NamespaceRewrite {
     ReactElement: mkTypeReferenceMacro(convertReactElement),
     // type ReactNode = ReactElement | string | number | …
     ReactNode: mkFixedName('React$Node'), // TODO use import
+    RefObject: substituteReactRefObject,
     Ref: substituteReactRef,
     RefAttributes: substituteReactRefAttributes,
 
