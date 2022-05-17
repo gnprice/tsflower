@@ -10,8 +10,9 @@ import { type ImageStyle as $tsflower_subst$RN$ImageStyle }
   from 'react-native/Libraries/StyleSheet/StyleSheet';
 import { type ColorValue as $tsflower_subst$RN$ColorValue }
   from 'react-native/Libraries/StyleSheet/StyleSheet';
-import { type ViewProps as $tsflower_subst$RN$ViewProps }
+import { type ViewProps as $tsflower_subst$RN$ViewPropsExact }
   from 'react-native/Libraries/Components/View/ViewPropTypes';
+type $tsflower_subst$RN$ViewProps = { ...$tsflower_subst$RN$ViewPropsExact, ... };
 import "react-native";
 import RN from "react-native";
 

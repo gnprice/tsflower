@@ -23,11 +23,15 @@ const substituteComponentPropTypes = Object.fromEntries(
   ['View'].map((componentName) => [
     `${componentName}Props`,
     mkSubstituteType(`${prefix}${componentName}Props`, () => {
-      // TODO: It'd be nice to reuse the normal names, when there's no conflict.
-      // TODO: Perhaps make an inexact type instead of the real (exact) thing?
+      // Note we don't translate these to refer directly to the
+      // corresponding export from RN.  Those are exact object types,
+      // whereas the ones in `@types/react-native` (like all TS object
+      // types) are inexact.  And RN-using TS code often relies on that, by
+      // making intersections as a way of adding more properties.
       const text = `
-      import { type ${componentName}Props as ${prefix}${componentName}Props }
+      import { type ${componentName}Props as ${prefix}${componentName}PropsExact }
         from 'react-native/Libraries/Components/${componentName}/${componentName}PropTypes';
+      type ${prefix}${componentName}Props = { ...${prefix}${componentName}PropsExact, ... };
     `;
       return recast.parse(text, { parser: flowParser }).program.body;
     }),
