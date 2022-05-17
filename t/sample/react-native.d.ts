@@ -21,6 +21,18 @@ declare var style: {
 declare var color: ColorValue;
 
 declare var props: {
+  drawerLayoutAndroidProps: RN.DrawerLayoutAndroidProps;
+  flatListProps: RN.FlatListProps;
+  pressableProps: RN.PressableProps;
+  scrollViewProps: RN.ScrollViewProps;
+  switchProps: RN.SwitchProps;
+  textInputProps: RN.TextInputProps;
+  textProps: RN.TextProps;
+  touchableHighlightProps: RN.TouchableHighlightProps;
+  touchableNativeFeedbackProps: RN.TouchableNativeFeedbackProps;
+  touchableOpacityProps: RN.TouchableOpacityProps;
+  touchableWithoutFeedbackProps: RN.TouchableWithoutFeedbackProps;
   viewProps: ViewProps;
+
   viewPropsPlus: ViewProps & { foo: string };
 };

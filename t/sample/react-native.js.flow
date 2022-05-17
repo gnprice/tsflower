@@ -10,9 +10,42 @@ import { type ImageStyle as $tsflower_subst$RN$ImageStyle }
   from 'react-native/Libraries/StyleSheet/StyleSheet';
 import { type ColorValue as $tsflower_subst$RN$ColorValue }
   from 'react-native/Libraries/StyleSheet/StyleSheet';
-import { type ViewProps as $tsflower_subst$RN$ViewPropsExact }
-  from 'react-native/Libraries/Components/View/ViewPropTypes';
-type $tsflower_subst$RN$ViewProps = { ...$tsflower_subst$RN$ViewPropsExact, ... };
+import { typeof DrawerLayoutAndroid as $tsflower_subst$RN$DrawerLayoutAndroid }
+  from 'react-native';
+type $tsflower_subst$RN$DrawerLayoutAndroidProps = React$ElementConfig<$tsflower_subst$RN$DrawerLayoutAndroid>;
+import { typeof FlatList as $tsflower_subst$RN$FlatList }
+  from 'react-native';
+type $tsflower_subst$RN$FlatListProps = React$ElementConfig<$tsflower_subst$RN$FlatList>;
+import { typeof Pressable as $tsflower_subst$RN$Pressable }
+  from 'react-native';
+type $tsflower_subst$RN$PressableProps = React$ElementConfig<$tsflower_subst$RN$Pressable>;
+import { typeof ScrollView as $tsflower_subst$RN$ScrollView }
+  from 'react-native';
+type $tsflower_subst$RN$ScrollViewProps = React$ElementConfig<$tsflower_subst$RN$ScrollView>;
+import { typeof Switch as $tsflower_subst$RN$Switch }
+  from 'react-native';
+type $tsflower_subst$RN$SwitchProps = React$ElementConfig<$tsflower_subst$RN$Switch>;
+import { typeof TextInput as $tsflower_subst$RN$TextInput }
+  from 'react-native';
+type $tsflower_subst$RN$TextInputProps = React$ElementConfig<$tsflower_subst$RN$TextInput>;
+import { typeof Text as $tsflower_subst$RN$Text }
+  from 'react-native';
+type $tsflower_subst$RN$TextProps = React$ElementConfig<$tsflower_subst$RN$Text>;
+import { typeof TouchableHighlight as $tsflower_subst$RN$TouchableHighlight }
+  from 'react-native';
+type $tsflower_subst$RN$TouchableHighlightProps = React$ElementConfig<$tsflower_subst$RN$TouchableHighlight>;
+import { typeof TouchableNativeFeedback as $tsflower_subst$RN$TouchableNativeFeedback }
+  from 'react-native';
+type $tsflower_subst$RN$TouchableNativeFeedbackProps = React$ElementConfig<$tsflower_subst$RN$TouchableNativeFeedback>;
+import { typeof TouchableOpacity as $tsflower_subst$RN$TouchableOpacity }
+  from 'react-native';
+type $tsflower_subst$RN$TouchableOpacityProps = React$ElementConfig<$tsflower_subst$RN$TouchableOpacity>;
+import { typeof TouchableWithoutFeedback as $tsflower_subst$RN$TouchableWithoutFeedback }
+  from 'react-native';
+type $tsflower_subst$RN$TouchableWithoutFeedbackProps = React$ElementConfig<$tsflower_subst$RN$TouchableWithoutFeedback>;
+import { typeof View as $tsflower_subst$RN$View }
+  from 'react-native';
+type $tsflower_subst$RN$ViewProps = React$ElementConfig<$tsflower_subst$RN$View>;
 import "react-native";
 import RN from "react-native";
 
@@ -27,6 +60,17 @@ declare var style: {
 declare var color: $tsflower_subst$RN$ColorValue;
 
 declare var props: {
+    drawerLayoutAndroidProps: $tsflower_subst$RN$DrawerLayoutAndroidProps,
+    flatListProps: $tsflower_subst$RN$FlatListProps,
+    pressableProps: $tsflower_subst$RN$PressableProps,
+    scrollViewProps: $tsflower_subst$RN$ScrollViewProps,
+    switchProps: $tsflower_subst$RN$SwitchProps,
+    textInputProps: $tsflower_subst$RN$TextInputProps,
+    textProps: $tsflower_subst$RN$TextProps,
+    touchableHighlightProps: $tsflower_subst$RN$TouchableHighlightProps,
+    touchableNativeFeedbackProps: $tsflower_subst$RN$TouchableNativeFeedbackProps,
+    touchableOpacityProps: $tsflower_subst$RN$TouchableOpacityProps,
+    touchableWithoutFeedbackProps: $tsflower_subst$RN$TouchableWithoutFeedbackProps,
     viewProps: $tsflower_subst$RN$ViewProps,
     viewPropsPlus: $tsflower_subst$RN$ViewProps & { foo: string, ... },
     ...

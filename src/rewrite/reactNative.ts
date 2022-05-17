@@ -19,8 +19,24 @@ const substituteStyleSheetExports = Object.fromEntries(
   ]),
 );
 
+// TODO: apply substitutions atop import types (`import(…).Foo`), too
 const substituteComponentPropTypes = Object.fromEntries(
-  ['View'].map((componentName) => [
+  [
+    // TODO: add the whole list of RN components (this is just what came up
+    //   in one version of the integration suite)
+    'DrawerLayoutAndroid',
+    'FlatList',
+    'Pressable',
+    'ScrollView',
+    'Switch',
+    'TextInput',
+    'Text',
+    'TouchableHighlight',
+    'TouchableNativeFeedback',
+    'TouchableOpacity',
+    'TouchableWithoutFeedback',
+    'View',
+  ].map((componentName) => [
     `${componentName}Props`,
     mkSubstituteType(`${prefix}${componentName}Props`, () => {
       // Note we don't translate these to refer directly to the
@@ -29,9 +45,9 @@ const substituteComponentPropTypes = Object.fromEntries(
       // types) are inexact.  And RN-using TS code often relies on that, by
       // making intersections as a way of adding more properties.
       const text = `
-      import { type ${componentName}Props as ${prefix}${componentName}PropsExact }
-        from 'react-native/Libraries/Components/${componentName}/${componentName}PropTypes';
-      type ${prefix}${componentName}Props = { ...${prefix}${componentName}PropsExact, ... };
+      import { typeof ${componentName} as ${prefix}${componentName} }
+        from 'react-native';
+      type ${prefix}${componentName}Props = React$ElementConfig<${prefix}${componentName}>;
     `;
       return recast.parse(text, { parser: flowParser }).program.body;
     }),
