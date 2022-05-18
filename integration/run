@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 
-# A bit of a hack, but a step up from keeping things in shell history.
-#
-# Note this only produces the output, and makes no attempt to validate it;
-# for that, see integration/README.md .
+# Note this produces the output, and partially validates it to catch some
+# regressions, but currently accepts that there will be Flow errors in the
+# output.  For inspecting those, see integration/README.md .
 
 trees=(
   @react-navigation
@@ -42,9 +41,16 @@ done
 
 # Look for Flow errors of kinds we've eliminated.
 # (In particular, syntax errors have empty `.error_codes`.)
+#
+# Also any in libraries where we've eliminated them.
+#
 # If any, print them and fail.
 if node_modules/.bin/flow integration/ --strip-root --json |
-  jq '.errors[] | select(.error_codes | length == 0)
+  jq '.errors[] | select(
+        (.error_codes | length == 0)
+        or (.message[0].path | test("^types/(?:
+                react-native-safe-area-context
+             )/"; "x")))
       | .message[0] | "integration/\(.path): \(.descr)"' -r -e; then
   false
 fi
