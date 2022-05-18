@@ -3,7 +3,6 @@ import { builders as b, namedTypes as n } from 'ast-types';
 import K from 'ast-types/gen/kinds';
 import { Converter, ErrorOr, mkError, mkSuccess } from '../convert';
 import {
-  mkFixedName,
   mkNamespaceRewrite,
   mkTypeReferenceMacro,
   NamespaceRewrite,
@@ -139,7 +138,7 @@ function prepSubstituteContext() {
     ConsumerProps: prepImportSubstitute('ConsumerProps'),
     Provider: prepImportSubstitute('Provider'),
     Consumer: prepImportSubstitute('Consumer'),
-    Context: mkFixedName('React$Context'),
+    Context: prepImportSubstitute('Context'),
   };
 }
 
@@ -153,10 +152,9 @@ export function prepReactRewrites(): NamespaceRewrite {
     Component: mkTypeReferenceMacro(convertReactComponent),
     FunctionComponent: mkTypeReferenceMacro(convertFunctionComponent),
     ReactElement: mkTypeReferenceMacro(convertReactElement),
-    ComponentProps: mkFixedName('React$ElementConfig'), // TODO use import
+    ComponentProps: prepImportSubstitute('ComponentProps'),
 
-    // type ReactNode = ReactElement | string | number | …
-    ReactNode: mkFixedName('React$Node'), // TODO use import
+    ReactNode: prepImportSubstitute('ReactNode'),
 
     PropsWithChildren: substitutePropsWithChildren,
     PropsWithoutRef: substitutePropsWithoutRef,

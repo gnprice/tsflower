@@ -9,6 +9,11 @@
 
 import * as React from 'react';
 
+// type ReactNode = ReactElement | string | number | …
+export type ReactNode = React.Node;
+
+export type ComponentProps<C> = React.ElementConfig<C>;
+
 // In @types/react:
 //   type PropsWithChildren<P> = P & { children?: ReactNode | undefined };
 export type PropsWithChildren<+P> = { ...P, children?: React$Node | void, ... };
@@ -96,9 +101,10 @@ export type NamedExoticComponent<-P> = React.ComponentType<P>;
 // and then createContext on a T returns a Context<T>.
 //
 // In flowlib, most of those pieces don't get names.  But there is a
-// React.Context (aka React$Context) with the same meaning.
-export type Provider<T> = $ElementType<React$Context<T>, 'Provider'>;
-export type Consumer<T> = $ElementType<React$Context<T>, 'Consumer'>;
+// React.Context with the same meaning.
+export type Context<T> = React.Context<T>;
+export type Provider<T> = $ElementType<Context<T>, 'Provider'>;
+export type Consumer<T> = $ElementType<Context<T>, 'Consumer'>;
 export type ProviderProps<T> = React$ElementConfig<Provider<T>>;
 export type ConsumerProps<T> = React$ElementConfig<Consumer<T>>;
 
