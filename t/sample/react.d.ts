@@ -1,9 +1,10 @@
-import React, {
+import {
   Component,
   Component as Component2,
   //  ReactElement // TODO rewrite imports, too
 } from 'react';
-import * as React2 from 'react';
+import React2 from 'react'; // TODO make this fully work too; see comment at convertTypeArguments
+import * as React from 'react';
 
 // `React.Component` in Flow requires its first argument.
 // Test that we rewrite references that lack that.

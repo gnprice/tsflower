@@ -1729,6 +1729,16 @@ export function convertSourceFile(
       return b.typeParameterInstantiation([]);
     }
 
+    // TODO: If the input code says e.g. `import React from 'react'` instead
+    //   of `import * as React from 'react'`, i.e. if it does a default
+    //   import instead of a namespace import, and then has a type reference
+    //   within that like `React.FunctionComponent`... then the symbol
+    //   doesn't resolve, and the logic above doesn't work -- we don't
+    //   insert the needed empty type-arguments list `<>`.
+    //
+    //   But it works fine in the IDE, and in the playground.  (So also with
+    //   `tsc`?)  Figure out how to replicate here whatever those do.
+
     return null;
   }
 

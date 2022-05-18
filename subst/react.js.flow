@@ -14,6 +14,14 @@ export type ReactNode = React.Node;
 
 export type ComponentProps<C> = React.ElementConfig<C>;
 
+// @types/react:
+//   interface FunctionComponent<P = {}> {
+// flowlib:
+//   declare type React$StatelessFunctionalComponent<Props> = {
+// So we need to fill in that default for the type argument.
+export type FunctionComponent<P = { ... }> =
+  React.StatelessFunctionalComponent<P>;
+
 // In @types/react:
 //   type PropsWithChildren<P> = P & { children?: ReactNode | undefined };
 export type PropsWithChildren<+P> = { ...P, children?: React$Node | void, ... };
