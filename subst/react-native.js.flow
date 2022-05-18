@@ -1,0 +1,80 @@
+/**
+ * Flow types corresponding to the TS types in `@types/react-native`.
+ *
+ * TsFlower will rewrite some TS references to React Native types
+ * so that their Flow versions refer instead to these types.
+ *
+ * @flow
+ */
+
+import * as React from 'react';
+
+// Actual RN doesn't export this, but see definition in
+// react-native/Libraries/StyleSheet/StyleSheetTypes.js
+// of GenericStyleProp.
+export type StyleProp<+T> =
+  | null
+  | void
+  | T
+  | false
+  | ''
+  | $ReadOnlyArray<StyleProp<T>>;
+
+// Types exported by RN's StyleSheet.js.
+export type {
+  ColorValue,
+  ViewStyle,
+  TextStyle,
+  ImageStyle,
+} from 'react-native/Libraries/StyleSheet/StyleSheet';
+
+// Event types.
+export type {
+  // TODO: add the rest of the event types defined in `@types/react-native`
+  //   (this is just what came up in one version of the integration suite)
+  PressEvent as GestureResponderEvent,
+  LayoutEvent as LayoutChangeEvent,
+  SyntheticEvent as NativeSyntheticEvent,
+} from 'react-native/Libraries/Types/CoreEventTypes';
+
+// Components' props types.
+//
+// Note we don't translate these to refer directly to the actual props
+// types from RN.  Those are exact object types, whereas the ones in
+// `@types/react-native` (like all TS object types) are inexact.  And
+// RN-using TS code often relies on that, by making intersections as a
+// way of adding more properties.
+type InexactProps<C> = { ...React.ElementConfig<C>, ... };
+import {
+  // TODO: add the whole list of RN components (this is just what came up
+  //   in one version of the integration suite)
+  typeof DrawerLayoutAndroid,
+  typeof FlatList,
+  typeof Pressable,
+  typeof ScrollView,
+  typeof Switch,
+  typeof TextInput,
+  typeof Text,
+  typeof TouchableHighlight,
+  typeof TouchableNativeFeedback,
+  typeof TouchableOpacity,
+  typeof TouchableWithoutFeedback,
+  typeof View,
+} from 'react-native';
+export type DrawerLayoutAndroidProps = InexactProps<DrawerLayoutAndroid>;
+export type FlatListProps = InexactProps<FlatList>;
+export type PressableProps = InexactProps<Pressable>;
+export type ScrollViewProps = InexactProps<ScrollView>;
+export type SwitchProps = InexactProps<Switch>;
+export type TextInputProps = InexactProps<TextInput>;
+export type TextProps = InexactProps<Text>;
+export type TouchableHighlightProps = InexactProps<TouchableHighlight>;
+export type TouchableNativeFeedbackProps =
+  InexactProps<TouchableNativeFeedback>;
+export type TouchableOpacityProps = InexactProps<TouchableOpacity>;
+export type TouchableWithoutFeedbackProps =
+  InexactProps<TouchableWithoutFeedback>;
+export type ViewProps = InexactProps<View>;
+
+// Miscellaneous types related to particular components.
+export type { StatusBarAnimation } from 'react-native/Libraries/Components/StatusBar/StatusBar';
