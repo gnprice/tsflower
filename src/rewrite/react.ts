@@ -121,80 +121,17 @@ function convertReactElement(
   });
 }
 
-// In @types/react:
-//   type PropsWithChildren<P> = P & { children?: ReactNode | undefined };
-const substitutePropsWithChildren = prepSubstituteType(
-  `${prefix}PropsWithChildren`,
-  (name) => `type ${name}<+P> = { ...P, children?: React$Node | void, ... };`,
-);
+const substitutePropsWithChildren = prepImportSubstitute(`PropsWithChildren`);
 
-// In @types/react:
-//   /** Ensures that the props do not include ref at all */
-//   type PropsWithoutRef<P> = …
-// The definition is complicated for reasons that seem TS-specific.
-// Make it easy with Flow's `$Rest`.
-const substitutePropsWithoutRef = prepSubstituteType(
-  `${prefix}PropsWithoutRef`,
-  (name) => `type ${name}<P> = $Rest<P, {| ref: mixed |}>;`,
-);
+const substitutePropsWithoutRef = prepImportSubstitute(`PropsWithoutRef`);
 
-// In @types/react:
-//   interface MutableRefObject<T> { current: T; }
-const substituteMutableRefObject = prepSubstituteType(
-  `${prefix}MutableRefObject`,
-  (name) => `type ${name}<T> = { current: T, ... };`,
-);
+const substituteMutableRefObject = prepImportSubstitute(`MutableRefObject`);
 
-// See comment on substituteReactRef.
-const substituteReactRefObject = prepSubstituteType(
-  `${prefix}RefObject`,
-  (name) => `type ${name}<T> = { +current: T | null, ... };`,
-);
+const substituteReactRefObject = prepImportSubstitute(`RefObject`);
 
-// Definition in @types/react/index.d.ts:
-//   interface RefObject<T> {
-//     readonly current: T | null;
-//   }
-//   // Bivariance hack for consistent unsoundness with RefObject
-//   type RefCallback<T> = { bivarianceHack(instance: T | null): void }["bivarianceHack"];
-//   type Ref<T> = RefCallback<T> | RefObject<T> | null;
-//
-// There's no definition in flowlib's react.js that corresponds; the types
-// of `useImperativeHandle` and `forwardRef` spell it out.  There's
-// `React.Ref`, but it's the type of the `ref` pseudoprop; its type
-// parameter is the ElementType of the element, and it passes that to
-// `React$ElementRef` to work out what type the ref should hold.
-//
-// So, just emit a definition of our own.
-const substituteReactRef = prepSubstituteType(
-  `${prefix}Ref`,
-  // TODO(substitute) Give the auxiliary definition its own substitution
-  (name) => `
-    // NB mixed return, not void; see e.g. flowlib's React$Ref
-    type ${prefix}RefCallback<T> = (T | null) => mixed;
-    type ${name}<T> = ${prefix}RefCallback<T> | ${substituteReactRefObject.name}<T> | null;
-  `,
-  [substituteReactRefObject],
-);
+const substituteReactRef = prepImportSubstitute(`Ref`);
 
-const substituteReactRefAttributes = prepSubstituteType(
-  `${prefix}RefAttributes`,
-  // Definition in @types/react/index.d.ts:
-  //   type Key = string | number;
-  //   interface Attributes {
-  //     key?: Key | null | undefined;
-  //   }
-  //   interface RefAttributes<T> extends Attributes {
-  //     ref?: Ref<T> | undefined;
-  //   }
-  (name) => `
-    type ${name}<T> = {
-      key?: string | number | void | null,
-      ref?: void | ${substituteReactRef.name}<T>,
-      ...
-    }`,
-  [substituteReactRef],
-);
+const substituteReactRefAttributes = prepImportSubstitute(`RefAttributes`);
 
 function prepSubstituteContext() {
   return {

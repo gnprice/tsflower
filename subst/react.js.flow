@@ -9,6 +9,57 @@
 
 import * as React from 'react';
 
+// In @types/react:
+//   type PropsWithChildren<P> = P & { children?: ReactNode | undefined };
+export type PropsWithChildren<+P> = { ...P, children?: React$Node | void, ... };
+
+// In @types/react:
+//   /** Ensures that the props do not include ref at all */
+//   type PropsWithoutRef<P> = …
+// The definition is complicated for reasons that seem TS-specific.
+// Make it easy with Flow's `$Rest`.
+export type PropsWithoutRef<P> = $Rest<P, {| ref: mixed |}>;
+
+// In @types/react:
+//   interface MutableRefObject<T> { current: T; }
+export type MutableRefObject<T> = { current: T, ... };
+
+// See comment on `Ref` below.
+export type RefObject<T> = { +current: T | null, ... };
+
+// Definition in @types/react/index.d.ts:
+//   interface RefObject<T> {
+//     readonly current: T | null;
+//   }
+//   // Bivariance hack for consistent unsoundness with RefObject
+//   type RefCallback<T> = { bivarianceHack(instance: T | null): void }["bivarianceHack"];
+//   type Ref<T> = RefCallback<T> | RefObject<T> | null;
+//
+// There's no definition in flowlib's react.js that corresponds; the types
+// of `useImperativeHandle` and `forwardRef` spell it out.  There's
+// `React.Ref`, but it's the type of the `ref` pseudoprop; its type
+// parameter is the ElementType of the element, and it passes that to
+// `React$ElementRef` to work out what type the ref should hold.
+//
+// So, just give a definition of our own.
+export type RefCallback<T> = (T | null) => mixed;
+// NB mixed return, not void; see e.g. flowlib's React$Ref
+export type Ref<T> = RefCallback<T> | RefObject<T> | null;
+
+// Definition in @types/react/index.d.ts:
+//   type Key = string | number;
+//   interface Attributes {
+//     key?: Key | null | undefined;
+//   }
+//   interface RefAttributes<T> extends Attributes {
+//     ref?: Ref<T> | undefined;
+//   }
+export type RefAttributes<T> = {
+  key?: string | number | void | null,
+  ref?: void | Ref<T>,
+  ...
+};
+
 // @types/react/index.d.ts (whitespace and comments elided):
 //   interface ProviderProps<T> {
 //       value: T;
