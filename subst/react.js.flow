@@ -84,3 +84,11 @@ export type Provider<T> = $ElementType<React$Context<T>, 'Provider'>;
 export type Consumer<T> = $ElementType<React$Context<T>, 'Consumer'>;
 export type ProviderProps<T> = React$ElementConfig<Provider<T>>;
 export type ConsumerProps<T> = React$ElementConfig<Consumer<T>>;
+
+//   // @types/react/index.d.ts
+//   declare global {
+//     namespace JSX {
+//         interface Element extends React.ReactElement<any, any> { }
+// Currently we handle React.ReactElement with a macro;
+// do here what that macro would give on `any, any`.
+export type JSX$Element = React$Element<any>;

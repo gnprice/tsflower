@@ -12,6 +12,7 @@ import { type ProviderProps as $tsflower_subst$React$ProviderProps } from "tsflo
 import { type ConsumerProps as $tsflower_subst$React$ConsumerProps } from "tsflower/subst/react";
 import { type Provider as $tsflower_subst$React$Provider } from "tsflower/subst/react";
 import { type Consumer as $tsflower_subst$React$Consumer } from "tsflower/subst/react";
+import { type JSX$Element as $tsflower_subst$React$JSX$Element } from "tsflower/subst/react";
 import React, { Component, Component as Component2 } from "react";
 import * as React2 from "react";
 
@@ -93,4 +94,4 @@ var context: {
     ...
 };
 
-var jsx: { element: React$Element<any>, ... };
+var jsx: { element: $tsflower_subst$React$JSX$Element, ... };

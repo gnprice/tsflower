@@ -143,19 +143,6 @@ function prepSubstituteContext() {
   };
 }
 
-// // @types/react/index.d.ts
-// declare global {
-//   namespace JSX {
-//       interface Element extends React.ReactElement<any, any> { }
-//
-// So do the equivalent of convertReactElement with `any, any`.
-function convertJsxElement() {
-  return mkSuccess({
-    id: b.identifier('React$Element'), // TODO use import
-    typeParameters: b.typeParameterInstantiation([b.anyTypeAnnotation()]),
-  });
-}
-
 /**
  * Prepare our static rewrite plans for the 'react' module.
  */
@@ -212,7 +199,7 @@ export function prepReactRewrites(): NamespaceRewrite {
  */
 export function prepGlobalJsxRewrites(): NamespaceRewrite {
   return mkNamespaceRewrite({
-    Element: mkTypeReferenceMacro(convertJsxElement),
+    Element: prepImportSubstitute('JSX$Element'),
     // If adding to this: note the unimplemented cases in findGlobalRewrites,
     // where we use this map.
   });
