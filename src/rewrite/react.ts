@@ -120,28 +120,6 @@ function convertReactElement(
   });
 }
 
-const substitutePropsWithChildren = prepImportSubstitute(`PropsWithChildren`);
-
-const substitutePropsWithoutRef = prepImportSubstitute(`PropsWithoutRef`);
-
-const substituteMutableRefObject = prepImportSubstitute(`MutableRefObject`);
-
-const substituteReactRefObject = prepImportSubstitute(`RefObject`);
-
-const substituteReactRef = prepImportSubstitute(`Ref`);
-
-const substituteReactRefAttributes = prepImportSubstitute(`RefAttributes`);
-
-function prepSubstituteContext() {
-  return {
-    ProviderProps: prepImportSubstitute('ProviderProps'),
-    ConsumerProps: prepImportSubstitute('ConsumerProps'),
-    Provider: prepImportSubstitute('Provider'),
-    Consumer: prepImportSubstitute('Consumer'),
-    Context: prepImportSubstitute('Context'),
-  };
-}
-
 /**
  * Prepare our static rewrite plans for the 'react' module.
  */
@@ -152,25 +130,29 @@ export function prepReactRewrites(): NamespaceRewrite {
     Component: mkTypeReferenceMacro(convertReactComponent),
     FunctionComponent: mkTypeReferenceMacro(convertFunctionComponent),
     ReactElement: mkTypeReferenceMacro(convertReactElement),
-    ComponentProps: prepImportSubstitute('ComponentProps'),
 
-    ReactNode: prepImportSubstitute('ReactNode'),
-
-    PropsWithChildren: substitutePropsWithChildren,
-    PropsWithoutRef: substitutePropsWithoutRef,
-
-    MutableRefObject: substituteMutableRefObject,
-    RefObject: substituteReactRefObject,
-    Ref: substituteReactRef,
-    RefAttributes: substituteReactRefAttributes,
-
-    ForwardRefExoticComponent: prepImportSubstitute(
-      'ForwardRefExoticComponent',
+    // TODO: Have the mapper find these import substitutions directly from
+    //   the declarations in subst/react.js.flow, rather than list them here
+    ...Object.fromEntries(
+      [
+        'ComponentProps',
+        'ReactNode',
+        'PropsWithChildren',
+        'PropsWithoutRef',
+        'MutableRefObject',
+        'RefObject',
+        'Ref',
+        'RefAttributes',
+        'ForwardRefExoticComponent',
+        'MemoExoticComponent',
+        'NamedExoticComponent',
+        'ProviderProps',
+        'ConsumerProps',
+        'Provider',
+        'Consumer',
+        'Context',
+      ].map((name) => [name, prepImportSubstitute(name)]),
     ),
-    MemoExoticComponent: prepImportSubstitute('MemoExoticComponent'),
-    NamedExoticComponent: prepImportSubstitute('NamedExoticComponent'),
-
-    ...prepSubstituteContext(),
 
     // If adding to this: note that currently any namespace rewrites within a
     // given library are ignored!  That is, the `namespaces` property of one
