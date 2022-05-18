@@ -4,28 +4,12 @@ import K from 'ast-types/gen/kinds';
 import { Converter, ErrorOr, mkError, mkSuccess } from '../convert';
 import {
   mkNamespaceRewrite,
-  mkSubstituteType,
   mkTypeReferenceMacro,
   NamespaceRewrite,
+  prepImportSubstitute,
 } from './core';
 
 const prefix = '$tsflower_subst$React$';
-
-function prepImportSubstitute(tsName: string) {
-  const localName = `${prefix}${tsName}`;
-  return mkSubstituteType(localName, () => [
-    b.importDeclaration(
-      [
-        b.importSpecifier.from({
-          imported: b.identifier(tsName),
-          local: b.identifier(localName),
-          importKind: 'type',
-        }),
-      ],
-      b.stringLiteral('tsflower/subst/react'),
-    ),
-  ]);
-}
 
 function convertReactComponent(
   converter: Converter,
@@ -125,7 +109,10 @@ export function prepReactRewrites(): NamespaceRewrite {
         'Provider',
         'Consumer',
         'Context',
-      ].map((name) => [name, prepImportSubstitute(name)]),
+      ].map((name) => [
+        name,
+        prepImportSubstitute(name, `${prefix}${name}`, 'tsflower/subst/react'),
+      ]),
     ),
 
     // If adding to this: note that currently any namespace rewrites within a
@@ -139,7 +126,12 @@ export function prepReactRewrites(): NamespaceRewrite {
  */
 export function prepGlobalJsxRewrites(): NamespaceRewrite {
   return mkNamespaceRewrite({
-    Element: prepImportSubstitute('JSX$Element'),
+    Element: prepImportSubstitute(
+      'JSX$Element',
+      `${prefix}JSX$Element`,
+      'tsflower/subst/react',
+    ),
+
     // If adding to this: note the unimplemented cases in findGlobalRewrites,
     // where we use this map.
   });

@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { namedTypes as n } from 'ast-types';
+import { builders as b, namedTypes as n } from 'ast-types';
 import K from 'ast-types/gen/kinds';
 // @ts-expect-error no TS types for flow-parser :-p
 import * as flowParser from 'flow-parser';
@@ -141,4 +141,23 @@ export function prepSubstituteType(
     return recast.parse(text, { parser: flowParser }).program.body;
   };
   return mkSubstituteType(name, substitute, dependencies);
+}
+
+export function prepImportSubstitute(
+  importedName: string,
+  localName: string,
+  moduleSpecifier: string,
+) {
+  return mkSubstituteType(localName, () => [
+    b.importDeclaration(
+      [
+        b.importSpecifier.from({
+          imported: b.identifier(importedName),
+          local: b.identifier(localName),
+          importKind: 'type',
+        }),
+      ],
+      b.stringLiteral(moduleSpecifier),
+    ),
+  ]);
 }
