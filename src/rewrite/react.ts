@@ -12,6 +12,14 @@ import {
 
 const prefix = '$tsflower_subst$React$';
 
+function prepImportSubstitute(tsName: string) {
+  return prepSubstituteType(
+    `${prefix}${tsName}`,
+    (name) =>
+      `import { type ${tsName} as ${name} } from "tsflower/subst/react";`,
+  );
+}
+
 function convertReactComponent(
   converter: Converter,
   typeName: ts.EntityNameOrEntityNameExpression,
@@ -189,52 +197,11 @@ const substituteReactRefAttributes = prepSubstituteType(
 );
 
 function prepSubstituteContext() {
-  // @types/react/index.d.ts (whitespace and comments elided):
-  //   interface ProviderProps<T> {
-  //       value: T;
-  //       children?: ReactNode | undefined;
-  //   }
-  //   interface ConsumerProps<T> {
-  //       children: (value: T) => ReactNode;
-  //   }
-  //   // …
-  //   type Provider<T> = ProviderExoticComponent<ProviderProps<T>>;
-  //   type Consumer<T> = ExoticComponent<ConsumerProps<T>>;
-  //   interface Context<T> {
-  //       Provider: Provider<T>;
-  //       Consumer: Consumer<T>;
-  //       displayName?: string | undefined;
-  //   }
-  // and then createContext on a T returns a Context<T>.
-  //
-  // In flowlib, most of those pieces don't get names.  But there is a
-  // React.Context (aka React$Context) with the same meaning.
-  const substProvider = prepSubstituteType(
-    `${prefix}Provider`,
-    (name) => `type ${name}<T> = $ElementType<React$Context<T>, 'Provider'>;`,
-  );
-  const substConsumer = prepSubstituteType(
-    `${prefix}Consumer`,
-    (name) => `type ${name}<T> = $ElementType<React$Context<T>, 'Consumer'>;`,
-  );
-  const substProviderProps = prepSubstituteType(
-    `${prefix}ProviderProps`,
-    (name) =>
-      `type ${name}<T> = React$ElementConfig<${substProvider.name}<T>>;`,
-    [substProvider],
-  );
-  const substConsumerProps = prepSubstituteType(
-    `${prefix}ConsumerProps`,
-    (name) =>
-      `type ${name}<T> = React$ElementConfig<${substConsumer.name}<T>>;`,
-    [substConsumer],
-  );
-
   return {
-    ProviderProps: substProviderProps,
-    ConsumerProps: substConsumerProps,
-    Provider: substProvider,
-    Consumer: substConsumer,
+    ProviderProps: prepImportSubstitute('ProviderProps'),
+    ConsumerProps: prepImportSubstitute('ConsumerProps'),
+    Provider: prepImportSubstitute('Provider'),
+    Consumer: prepImportSubstitute('Consumer'),
     Context: mkFixedName('React$Context'),
   };
 }

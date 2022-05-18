@@ -1,11 +1,14 @@
 [include]
 ../imported/
 ../../node_modules/react-native/
+../../subst/
 
 [lints]
 untyped-import=error
 
 [options]
+
+module.name_mapper='^tsflower/\(.*\)$' -> '<PROJECT_ROOT>/../../\1'
 
 ; The RN template app has:
 ; module.name_mapper='^react-native/\(.*\)$' -> '<PROJECT_ROOT>/node_modules/react-native/\1'

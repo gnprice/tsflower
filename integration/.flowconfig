@@ -2,7 +2,16 @@
 ; https://github.com/facebook/flow/issues/2364
 .*/node_modules/resolve/test/resolver/malformed_package_json/.*
 
+[include]
+../subst/
+
 [options]
+
+# A normal TsFlower-using project, with `tsflower` in its node_modules,
+# doesn't need this.  But we need it here because we want to find a module
+# like 'tsflower/subst/react' from the development version in this repo.
+module.name_mapper='^tsflower/\(.*\)$' -> '<PROJECT_ROOT>/../\1'
+
 # This causes Flow to find our `types/foo/bar.js.flow`, if one exists,
 # when looking at an import from `foo/bar`.  (The `[^.]` is so Flow doesn't
 # try to apply this to relative imports.)

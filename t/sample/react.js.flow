@@ -13,10 +13,10 @@ type $tsflower_subst$React$RefAttributes<T> = {
   ref?: void | $tsflower_subst$React$Ref<T>,
   ...
 }
-type $tsflower_subst$React$Provider<T> = $ElementType<React$Context<T>, 'Provider'>;
-type $tsflower_subst$React$ProviderProps<T> = React$ElementConfig<$tsflower_subst$React$Provider<T>>;
-type $tsflower_subst$React$Consumer<T> = $ElementType<React$Context<T>, 'Consumer'>;
-type $tsflower_subst$React$ConsumerProps<T> = React$ElementConfig<$tsflower_subst$React$Consumer<T>>;
+import { type ProviderProps as $tsflower_subst$React$ProviderProps } from "tsflower/subst/react";
+import { type ConsumerProps as $tsflower_subst$React$ConsumerProps } from "tsflower/subst/react";
+import { type Provider as $tsflower_subst$React$Provider } from "tsflower/subst/react";
+import { type Consumer as $tsflower_subst$React$Consumer } from "tsflower/subst/react";
 import React, { Component, Component as Component2 } from "react";
 import * as React2 from "react";
 

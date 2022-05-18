@@ -1,0 +1,35 @@
+/**
+ * Flow type definitions corresponding to the TS definitions in `@types/react`.
+ *
+ * TsFlower will rewrite some TS references to React types so that their
+ * Flow versions refer instead to these types.
+ *
+ * @flow
+ */
+
+import * as React from 'react';
+
+// @types/react/index.d.ts (whitespace and comments elided):
+//   interface ProviderProps<T> {
+//       value: T;
+//       children?: ReactNode | undefined;
+//   }
+//   interface ConsumerProps<T> {
+//       children: (value: T) => ReactNode;
+//   }
+//   // …
+//   type Provider<T> = ProviderExoticComponent<ProviderProps<T>>;
+//   type Consumer<T> = ExoticComponent<ConsumerProps<T>>;
+//   interface Context<T> {
+//       Provider: Provider<T>;
+//       Consumer: Consumer<T>;
+//       displayName?: string | undefined;
+//   }
+// and then createContext on a T returns a Context<T>.
+//
+// In flowlib, most of those pieces don't get names.  But there is a
+// React.Context (aka React$Context) with the same meaning.
+export type Provider<T> = $ElementType<React$Context<T>, 'Provider'>;
+export type Consumer<T> = $ElementType<React$Context<T>, 'Consumer'>;
+export type ProviderProps<T> = React$ElementConfig<Provider<T>>;
+export type ConsumerProps<T> = React$ElementConfig<Consumer<T>>;
