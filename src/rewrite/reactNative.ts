@@ -60,16 +60,16 @@ const substituteComponentPropTypes = Object.fromEntries(
     `${componentName}Props`,
     prepSubstituteType(
       `${prefix}${componentName}Props`,
-      // Note we don't translate these to refer directly to the
-      // corresponding export from RN.  Those are exact object types,
-      // whereas the ones in `@types/react-native` (like all TS object
-      // types) are inexact.  And RN-using TS code often relies on that, by
-      // making intersections as a way of adding more properties.
+      // Note we don't translate these to refer directly to the actual props
+      // type from RN.  Those are exact object types, whereas the ones in
+      // `@types/react-native` (like all TS object types) are inexact.  And
+      // RN-using TS code often relies on that, by making intersections as a
+      // way of adding more properties.
       // TODO(substitute): Give the auxiliary name here its own substitution.
       (name) => `
       import { typeof ${componentName} as ${prefix}${componentName} }
         from 'react-native';
-      type ${name} = React$ElementConfig<${prefix}${componentName}>;
+      type ${name} = { ...React$ElementConfig<${prefix}${componentName}>, ... };
       `,
     ),
   ]),
