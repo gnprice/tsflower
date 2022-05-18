@@ -1,0 +1,16 @@
+/**
+ * Flow types corresponding to types in the TS default library / stdlib.
+ *
+ * TsFlower will rewrite some TS references to these types into Flow
+ * references to these types.
+ *
+ * @flow
+ */
+
+export type Readonly<+T> = $ReadOnly<T>;
+
+export type { $ReadOnlyArray as ReadonlyArray };
+
+// From lib.es5.d.ts:
+//   type Partial<T> = { [P in keyof T]?: T[P]; };
+export type Partial<T> = $Rest<T, { ... }>;

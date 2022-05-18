@@ -10,6 +10,16 @@ interface TypeRewriteBase {
   readonly kind: string;
 }
 
+// We don't actually currently use this kind of rewrite.  Leaving it in
+// partly because its implementation is so simple that it's very cheap to
+// keep around.
+//
+// Possibly we should use it after all for things like Readonly/$ReadOnly
+// and ReadonlyArray/$ReadOnlyArray?  Seems like using the normal Flow names
+// for such things could make the output more readable than following the TS
+// names.  ... Or perhaps that should be done as a more general inlining
+// feature on the subst mechanism, which could also be invoked on many
+// definitions in React and React Native.
 export interface FixedName extends TypeRewriteBase {
   readonly kind: 'FixedName';
   readonly name: string;

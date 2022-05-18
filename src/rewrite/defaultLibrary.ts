@@ -9,23 +9,12 @@ import {
   mkUnimplemented,
 } from '../convert';
 import {
-  mkFixedName,
   mkNamespaceRewrite,
-  prepSubstituteType,
   mkTypeMacro,
   mkTypeReferenceMacro,
+  prepImportSubstitute,
 } from './core';
 import { formatSyntaxKind } from '../tsdebug';
-
-// From lib.es5.d.ts:
-//   type Partial<T> = { [P in keyof T]?: T[P]; };
-// No need to munge the name; the input code won't have had to import it, so
-// won't have a chance to pick a different name.  Keep TS's name for it, and
-// just supply a Flow definition.
-const substitutePartial = prepSubstituteType(
-  'Partial',
-  (name) => `type ${name}<T> = $Rest<T, { ... }>;`,
-);
 
 function convertRecord(
   converter: Converter,
@@ -175,11 +164,21 @@ function convertOmit(
  */
 export function prepDefaultLibraryRewrites() {
   return mkNamespaceRewrite({
-    Readonly: mkFixedName('$ReadOnly'),
-    ReadonlyArray: mkFixedName('$ReadOnlyArray'),
-    Partial: substitutePartial,
     Record: mkTypeMacro(convertRecord),
     Omit: mkTypeReferenceMacro(convertOmit),
+
+    // TODO: Have the mapper find these import substitutions directly from
+    //   the declarations in subst/react.js.flow, rather than list them here
+    ...Object.fromEntries(
+      ['Readonly', 'ReadonlyArray', 'Partial'].map((name) => [
+        name,
+        // No need to munge the names of these; the input code won't have
+        // had to import them, so won't have a chance to pick a different
+        // name.  Keep TS's name, and just supply a Flow definition.
+        prepImportSubstitute(name, `${name}`, 'tsflower/subst/lib'),
+      ]),
+    ),
+
     // If adding to this: note that any `namespaces` map is ignored.
     // See findRewritesInDefaultLibrary.
   });
