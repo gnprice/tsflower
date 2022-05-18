@@ -11,7 +11,7 @@ import { type MutableRefObject as $tsflower_subst$React$MutableRefObject } from 
 import { type RefObject as $tsflower_subst$React$RefObject } from "tsflower/subst/react";
 import { type Ref as $tsflower_subst$React$Ref } from "tsflower/subst/react";
 import { type RefAttributes as $tsflower_subst$React$RefAttributes } from "tsflower/subst/react";
-import { type ForwardRefExoticComponent as $tsflower_subst$React$ForwardRefExoticComponent } from "tsflower/subst/react";
+import {     type ForwardRefExoticComponent as $tsflower_subst$React$ForwardRefExoticComponent, } from "tsflower/subst/react";
 import { type ProviderProps as $tsflower_subst$React$ProviderProps } from "tsflower/subst/react";
 import { type ConsumerProps as $tsflower_subst$React$ConsumerProps } from "tsflower/subst/react";
 import { type Provider as $tsflower_subst$React$Provider } from "tsflower/subst/react";

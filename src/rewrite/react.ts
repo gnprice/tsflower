@@ -4,19 +4,27 @@ import K from 'ast-types/gen/kinds';
 import { Converter, ErrorOr, mkError, mkSuccess } from '../convert';
 import {
   mkNamespaceRewrite,
+  mkSubstituteType,
   mkTypeReferenceMacro,
   NamespaceRewrite,
-  prepSubstituteType,
 } from './core';
 
 const prefix = '$tsflower_subst$React$';
 
 function prepImportSubstitute(tsName: string) {
-  return prepSubstituteType(
-    `${prefix}${tsName}`,
-    (name) =>
-      `import { type ${tsName} as ${name} } from "tsflower/subst/react";`,
-  );
+  const localName = `${prefix}${tsName}`;
+  return mkSubstituteType(localName, () => [
+    b.importDeclaration(
+      [
+        b.importSpecifier.from({
+          imported: b.identifier(tsName),
+          local: b.identifier(localName),
+          importKind: 'type',
+        }),
+      ],
+      b.stringLiteral('tsflower/subst/react'),
+    ),
+  ]);
 }
 
 function convertReactComponent(
