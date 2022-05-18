@@ -3,11 +3,13 @@
  */
 import { type PropsWithChildren as $tsflower_subst$React$PropsWithChildren } from "tsflower/subst/react";
 import { type PropsWithoutRef as $tsflower_subst$React$PropsWithoutRef } from "tsflower/subst/react";
-type $tsflower_subst$React$Nop<+T> = T;
+import { type MemoExoticComponent as $tsflower_subst$React$MemoExoticComponent } from "tsflower/subst/react";
+import { type NamedExoticComponent as $tsflower_subst$React$NamedExoticComponent } from "tsflower/subst/react";
 import { type MutableRefObject as $tsflower_subst$React$MutableRefObject } from "tsflower/subst/react";
 import { type RefObject as $tsflower_subst$React$RefObject } from "tsflower/subst/react";
 import { type Ref as $tsflower_subst$React$Ref } from "tsflower/subst/react";
 import { type RefAttributes as $tsflower_subst$React$RefAttributes } from "tsflower/subst/react";
+import { type ForwardRefExoticComponent as $tsflower_subst$React$ForwardRefExoticComponent } from "tsflower/subst/react";
 import { type ProviderProps as $tsflower_subst$React$ProviderProps } from "tsflower/subst/react";
 import { type ConsumerProps as $tsflower_subst$React$ConsumerProps } from "tsflower/subst/react";
 import { type Provider as $tsflower_subst$React$Provider } from "tsflower/subst/react";
@@ -68,8 +70,8 @@ var propsManipulation: {
 var miscComponents: {
     functional0: React$StatelessFunctionalComponent<{...}>,
     functional1: React$StatelessFunctionalComponent<{ x: number, ... }>,
-    memo: $tsflower_subst$React$Nop<A>,
-    named: React$ComponentType<{...}>,
+    memo: $tsflower_subst$React$MemoExoticComponent<A>,
+    named: $tsflower_subst$React$NamedExoticComponent<{...}>,
     ...
 };
 
@@ -81,7 +83,7 @@ var ref: {
     ref: $tsflower_subst$React$Ref<number>,
     ref2: $tsflower_subst$React$Ref<React.Component<{...}>>,
     refAttributes: $tsflower_subst$React$RefAttributes<React.Component<{...}>>,
-    forwardRefExoticComponent: React$ComponentType<{ x: string, ... } & $tsflower_subst$React$RefAttributes<React.Component<{...}>>>,
+    forwardRefExoticComponent: $tsflower_subst$React$ForwardRefExoticComponent<{ x: string, ... } & $tsflower_subst$React$RefAttributes<React.Component<{...}>>>,
     ...
 };
 

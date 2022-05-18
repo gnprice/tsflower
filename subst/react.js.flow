@@ -60,6 +60,23 @@ export type RefAttributes<T> = {
   ...
 };
 
+// The `@types/react` definition of ForwardRefExoticComponent has
+// various hair on it, but ultimately its job is to model the return
+// type of React.forwardRef.  In flowlib, that returns a certain
+// React$AbstractComponent.  The second ("Instance") type parameter
+// seems hard to recover, so just approximate it as `mixed`… and that's
+// what React$ComponentType does.
+export type ForwardRefExoticComponent<-P> = React.ComponentType<P>;
+
+// Similarly MemoExoticComponent models the return type of React.memo.
+// Here the type argument is actually the component type (the type of
+// the function's first argument), not the props.  In flowlib, the
+// argument and return types are the same; so it's the identity.
+export type MemoExoticComponent<+T> = T;
+
+// And NamedExoticComponent is the base interface of ForwardRefExoticComponent.
+export type NamedExoticComponent<-P> = React.ComponentType<P>;
+
 // @types/react/index.d.ts (whitespace and comments elided):
 //   interface ProviderProps<T> {
 //       value: T;

@@ -166,25 +166,11 @@ export function prepReactRewrites(): NamespaceRewrite {
     Ref: substituteReactRef,
     RefAttributes: substituteReactRefAttributes,
 
-    // The `@types/react` definition of ForwardRefExoticComponent has
-    // various hair on it, but ultimately its job is to model the return
-    // type of React.forwardRef.  In flowlib, that returns a certain
-    // React$AbstractComponent.  The second ("Instance") type parameter
-    // seems hard to recover, so just approximate it as `mixed`… and that's
-    // what React$ComponentType does.
-    ForwardRefExoticComponent: mkFixedName('React$ComponentType'), // TODO use import
-
-    // Similarly MemoExoticComponent models the return type of React.memo.
-    // Here the type argument is actually the component type (the type of
-    // the function's first argument), not the props.  In flowlib, the
-    // argument and return types are the same; so it's the identity.
-    MemoExoticComponent: prepSubstituteType(
-      `${prefix}Nop`,
-      (name) => `type ${name}<+T> = T;`,
+    ForwardRefExoticComponent: prepImportSubstitute(
+      'ForwardRefExoticComponent',
     ),
-
-    // And NamedExoticComponent is the base interface of ForwardRefExoticComponent.
-    NamedExoticComponent: mkFixedName('React$ComponentType'), // TODO use import
+    MemoExoticComponent: prepImportSubstitute('MemoExoticComponent'),
+    NamedExoticComponent: prepImportSubstitute('NamedExoticComponent'),
 
     ...prepSubstituteContext(),
 
