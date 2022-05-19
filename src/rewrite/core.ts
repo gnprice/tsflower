@@ -1,9 +1,6 @@
 import ts from 'typescript';
 import { builders as b, namedTypes as n } from 'ast-types';
 import K from 'ast-types/gen/kinds';
-// @ts-expect-error no TS types for flow-parser :-p
-import * as flowParser from 'flow-parser';
-import * as recast from 'recast';
 import { Converter, ErrorOr } from '../convert';
 
 interface TypeRewriteBase {
@@ -134,23 +131,6 @@ export function mkNamespaceRewrite(
   if (types) r.types = mapOfObject(types);
   if (namespaces) r.namespaces = mapOfObject(namespaces);
   return r;
-}
-
-/** (The substituteText callback should use the name it's passed, even
- * though at present that's the same as the name passed here.  That'll be
- * needed when we start having the converter pick a unique name.) */
-export function prepSubstituteType(
-  name: string,
-  substituteText: (name: string) => string,
-  dependencies?: SubstituteType[],
-): SubstituteType {
-  const substitute = () => {
-    const text = substituteText(name)
-      .replace(/^\s*\/\/.*\n?/gm, '')
-      .replace(/\s*$/, '\n');
-    return recast.parse(text, { parser: flowParser }).program.body;
-  };
-  return mkSubstituteType(name, substitute, dependencies);
 }
 
 export function prepImportSubstitute(
