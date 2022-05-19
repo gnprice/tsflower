@@ -45,6 +45,17 @@ import * as React from 'react';
 //    in how it's chosen to describe it.)
 //
 
+// @types/react has:
+//   type JSXElementConstructor<P> =
+//       | ((props: P) => ReactElement<any, any> | null)
+//       | (new (props: P) => Component<any, any>);
+// Then that gets unioned with `string` to get used as the type of a
+// React element type.  Meanwhile flowlib has:
+//   declare type React$ElementType = string | React$AbstractComponent<empty, mixed>;
+// So basically this is a way of saying an abstract component, with no
+// information on the instance type... in other words, React.ComponentType.
+export type { ComponentType as JSXElementConstructor } from 'react';
+
 // Definition in @types/react/index.d.ts:
 //   interface RefObject<T> {
 //     readonly current: T | null;
@@ -52,6 +63,7 @@ import * as React from 'react';
 //   // Bivariance hack for consistent unsoundness with RefObject
 //   type RefCallback<T> = { bivarianceHack(instance: T | null): void }["bivarianceHack"];
 //   type Ref<T> = RefCallback<T> | RefObject<T> | null;
+//   type LegacyRef<T> = string | Ref<T>;
 //
 // There's no definition in flowlib's react.js that corresponds; the types
 // of `useImperativeHandle` and `forwardRef` spell it out.  There's
@@ -61,9 +73,14 @@ import * as React from 'react';
 //
 // So, just give definitions of our own.
 export type RefObject<T> = { +current: T | null, ... };
+// NB RefCallback gets mixed return, not void; see e.g. flowlib's React$Ref
 export type RefCallback<T> = (T | null) => mixed;
-// NB mixed return, not void; see e.g. flowlib's React$Ref
 export type Ref<T> = RefCallback<T> | RefObject<T> | null;
+export type LegacyRef<T> = string | Ref<T>;
+
+// @types/react:
+//   type ComponentState = any;
+export type ComponentState = any;
 
 // Definition in @types/react/index.d.ts:
 //   type Key = string | number;
@@ -80,6 +97,21 @@ export type RefAttributes<T> = {
 };
 
 // export type ReactElement = …  // We translate this as a macro.
+// TODO: Can ReactElement just be React.AbstractComponent?
+
+//   type CElement<P, T extends Component<P, ComponentState>> = ComponentElement<P, T>;
+//   interface ComponentElement<P, T extends Component<P, ComponentState>>
+//       extends ReactElement<P, ComponentClass<P>> {
+//     ref?: LegacyRef<T> | undefined;
+//   }
+export type CElement<P, T: React.Component<P>> = ComponentElement<P, T>;
+export type ComponentElement<
+  P,
+  T: React.Component<P>,
+> = React.AbstractComponent<P, React.Component<P>> &
+  interface {
+    ref?: LegacyRef<T> | void,
+  };
 
 // type ReactNode = ReactElement | string | number | …
 export type { Node as ReactNode } from 'react';
@@ -118,6 +150,8 @@ export type Consumer<T> = $ElementType<React.Context<T>, 'Consumer'>;
 export type { Context } from 'react';
 
 // export type Component<P, S> = …  // We translate this as a macro.
+// TODO: Can Component just be a thin type-wrapper on React.Component?
+//   The macro is filling in a default type argument, but that seems doable.
 
 // @types/react:
 //   interface FunctionComponent<P = {}> {
@@ -158,6 +192,9 @@ export type MemoExoticComponent<+T> = T;
 // In @types/react:
 //   interface MutableRefObject<T> { current: T; }
 export type MutableRefObject<T> = { current: T, ... };
+
+// In flowlib these event types live in react-dom.js, as globals.
+export type { SyntheticMouseEvent as MouseEvent };
 
 //   // @types/react/index.d.ts
 //   declare global {

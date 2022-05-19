@@ -92,9 +92,15 @@ export function prepReactRewrites(): NamespaceRewrite {
     //   the declarations in subst/react.js.flow, rather than list them here
     ...Object.fromEntries(
       [
+        'JSXElementConstructor',
         'RefObject',
+        'RefCallback',
         'Ref',
+        'LegacyRef',
+        'ComponentState',
         'RefAttributes',
+        'CElement',
+        'ComponentElement',
         'ReactNode',
         'ProviderProps',
         'ConsumerProps',
@@ -109,6 +115,7 @@ export function prepReactRewrites(): NamespaceRewrite {
         'ComponentProps',
         'MemoExoticComponent',
         'MutableRefObject',
+        'MouseEvent',
       ].map((name) => [
         name,
         prepImportSubstitute(name, `${prefix}${name}`, 'tsflower/subst/react'),

@@ -11,11 +11,19 @@ import * as React from 'react';
 // (which in turn is the same order as `@types/react/index.d.ts`.)
 //
 
+var jsxElementConstructor: React.JSXElementConstructor<{ x: number }>;
+
 var refObject: React.RefObject<number>;
+
+var refCallback: React.RefCallback<number>;
 
 // TODO(test): Add Flow test code to confirm this interoperates with flowlib
 var ref: React.Ref<number>;
 var ref2: React.Ref<React.Component<>>;
+
+var legacyRef: React.LegacyRef<boolean>;
+
+var componentState: React.ComponentState;
 
 // TODO(test): Add Flow test code to confirm this interoperates with flowlib
 var refAttributes: React.RefAttributes<React.Component<>>;
@@ -33,6 +41,15 @@ var reactElement: {
   c2: React.ReactElement<AProps, 'div'>;
   c3: React2.ReactElement<AProps, 'div'>;
 };
+
+var cElement1: React.CElement<{ x: number }>;
+var cElement2: React.CElement<{ x: number; y: string; z: boolean }, A>;
+
+var componentElement1: React.ComponentElement<{ x: number }>;
+var componentElement2: React.ComponentElement<
+  { x: number; y: string; z: boolean },
+  A
+>;
 
 var reactNode: React.ReactNode;
 
@@ -96,6 +113,10 @@ var componentProps: {
 var memoExoticComponent: React.MemoExoticComponent<A>;
 
 var mutableRefObject: React.MutableRefObject<number>;
+
+var event: {
+  mouseEvent: React.MouseEvent;
+};
 
 var jsx: {
   element: JSX.Element;
