@@ -6,13 +6,11 @@
 
 trees=(
   @react-navigation
-  react-native-gesture-handler
   react-native-safe-area-context
 )
 
 packages=(
   @react-navigation/{core,elements,routers,native}
-  react-native-gesture-handler
   react-native-safe-area-context
 )
 
