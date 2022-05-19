@@ -1195,13 +1195,13 @@ export function convertSourceFile(
     preambleStatements.push(
       b.importDeclaration(
         [
-          b.importSpecifier.from({
-            imported: b.identifier(rewrite.importedName),
-            local: b.identifier(rewrite.name),
-            importKind: 'type',
-          }),
+          b.importSpecifier(
+            b.identifier(rewrite.importedName),
+            b.identifier(rewrite.name),
+          ),
         ],
         b.stringLiteral(rewrite.moduleSpecifier),
+        'type',
       ),
     );
   }
