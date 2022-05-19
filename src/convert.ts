@@ -346,11 +346,11 @@ export function convertSourceFile(
       const importedSymbol =
         localSymbol && checker.getImmediateAliasedSymbol(localSymbol);
 
-      const mapped = importedSymbol && mapper.getSymbol(importedSymbol);
+      const mapped = importedSymbol && mapper.getSymbolAsType(importedSymbol);
       if (mapped) {
         switch (mapped.kind) {
           case 'RenameType': {
-            const mappedLocal = mapper.getSymbol(localSymbol);
+            const mappedLocal = mapper.getSymbolAsType(localSymbol);
             if (!mappedLocal || mappedLocal.kind !== 'RenameType') {
               // TODO(error): localize this to the one ts.ImportSpecifier
               return errorStatement(
@@ -598,7 +598,7 @@ export function convertSourceFile(
     node: ts.TypeAliasDeclaration,
   ): K.StatementKind {
     const symbol = checker.getSymbolAtLocation(node.name);
-    const mapped = symbol && mapper.getSymbol(symbol);
+    const mapped = symbol && mapper.getSymbolAsType(symbol);
     let name = node.name.text;
     if (mapped) {
       switch (mapped.kind) {

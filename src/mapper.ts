@@ -24,7 +24,7 @@ export interface Mapper {
   /** (Each call to this in the converter should have a corresponding case
    * in the visitor in `createMapper`, to ensure that we find and
    * investigate that symbol.) */
-  getSymbol(symbol: ts.Symbol): void | TypeRewrite;
+  getSymbolAsType(symbol: ts.Symbol): void | TypeRewrite;
 
   /** (Each call to this in the converter should have a corresponding case
    * in the visitor in `createMapper`, to ensure that we find and
@@ -40,17 +40,17 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
   const seenSymbols: Set<ts.Symbol> = new Set();
   let hadRenames = false;
 
+  // TODO rename to reflect this is specifically about *type* bindings
   const mappedSymbols: Map<ts.Symbol, TypeRewrite> = new Map();
   const mappedModuleSymbols: Map<ts.Symbol, NamespaceRewrite> = new Map();
 
   const mapper: Mapper = {
     getModule: (specifier) => libraryRewrites.get(specifier),
 
-    // TODO rename to reflect this is specifically about *type* bindings
-    getSymbol: (symbol) => mappedSymbols.get(symbol),
+    getSymbolAsType: (symbol) => mappedSymbols.get(symbol),
     getTypeName: (node) => {
       const symbol = checker.getSymbolAtLocation(node);
-      const mapped = symbol && mapper.getSymbol(symbol);
+      const mapped = symbol && mapper.getSymbolAsType(symbol);
       if (mapped) return mapped;
 
       if (ts.isIdentifier(node)) return undefined;
@@ -330,7 +330,7 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
         }
 
         const importedSymbol = checker.getImmediateAliasedSymbol(localSymbol);
-        const mapped = importedSymbol && mapper.getSymbol(importedSymbol);
+        const mapped = importedSymbol && mapper.getSymbolAsType(importedSymbol);
         if (!mapped || mapped.kind !== 'RenameType') {
           return;
         }
