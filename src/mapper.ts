@@ -50,22 +50,8 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
 
   const mapper: Mapper = {
     getModule: (specifier) => libraryRewrites.get(specifier),
-
     getSymbolAsType: (symbol) => symbolTypeRewrites.get(symbol),
-    getTypeName: (node) => {
-      const symbol = checker.getSymbolAtLocation(node);
-      const mapped = symbol && mapper.getSymbolAsType(symbol);
-      if (mapped) return mapped;
-
-      if (ts.isIdentifier(node)) return undefined;
-      const qualifier = ts.isQualifiedName(node) ? node.left : node.expression;
-      const name = ts.isQualifiedName(node) ? node.right.text : node.name.text;
-      const qualifierSymbol = checker.getSymbolAtLocation(qualifier);
-      return (
-        qualifierSymbol &&
-        symbolNamespaceRewrites.get(qualifierSymbol)?.types?.get(name)
-      );
-    },
+    getTypeName,
   };
 
   initMapper();
@@ -74,6 +60,21 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
   targetSet.clear();
 
   return mapper;
+
+  function getTypeName(node: ts.EntityNameOrEntityNameExpression) {
+    const symbol = checker.getSymbolAtLocation(node);
+    const mapped = symbol && symbolTypeRewrites.get(symbol);
+    if (mapped) return mapped;
+
+    if (ts.isIdentifier(node)) return undefined;
+    const qualifier = ts.isQualifiedName(node) ? node.left : node.expression;
+    const name = ts.isQualifiedName(node) ? node.right.text : node.name.text;
+    const qualifierSymbol = checker.getSymbolAtLocation(qualifier);
+    return (
+      qualifierSymbol &&
+      symbolNamespaceRewrites.get(qualifierSymbol)?.types?.get(name)
+    );
+  }
 
   function initMapper() {
     const sourceFiles = program.getSourceFiles();
