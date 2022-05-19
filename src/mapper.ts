@@ -32,6 +32,13 @@ export interface Mapper {
   getTypeName(
     typeName: ts.EntityNameOrEntityNameExpression,
   ): void | TypeRewrite;
+
+  /** (Each call to this in the converter should have a corresponding case
+   * in the visitor in `createMapper`, to ensure that we find and
+   * investigate that symbol.) */
+  getNamespaceReference(
+    name: ts.EntityNameOrEntityNameExpression,
+  ): void | NamespaceRewrite;
 }
 
 export function createMapper(program: ts.Program, targetFilenames: string[]) {
@@ -52,6 +59,7 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
     getModule: (specifier) => libraryRewrites.get(specifier),
     getSymbolAsType: (symbol) => symbolTypeRewrites.get(symbol),
     getTypeName,
+    getNamespaceReference,
   };
 
   initMapper();
@@ -69,11 +77,13 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
     if (ts.isIdentifier(node)) return undefined;
     const qualifier = ts.isQualifiedName(node) ? node.left : node.expression;
     const name = ts.isQualifiedName(node) ? node.right.text : node.name.text;
-    const qualifierSymbol = checker.getSymbolAtLocation(qualifier);
-    return (
-      qualifierSymbol &&
-      symbolNamespaceRewrites.get(qualifierSymbol)?.types?.get(name)
-    );
+    return getNamespaceReference(qualifier)?.types?.get(name);
+  }
+
+  function getNamespaceReference(node: ts.EntityNameOrEntityNameExpression) {
+    // TODO: Work recursively, so type references Foo.Bar.Baz work
+    const symbol = checker.getSymbolAtLocation(node);
+    return symbol && symbolNamespaceRewrites.get(symbol);
   }
 
   function initMapper() {
