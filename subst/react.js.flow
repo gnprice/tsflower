@@ -21,6 +21,8 @@ import * as React from 'react';
 //  * Where possible, define things directly in terms of Flow's React types
 //    (the types flowlib provides for `import … from 'react'`.)
 //
+//  * Use the imported names `React.Foo`, not the global names `React$Foo`.
+//
 //  * Even when Flow doesn't export a name for the same piece of the API
 //    described by some @types/react type, try to write a definition that
 //    aligns with Flow's React types.
@@ -101,8 +103,8 @@ export type ReactNode = React.Node;
 //
 // In flowlib, most of those pieces don't get names.  But there is a
 // React.Context with the same meaning.
-export type ProviderProps<T> = React$ElementConfig<Provider<T>>;
-export type ConsumerProps<T> = React$ElementConfig<Consumer<T>>;
+export type ProviderProps<T> = React.ElementConfig<Provider<T>>;
+export type ConsumerProps<T> = React.ElementConfig<Consumer<T>>;
 // (For Provider, Consumer, and Context, see below, following the `@types/react` order.)
 
 // NamedExoticComponent is the base interface of ForwardRefExoticComponent.
@@ -129,7 +131,7 @@ export type FunctionComponent<P = { ... }> =
 // type of React.forwardRef.  In flowlib, that returns a certain
 // React$AbstractComponent.  The second ("Instance") type parameter
 // seems hard to recover, so just approximate it as `mixed`… and that's
-// what React$ComponentType does.
+// what React.ComponentType does.
 export type ForwardRefExoticComponent<-P> = React.ComponentType<P>;
 
 // In @types/react:
@@ -141,7 +143,7 @@ export type PropsWithoutRef<P> = $Rest<P, {| ref: mixed |}>;
 
 // In @types/react:
 //   type PropsWithChildren<P> = P & { children?: ReactNode | undefined };
-export type PropsWithChildren<+P> = { ...P, children?: React$Node | void, ... };
+export type PropsWithChildren<+P> = { ...P, children?: React.Node | void, ... };
 
 export type ComponentProps<C> = React.ElementConfig<C>;
 
@@ -162,4 +164,4 @@ export type MutableRefObject<T> = { current: T, ... };
 //         interface Element extends React.ReactElement<any, any> { }
 // Currently we handle React.ReactElement with a macro;
 // do here what that macro would give on `any, any`.
-export type JSX$Element = React$Element<any>;
+export type JSX$Element = React.Element<any>;
