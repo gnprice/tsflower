@@ -9,36 +9,15 @@
 
 import * as React from 'react';
 
-// type ReactNode = ReactElement | string | number | …
-export type ReactNode = React.Node;
-
-export type ComponentProps<C> = React.ElementConfig<C>;
-
-// @types/react:
-//   interface FunctionComponent<P = {}> {
-// flowlib:
-//   declare type React$StatelessFunctionalComponent<Props> = {
-// So we need to fill in that default for the type argument.
-export type FunctionComponent<P = { ... }> =
-  React.StatelessFunctionalComponent<P>;
-
-// In @types/react:
-//   type PropsWithChildren<P> = P & { children?: ReactNode | undefined };
-export type PropsWithChildren<+P> = { ...P, children?: React$Node | void, ... };
-
-// In @types/react:
-//   /** Ensures that the props do not include ref at all */
-//   type PropsWithoutRef<P> = …
-// The definition is complicated for reasons that seem TS-specific.
-// Make it easy with Flow's `$Rest`.
-export type PropsWithoutRef<P> = $Rest<P, {| ref: mixed |}>;
-
-// In @types/react:
-//   interface MutableRefObject<T> { current: T; }
-export type MutableRefObject<T> = { current: T, ... };
-
-// See comment on `Ref` below.
-export type RefObject<T> = { +current: T | null, ... };
+//
+// Principles of this file:
+//
+//  * Everything appears in the same order as in @types/react/index.d.ts.
+//    This helps make it easy to compare when filling in more definitions.
+//
+//  * Every definition in this file should have a test case in `t/sample/`,
+//    even if it's just a trivial one.
+//
 
 // Definition in @types/react/index.d.ts:
 //   interface RefObject<T> {
@@ -54,7 +33,8 @@ export type RefObject<T> = { +current: T | null, ... };
 // parameter is the ElementType of the element, and it passes that to
 // `React$ElementRef` to work out what type the ref should hold.
 //
-// So, just give a definition of our own.
+// So, just give definitions of our own.
+export type RefObject<T> = { +current: T | null, ... };
 export type RefCallback<T> = (T | null) => mixed;
 // NB mixed return, not void; see e.g. flowlib's React$Ref
 export type Ref<T> = RefCallback<T> | RefObject<T> | null;
@@ -73,22 +53,10 @@ export type RefAttributes<T> = {
   ...
 };
 
-// The `@types/react` definition of ForwardRefExoticComponent has
-// various hair on it, but ultimately its job is to model the return
-// type of React.forwardRef.  In flowlib, that returns a certain
-// React$AbstractComponent.  The second ("Instance") type parameter
-// seems hard to recover, so just approximate it as `mixed`… and that's
-// what React$ComponentType does.
-export type ForwardRefExoticComponent<-P> = React.ComponentType<P>;
+// export type ReactElement = …  // We translate this as a macro.
 
-// Similarly MemoExoticComponent models the return type of React.memo.
-// Here the type argument is actually the component type (the type of
-// the function's first argument), not the props.  In flowlib, the
-// argument and return types are the same; so it's the identity.
-export type MemoExoticComponent<+T> = T;
-
-// And NamedExoticComponent is the base interface of ForwardRefExoticComponent.
-export type NamedExoticComponent<-P> = React.ComponentType<P>;
+// type ReactNode = ReactElement | string | number | …
+export type ReactNode = React.Node;
 
 // @types/react/index.d.ts (whitespace and comments elided):
 //   interface ProviderProps<T> {
@@ -110,11 +78,60 @@ export type NamedExoticComponent<-P> = React.ComponentType<P>;
 //
 // In flowlib, most of those pieces don't get names.  But there is a
 // React.Context with the same meaning.
-export type Context<T> = React.Context<T>;
-export type Provider<T> = $ElementType<Context<T>, 'Provider'>;
-export type Consumer<T> = $ElementType<Context<T>, 'Consumer'>;
 export type ProviderProps<T> = React$ElementConfig<Provider<T>>;
 export type ConsumerProps<T> = React$ElementConfig<Consumer<T>>;
+// (For Provider, Consumer, and Context, see below, following the `@types/react` order.)
+
+// NamedExoticComponent is the base interface of ForwardRefExoticComponent.
+// See there.
+export type NamedExoticComponent<-P> = React.ComponentType<P>;
+
+// For background on Provider, Consumer, and Context, see ProviderProps above.
+export type Provider<T> = $ElementType<Context<T>, 'Provider'>;
+export type Consumer<T> = $ElementType<Context<T>, 'Consumer'>;
+export type Context<T> = React.Context<T>;
+
+// export type Component<P, S> = …  // We translate this as a macro.
+
+// @types/react:
+//   interface FunctionComponent<P = {}> {
+// flowlib:
+//   declare type React$StatelessFunctionalComponent<Props> = {
+// So we need to fill in that default for the type argument.
+export type FunctionComponent<P = { ... }> =
+  React.StatelessFunctionalComponent<P>;
+
+// The `@types/react` definition of ForwardRefExoticComponent has
+// various hair on it, but ultimately its job is to model the return
+// type of React.forwardRef.  In flowlib, that returns a certain
+// React$AbstractComponent.  The second ("Instance") type parameter
+// seems hard to recover, so just approximate it as `mixed`… and that's
+// what React$ComponentType does.
+export type ForwardRefExoticComponent<-P> = React.ComponentType<P>;
+
+// In @types/react:
+//   /** Ensures that the props do not include ref at all */
+//   type PropsWithoutRef<P> = …
+// The definition is complicated for reasons that seem TS-specific.
+// Make it easy with Flow's `$Rest`.
+export type PropsWithoutRef<P> = $Rest<P, {| ref: mixed |}>;
+
+// In @types/react:
+//   type PropsWithChildren<P> = P & { children?: ReactNode | undefined };
+export type PropsWithChildren<+P> = { ...P, children?: React$Node | void, ... };
+
+export type ComponentProps<C> = React.ElementConfig<C>;
+
+// Similarly to ForwardRefExoticComponent for React.forwardRef,
+// MemoExoticComponent models the return type of React.memo.  Here the type
+// argument is actually the component type (the type of the function's first
+// argument), not the props.  In flowlib, the argument and return types are
+// the same; so it's the identity.
+export type MemoExoticComponent<+T> = T;
+
+// In @types/react:
+//   interface MutableRefObject<T> { current: T; }
+export type MutableRefObject<T> = { current: T, ... };
 
 //   // @types/react/index.d.ts
 //   declare global {
