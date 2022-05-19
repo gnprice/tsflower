@@ -23,6 +23,8 @@ import type {
     TouchableWithoutFeedbackProps as $tsflower_subst$RN$TouchableWithoutFeedbackProps,
     ViewProps as $tsflower_subst$RN$ViewProps,
     StatusBarAnimation as $tsflower_subst$RN$StatusBarAnimation,
+    AnimatedAddition as $tsflower_subst$RN$Animated$AnimatedAddition,
+    AnimatedInterpolation as $tsflower_subst$RN$Animated$AnimatedInterpolation,
 } from "tsflower/subst/react-native";
 
 import { Animated } from "react-native";
@@ -63,4 +65,9 @@ declare var props: {
 };
 
 declare var components: { statusBar: { animation: $tsflower_subst$RN$StatusBarAnimation, ... }, ... };
-declare var animated: {...};
+
+declare var animated: {
+    addition: $tsflower_subst$RN$Animated$AnimatedAddition,
+    interpolation: $tsflower_subst$RN$Animated$AnimatedInterpolation,
+    ...
+};

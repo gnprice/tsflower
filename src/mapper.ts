@@ -144,11 +144,13 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
         for (const decl of symbol.declarations ?? []) {
           if (ts.isImportSpecifier(decl)) {
             const module = getModuleSpecifier(decl.parent.parent.parent);
+            const rewrites = libraryRewrites.get(module);
+            if (!rewrites) return;
             const name = (decl.propertyName ?? decl.name).text;
-            const rewrite = libraryRewrites.get(module)?.types?.get(name);
-            // TODO rewrite any namespace binding it might have, too;
-            //   e.g., `import { Animated } from 'react-native';`
-            if (rewrite) symbolTypeRewrites.set(symbol, rewrite);
+            const typeRewrite = rewrites.types?.get(name);
+            if (typeRewrite) symbolTypeRewrites.set(symbol, typeRewrite);
+            const nsRewrite = rewrites.namespaces?.get(name);
+            if (nsRewrite) symbolNamespaceRewrites.set(symbol, nsRewrite);
             return;
           } else if (ts.isImportClause(decl) || ts.isNamespaceImport(decl)) {
             // TODO: Do `import foo` and `import * as foo` need any different treatment?

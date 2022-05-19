@@ -53,8 +53,9 @@ declare var components: {
 };
 
 declare var animated: {
+  addition: Animated.AnimatedAddition;
+  interpolation: Animated.AnimatedInterpolation;
+
   // TODO: Have mapper more fully support namespaces
-  // addition: Animated.AnimatedAddition;
-  // interpolation: Animated.AnimatedInterpolation;
   // addition2: RN.Animated.AnimatedAddition;
 };
