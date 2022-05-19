@@ -80,10 +80,17 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
     return getNamespaceReference(qualifier)?.types?.get(name);
   }
 
-  function getNamespaceReference(node: ts.EntityNameOrEntityNameExpression) {
-    // TODO: Work recursively, so type references Foo.Bar.Baz work
+  function getNamespaceReference(
+    node: ts.EntityNameOrEntityNameExpression,
+  ): void | NamespaceRewrite {
     const symbol = checker.getSymbolAtLocation(node);
-    return symbol && symbolNamespaceRewrites.get(symbol);
+    const mapped = symbol && symbolNamespaceRewrites.get(symbol);
+    if (mapped) return mapped;
+
+    if (ts.isIdentifier(node)) return undefined;
+    const qualifier = ts.isQualifiedName(node) ? node.left : node.expression;
+    const name = ts.isQualifiedName(node) ? node.right.text : node.name.text;
+    return getNamespaceReference(qualifier)?.namespaces?.get(name);
   }
 
   function initMapper() {

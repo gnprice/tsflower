@@ -69,5 +69,6 @@ declare var components: { statusBar: { animation: $tsflower_subst$RN$StatusBarAn
 declare var animated: {
     addition: $tsflower_subst$RN$Animated$AnimatedAddition,
     interpolation: $tsflower_subst$RN$Animated$AnimatedInterpolation,
+    addition2: $tsflower_subst$RN$Animated$AnimatedAddition,
     ...
 };
