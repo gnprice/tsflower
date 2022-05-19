@@ -6,6 +6,7 @@ import {
   ColorValue,
   ViewProps,
   GestureResponderEvent,
+  Animated,
 } from 'react-native';
 import RN from 'react-native';
 
@@ -49,4 +50,11 @@ declare var components: {
   statusBar: {
     animation: RN.StatusBarAnimation;
   };
+};
+
+declare var animated: {
+  // TODO: Have mapper more fully support namespaces
+  // addition: Animated.AnimatedAddition;
+  // interpolation: Animated.AnimatedInterpolation;
+  // addition2: RN.Animated.AnimatedAddition;
 };

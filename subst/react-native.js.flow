@@ -78,3 +78,10 @@ export type ViewProps = InexactProps<View>;
 
 // Miscellaneous types related to particular components.
 export type { StatusBarAnimation } from 'react-native/Libraries/Components/StatusBar/StatusBar';
+
+// Animation types.
+// TODO: Add the whole list of animated components.
+import AnimatedAddition from 'react-native/Libraries/Animated/nodes/AnimatedAddition';
+export { AnimatedAddition };
+import AnimatedInterpolation from 'react-native/Libraries/Animated/nodes/AnimatedInterpolation';
+export { AnimatedInterpolation };

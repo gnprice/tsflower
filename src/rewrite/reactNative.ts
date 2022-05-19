@@ -49,5 +49,19 @@ export function prepReactNativeRewrites(): NamespaceRewrite {
         ),
       ]),
     ),
+    {
+      Animated: mkNamespaceRewrite(
+        Object.fromEntries(
+          ['AnimatedAddition', 'AnimatedInterpolation'].map((name) => [
+            name,
+            prepImportSubstitute(
+              name,
+              prefix + 'Animated$' + name,
+              'tsflower/subst/react-native',
+            ),
+          ]),
+        ),
+      ),
+    },
   );
 }

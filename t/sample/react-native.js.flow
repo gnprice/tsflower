@@ -25,7 +25,7 @@ import type {
     StatusBarAnimation as $tsflower_subst$RN$StatusBarAnimation,
 } from "tsflower/subst/react-native";
 
-import "react-native";
+import { Animated } from "react-native";
 import RN from "react-native";
 
 declare var style: {
@@ -63,3 +63,4 @@ declare var props: {
 };
 
 declare var components: { statusBar: { animation: $tsflower_subst$RN$StatusBarAnimation, ... }, ... };
+declare var animated: {...};

@@ -151,7 +151,8 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
             const module = getModuleSpecifier(decl.parent.parent.parent);
             const name = (decl.propertyName ?? decl.name).text;
             const rewrite = libraryRewrites.get(module)?.types?.get(name);
-            // TODO rewrite any namespace binding it might have, too
+            // TODO rewrite any namespace binding it might have, too;
+            //   e.g., `import { Animated } from 'react-native';`
             if (rewrite) mappedSymbols.set(symbol, rewrite);
             return;
           } else if (ts.isImportClause(decl) || ts.isNamespaceImport(decl)) {
