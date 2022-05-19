@@ -1,0 +1,32 @@
+/**
+ * Flow types to override a few fragments of `@react-navigation/*`.
+ *
+ * When TsFlower is translating this library, there are a small number of
+ * declarations that can't be translated automatically.  For those, it
+ * instead rewrites references to refer to these substitute definitions.
+ *
+ * TODO: Have a mechanism for the TsFlower-using project to provide these,
+ *   rather than get them from TsFlower itself.
+ *
+ * @flow
+ */
+
+// From @react-navigation/core/src/types.tsx:
+//   declare global {
+//     namespace ReactNavigation {
+//       interface RootParamList {}
+//
+// The purpose is apparently to let an application inject into that
+// interface globally, with their own `declare global`.  Upstream docs:
+//   https://reactnavigation.org/docs/typescript/#specifying-default-types-for-usenavigation-link-ref-etc
+//
+// Nasty.  Fortunately we can safely assume that isn't happening:
+// libraries wisely leave it up to the app to make such an injection
+// (because it's all about the app's particular routes), and if you're
+// using TsFlower then your app is in Flow.  So make it an empty
+// interface, for the sake of successfully translating other parts of
+// React Navigation that refer to this global name.
+//
+// TODO: or `interface {}`?  But library code tries to have it
+//   upper-bounded by `{}`.  Perhaps emit type literals as interfaces?
+export type ReactNavigation_RootParamList = { ... };
