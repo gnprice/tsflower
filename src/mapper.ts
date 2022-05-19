@@ -40,14 +40,18 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
   const seenSymbols: Set<ts.Symbol> = new Set();
   let hadRenames = false;
 
-  // TODO rename to reflect this is specifically about *type* bindings
-  const mappedSymbols: Map<ts.Symbol, TypeRewrite> = new Map();
-  const mappedModuleSymbols: Map<ts.Symbol, NamespaceRewrite> = new Map();
+  // In TypeScript, a given name in a given scope may refer to a value, a
+  // type, a namespace, or any combination, and the same name's bindings of
+  // the three different kinds may have nothing to do with one another.
+  // We keep separate maps for how to rewrite the symbol when it appears as
+  // a type or as a namespace.  (And we don't rewrite value references.)
+  const symbolTypeRewrites: Map<ts.Symbol, TypeRewrite> = new Map();
+  const symbolNamespaceRewrites: Map<ts.Symbol, NamespaceRewrite> = new Map();
 
   const mapper: Mapper = {
     getModule: (specifier) => libraryRewrites.get(specifier),
 
-    getSymbolAsType: (symbol) => mappedSymbols.get(symbol),
+    getSymbolAsType: (symbol) => symbolTypeRewrites.get(symbol),
     getTypeName: (node) => {
       const symbol = checker.getSymbolAtLocation(node);
       const mapped = symbol && mapper.getSymbolAsType(symbol);
@@ -59,7 +63,7 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
       const qualifierSymbol = checker.getSymbolAtLocation(qualifier);
       return (
         qualifierSymbol &&
-        mappedModuleSymbols.get(qualifierSymbol)?.types?.get(name)
+        symbolNamespaceRewrites.get(qualifierSymbol)?.types?.get(name)
       );
     },
   };
@@ -132,7 +136,7 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
           // TODO don't attempt if defined in non-target lib, like React
           // TODO pick non-colliding name
           const name = `${symbol.name}T`;
-          mappedSymbols.set(symbol, { kind: 'RenameType', name });
+          symbolTypeRewrites.set(symbol, { kind: 'RenameType', name });
           hadRenames = true;
           return;
         }
@@ -144,7 +148,7 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
             const rewrite = libraryRewrites.get(module)?.types?.get(name);
             // TODO rewrite any namespace binding it might have, too;
             //   e.g., `import { Animated } from 'react-native';`
-            if (rewrite) mappedSymbols.set(symbol, rewrite);
+            if (rewrite) symbolTypeRewrites.set(symbol, rewrite);
             return;
           } else if (ts.isImportClause(decl) || ts.isNamespaceImport(decl)) {
             // TODO: Do `import foo` and `import * as foo` need any different treatment?
@@ -152,7 +156,7 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
             const importClause = ts.isImportClause(decl) ? decl : decl.parent;
             const module = getModuleSpecifier(importClause.parent);
             const rewrites = libraryRewrites.get(module);
-            if (rewrites) mappedModuleSymbols.set(symbol, rewrites);
+            if (rewrites) symbolNamespaceRewrites.set(symbol, rewrites);
             return;
           }
         }
@@ -227,7 +231,7 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
               // TODO(error): missing symbol
               continue;
             }
-            mappedSymbols.set(symbol, rewrite);
+            symbolTypeRewrites.set(symbol, rewrite);
           }
           // TODO(unimplemented): other type declarations: type alias, class
           //   (for type parameters), enum, enum member; imports/re-exports?
@@ -266,7 +270,7 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
               );
               return;
             }
-            mappedSymbols.set(symbol, rewrite);
+            symbolTypeRewrites.set(symbol, rewrite);
           }
           return;
         }
@@ -325,7 +329,7 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
 
       function visitImportSpecifier(node: ts.ImportSpecifier) {
         const localSymbol = checker.getSymbolAtLocation(node.name);
-        if (!localSymbol || mappedSymbols.has(localSymbol)) {
+        if (!localSymbol || symbolTypeRewrites.has(localSymbol)) {
           return;
         }
 
@@ -337,7 +341,7 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
 
         // TODO pick non-colliding name
         const name = `${localSymbol.name}T`;
-        mappedSymbols.set(localSymbol, { kind: 'RenameType', name });
+        symbolTypeRewrites.set(localSymbol, { kind: 'RenameType', name });
         hadRenames = true;
       }
     }
