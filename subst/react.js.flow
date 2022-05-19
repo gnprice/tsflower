@@ -18,6 +18,29 @@ import * as React from 'react';
 //  * Every definition in this file should have a test case in `t/sample/`,
 //    even if it's just a trivial one.
 //
+//  * Where possible, define things directly in terms of Flow's React types
+//    (the types flowlib provides for `import … from 'react'`.)
+//
+//  * Even when Flow doesn't export a name for the same piece of the API
+//    described by some @types/react type, try to write a definition that
+//    aligns with Flow's React types.
+//
+//    In other words, try to write down flowlib's description of the same
+//    piece of the React API, even if that differs slightly from the type
+//    found in @types/react.  It's more important to have types that can be
+//    used smoothly with React than to match the nuances of how @types/react
+//    describes React.
+//
+//    (After all, the Flow and TS types are two independent efforts at
+//    describing the same underlying reality, the React API.  They've made
+//    different choices in the details; at different times one may be a more
+//    accurate model than the other, or vice versa, or neither.  In any TS
+//    type definitions that TsFlower is translating for some library that
+//    uses React, the references to React types are presumably intended most
+//    of all to refer to React as it really is, and/or as other React-using
+//    code will understand it to be, not to any quirks @types/react may have
+//    in how it's chosen to describe it.)
+//
 
 // Definition in @types/react/index.d.ts:
 //   interface RefObject<T> {
