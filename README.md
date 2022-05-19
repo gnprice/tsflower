@@ -31,6 +31,13 @@ For more, see:
     for example, TS's conditional types, particularly with their
     "distributive" behavior on unions.
 
+  - Convert [TS function types returning `void`][] to return `mixed`, just
+    as if the originals had returned `unknown`.  Pretty sure TS's quirky
+    behavior there means that a function type returning `void` is equivalent
+    to (mutually assignable to) one returning `unknown`.
+
+[TS function types returning `void`]: https://www.typescriptlang.org/docs/handbook/2/functions.html#return-type-void
+
   - Sometimes this requires fixes to Recast and/or `ast-types`, because
     their support for Flow is incomplete.  E.g. Recast PRs #1089 and #1090,
     and `ast-types` PRs #745 and #746.  These are a nice pair of libraries
@@ -42,9 +49,27 @@ For more, see:
     their codemods, and they're all in on Flow -- so surely whatever tool
     they're using does have solid Flow support.
 
-- Do more renaming and rewriting.  See `src/rewrite/*.ts` for many
-  existing examples, for references to things in the default library,
-  in React, and in React Native.
+- Add more substitutions in `subst/*.js.flow`; and where needed, macros in
+  `src/rewrite/*.ts`.
+
+  - Cover all the remaining names that come up in the integration suite.
+
+  - Make systematic sweeps through swaths of the libraries the substitutions
+    apply to, covering everything around the definitions we've needed so
+    far:
+
+    - In `@types/react`, the whole main sections (through the "Component
+      API" section, to the definition of LazyExoticComponent)
+
+    - In `@types/react`, all the event types (just re-export them all from
+      flowlib's react-dom.js, hopefully)
+
+    - In `@types/react-native`, the swaths commented in the subst file
+
+    - In the TS default library, all the operators akin to `Record` and
+      `Omit`... or perhaps for these it's better to wait to see them come up
+      in practice, because the translations are likely not to cover all
+      possible cases and it's helpful to see what cases actually come up.
 
 - Extend the driver and CLI layer:
 
@@ -117,10 +142,41 @@ For more, see:
     require working something out for how to get TS type-checker / symbol
     information, since that's naturally only available on TS's own AST.
 
+- Extend the substitution system:
+
+  - Get the list of substitutions for a given library by reading the
+    substitution file, rather than having to list them in the rewriter
+    source code.
+
+    - For namespaces, perhaps make a separate file corresponding to the
+      namespace?  Then the emitted Flow code can effectively import the
+      namespace by importing that file.  Will need some sort of convention
+      for naming such files, and/or some form of metadata.
+
+    - For global augmentations, perhaps again a separate file with some kind
+      of naming convention.  Perhaps also some form of metadata -- perhaps a
+      `/// <foo … />` comment akin to TS's reference pragmas, if marking the
+      file, or some other form of comment if marking individual declarations.
+
+  - Have a way for a project using TsFlower to provide substitutions, in
+    addition to those TsFlower itself provides.
+
+  - Move all our "misc" rewrites -- those for react-navigation and any other
+    library that we expect to be actually translating -- to be provided by
+    the user project.  (So in the TsFlower repo, move them to the
+    integration suite.)
+
 - Figure out more renaming and rewriting:
 
   - Apply rewrites to import types, like `import('react').Component`, just
     like we do for type references like `React.Component`.
+
+  - When an input file has a reference like `React.Component` where `React`
+    is a global -- because it just said `/// <reference types="react" />`
+    and didn't actually import React -- apply substitutions there just like
+    we would if it'd done the import.  (Not sure the right way to generalize
+    this.  Fortunately I think there are not many other things people do
+    this with.)
 
   - When introducing a name (with a `SubstituteType` rewrite), try to
     use the original name, rather than our `$tsflower_subst$`-prefixed
