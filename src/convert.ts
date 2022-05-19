@@ -1192,7 +1192,18 @@ export function convertSourceFile(
   function ensureEmittedSubstitute(rewrite: SubstituteType) {
     if (substituteTypes.has(rewrite.name)) return;
     substituteTypes.add(rewrite.name);
-    preambleStatements.push(rewrite.substitute());
+    preambleStatements.push(
+      b.importDeclaration(
+        [
+          b.importSpecifier.from({
+            imported: b.identifier(rewrite.importedName),
+            local: b.identifier(rewrite.name),
+            importKind: 'type',
+          }),
+        ],
+        b.stringLiteral(rewrite.moduleSpecifier),
+      ),
+    );
   }
 
   function convertEntityNameAsType(

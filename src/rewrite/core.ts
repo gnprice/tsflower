@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { builders as b, namedTypes as n } from 'ast-types';
+import { namedTypes as n } from 'ast-types';
 import K from 'ast-types/gen/kinds';
 import { Converter, ErrorOr } from '../convert';
 
@@ -42,16 +42,20 @@ export interface RenameType extends TypeRewriteBase {
 /**
  * Substitute this type, with a definition of our own.
  *
- * The substitute will define a type of the stated name.  This will
- * accept exactly the same type arguments, or none, as the original.
+ * When translating a reference to this type, we'll emit a type-import of
+ * the given imported name from the given module, and refer to that.
  *
  * The name must be distinct from any other substitution, and prefixed to
  * avoid collision with user code.
+ *
+ * TODO: Have the converter pick a unique name instead, with importedName
+ *   as the first choice.
  */
 export interface SubstituteType extends TypeRewriteBase {
   readonly kind: 'SubstituteType';
   readonly name: string;
-  readonly substitute: () => K.StatementKind;
+  readonly importedName: string;
+  readonly moduleSpecifier: string;
 }
 
 /**
@@ -98,9 +102,10 @@ export function mkFixedName(name: string): FixedName {
 
 export function mkSubstituteType(
   name: string,
-  substitute: () => K.StatementKind,
+  importedName: string,
+  moduleSpecifier: string,
 ): SubstituteType {
-  return { kind: 'SubstituteType', name, substitute };
+  return { kind: 'SubstituteType', name, importedName, moduleSpecifier };
 }
 
 export function mkTypeMacro(convert: TypeMacro['convert']): TypeMacro {
@@ -134,16 +139,5 @@ export function prepImportSubstitute(
   localName: string,
   moduleSpecifier: string,
 ) {
-  return mkSubstituteType(localName, () =>
-    b.importDeclaration(
-      [
-        b.importSpecifier.from({
-          imported: b.identifier(importedName),
-          local: b.identifier(localName),
-          importKind: 'type',
-        }),
-      ],
-      b.stringLiteral(moduleSpecifier),
-    ),
-  );
+  return mkSubstituteType(localName, importedName, moduleSpecifier);
 }
