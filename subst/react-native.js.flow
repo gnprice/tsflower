@@ -85,3 +85,52 @@ import AnimatedAddition from 'react-native/Libraries/Animated/nodes/AnimatedAddi
 export { AnimatedAddition };
 import AnimatedInterpolation from 'react-native/Libraries/Animated/nodes/AnimatedInterpolation';
 export { AnimatedInterpolation };
+
+// @types/react-native has:
+//    export type WithAnimatedValue<T> = T extends Builtin | Nullable
+//        ? T
+//        : T extends Primitive
+//        ? T | Value | AnimatedInterpolation // add `Value` and `AnimatedInterpolation` but also preserve original T
+//        : T extends Array<infer P>
+//        ? WithAnimatedArray<P>
+//        : T extends {}
+//        ? WithAnimatedObject<T>
+//        : T; // in case it's something we don't yet know about (for .e.g bigint)
+//
+//    type NonAnimatedProps = 'key' | 'ref';
+//
+//    type TAugmentRef<T> = T extends React.Ref<infer R> ? React.Ref<R | LegacyRef<R>> : never;
+//
+//    export type AnimatedProps<T> = {
+//        [key in keyof T]: key extends NonAnimatedProps
+//            ? key extends 'ref'
+//                ? TAugmentRef<T[key]>
+//                : T[key]
+//            : WithAnimatedValue<T[key]>;
+//    };
+//
+//    export interface AnimatedComponent<T extends React.ComponentType<any>>
+//        extends React.FC<AnimatedProps<React.ComponentPropsWithRef<T>>> {}
+//
+// So the job of WithAnimatedValue is to turn an individual prop's type on
+// the underlying component to its type on the animated component.
+//
+// In actual RN, this is... `any`.  Here's the definition:
+//   // react-native/Libraries/Animated/createAnimatedComponent.js
+//   export type AnimatedComponentType<
+//     Props: {+[string]: mixed, ...},
+//     Instance,
+//   > = React.AbstractComponent<
+//     $ObjMap<
+//       Props &
+//         $ReadOnly<{
+//           passthroughAnimatedPropExplicitValues?: React.ElementConfig<
+//             typeof View,
+//           >,
+//         }>,
+//       () => any,
+//     >,
+//     Instance,
+//   >;
+// So it (a) adds one prop, and (b) turns all the props to `any`.
+export type WithAnimatedValue<Props> = any;

@@ -55,6 +55,7 @@ declare var components: {
 declare var animated: {
   addition: Animated.AnimatedAddition;
   interpolation: Animated.AnimatedInterpolation;
+  withAnimatedValue: Animated.WithAnimatedValue;
 
   addition2: RN.Animated.AnimatedAddition;
 };

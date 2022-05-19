@@ -52,7 +52,11 @@ export function prepReactNativeRewrites(): NamespaceRewrite {
     {
       Animated: mkNamespaceRewrite(
         Object.fromEntries(
-          ['AnimatedAddition', 'AnimatedInterpolation'].map((name) => [
+          [
+            'AnimatedAddition',
+            'AnimatedInterpolation',
+            'WithAnimatedValue',
+          ].map((name) => [
             name,
             prepImportSubstitute(
               name,

@@ -25,6 +25,7 @@ import type {
     StatusBarAnimation as $tsflower_subst$RN$StatusBarAnimation,
     AnimatedAddition as $tsflower_subst$RN$Animated$AnimatedAddition,
     AnimatedInterpolation as $tsflower_subst$RN$Animated$AnimatedInterpolation,
+    WithAnimatedValue as $tsflower_subst$RN$Animated$WithAnimatedValue,
 } from "tsflower/subst/react-native";
 
 import { Animated } from "react-native";
@@ -69,6 +70,7 @@ declare var components: { statusBar: { animation: $tsflower_subst$RN$StatusBarAn
 declare var animated: {
     addition: $tsflower_subst$RN$Animated$AnimatedAddition,
     interpolation: $tsflower_subst$RN$Animated$AnimatedInterpolation,
+    withAnimatedValue: $tsflower_subst$RN$Animated$WithAnimatedValue<>,
     addition2: $tsflower_subst$RN$Animated$AnimatedAddition,
     ...
 };
