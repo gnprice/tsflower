@@ -20,6 +20,7 @@ import * as React from 'react';
 //
 //  * Where possible, define things directly in terms of Flow's React types
 //    (the types flowlib provides for `import … from 'react'`.)
+//    Better yet, just re-export them.
 //
 //  * Use the imported names `React.Foo`, not the global names `React$Foo`.
 //
@@ -81,7 +82,7 @@ export type RefAttributes<T> = {
 // export type ReactElement = …  // We translate this as a macro.
 
 // type ReactNode = ReactElement | string | number | …
-export type ReactNode = React.Node;
+export type { Node as ReactNode } from 'react';
 
 // @types/react/index.d.ts (whitespace and comments elided):
 //   interface ProviderProps<T> {
@@ -109,12 +110,12 @@ export type ConsumerProps<T> = React.ElementConfig<Consumer<T>>;
 
 // NamedExoticComponent is the base interface of ForwardRefExoticComponent.
 // See there.
-export type NamedExoticComponent<-P> = React.ComponentType<P>;
+export type { ComponentType as NamedExoticComponent } from 'react';
 
 // For background on Provider, Consumer, and Context, see ProviderProps above.
-export type Provider<T> = $ElementType<Context<T>, 'Provider'>;
-export type Consumer<T> = $ElementType<Context<T>, 'Consumer'>;
-export type Context<T> = React.Context<T>;
+export type Provider<T> = $ElementType<React.Context<T>, 'Provider'>;
+export type Consumer<T> = $ElementType<React.Context<T>, 'Consumer'>;
+export type { Context } from 'react';
 
 // export type Component<P, S> = …  // We translate this as a macro.
 
@@ -132,7 +133,7 @@ export type FunctionComponent<P = { ... }> =
 // React$AbstractComponent.  The second ("Instance") type parameter
 // seems hard to recover, so just approximate it as `mixed`… and that's
 // what React.ComponentType does.
-export type ForwardRefExoticComponent<-P> = React.ComponentType<P>;
+export type { ComponentType as ForwardRefExoticComponent } from 'react';
 
 // In @types/react:
 //   /** Ensures that the props do not include ref at all */
@@ -145,7 +146,7 @@ export type PropsWithoutRef<P> = $Rest<P, {| ref: mixed |}>;
 //   type PropsWithChildren<P> = P & { children?: ReactNode | undefined };
 export type PropsWithChildren<+P> = { ...P, children?: React.Node | void, ... };
 
-export type ComponentProps<C> = React.ElementConfig<C>;
+export type { ElementConfig as ComponentProps } from 'react';
 
 // Similarly to ForwardRefExoticComponent for React.forwardRef,
 // MemoExoticComponent models the return type of React.memo.  Here the type
