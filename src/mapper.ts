@@ -29,14 +29,6 @@ export interface Mapper {
   /** (Each call to this in the converter should have a corresponding case
    * in the visitor in `createMapper`, to ensure that we find and
    * investigate that symbol.) */
-  getQualifiedSymbol(
-    qualifierSymbol: ts.Symbol,
-    name: string,
-  ): void | TypeRewrite;
-
-  /** (Each call to this in the converter should have a corresponding case
-   * in the visitor in `createMapper`, to ensure that we find and
-   * investigate that symbol.) */
   getTypeName(
     typeName: ts.EntityNameOrEntityNameExpression,
   ): void | TypeRewrite;
@@ -54,10 +46,8 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
   const mapper: Mapper = {
     getModule: (specifier) => libraryRewrites.get(specifier),
 
-    // TODO rename to reflect these are specifically about *type* bindings
+    // TODO rename to reflect this is specifically about *type* bindings
     getSymbol: (symbol) => mappedSymbols.get(symbol),
-    getQualifiedSymbol: (qualifierSymbol, name) =>
-      mappedModuleSymbols.get(qualifierSymbol)?.types?.get(name),
     getTypeName: (node) => {
       const symbol = checker.getSymbolAtLocation(node);
       const mapped = symbol && mapper.getSymbol(symbol);
@@ -68,7 +58,8 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
       const name = ts.isQualifiedName(node) ? node.right.text : node.name.text;
       const qualifierSymbol = checker.getSymbolAtLocation(qualifier);
       return (
-        qualifierSymbol && mapper.getQualifiedSymbol(qualifierSymbol, name)
+        qualifierSymbol &&
+        mappedModuleSymbols.get(qualifierSymbol)?.types?.get(name)
       );
     },
   };
