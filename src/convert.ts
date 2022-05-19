@@ -61,8 +61,8 @@ export function convertSourceFile(
   // Elements are local names.
   const importTypeImports: Set<string> = new Set();
 
-  // Elements are names from SubstituteType rewrites.
-  const substituteTypes: Set<string> = new Set();
+  // Map from a SubstituteType's module specifier, to name, to imported name.
+  const substituteTypes: Map<string, Map<string, string>> = new Map();
 
   const preambleStatements: K.StatementKind[] = [];
 
@@ -75,6 +75,8 @@ export function convertSourceFile(
   };
 
   const convertedStatements = sourceFile.statements.map(convertStatement);
+
+  emitSubstitutes();
 
   const body = preambleStatements.length
     ? [...preambleStatements, ...convertedStatements]
@@ -745,7 +747,7 @@ export function convertSourceFile(
       } else {
         switch (mapped.kind) {
           case 'SubstituteType':
-            ensureEmittedSubstitute(mapped);
+            ensureWillEmitSubstitute(mapped);
           // fallthrough
 
           case 'FixedName':
@@ -1154,7 +1156,7 @@ export function convertSourceFile(
     } else {
       switch (mapped.kind) {
         case 'SubstituteType':
-          ensureEmittedSubstitute(mapped);
+          ensureWillEmitSubstitute(mapped);
         // fallthrough
 
         case 'FixedName':
@@ -1189,21 +1191,32 @@ export function convertSourceFile(
     }
   }
 
-  function ensureEmittedSubstitute(rewrite: SubstituteType) {
-    if (substituteTypes.has(rewrite.name)) return;
-    substituteTypes.add(rewrite.name);
-    preambleStatements.push(
-      b.importDeclaration(
-        [
-          b.importSpecifier(
-            b.identifier(rewrite.importedName),
-            b.identifier(rewrite.name),
-          ),
-        ],
-        b.stringLiteral(rewrite.moduleSpecifier),
-        'type',
-      ),
-    );
+  function ensureWillEmitSubstitute(rewrite: SubstituteType) {
+    let perModule = substituteTypes.get(rewrite.moduleSpecifier);
+    if (perModule?.get(rewrite.name)) return;
+    if (!perModule) {
+      perModule = new Map();
+      substituteTypes.set(rewrite.moduleSpecifier, perModule);
+    }
+    perModule.set(rewrite.name, rewrite.importedName);
+  }
+
+  function emitSubstitutes() {
+    for (const [moduleSpecifier, perModule] of substituteTypes.entries()) {
+      const specifiers = [];
+      for (const [name, importedName] of perModule) {
+        specifiers.push(
+          b.importSpecifier(b.identifier(importedName), b.identifier(name)),
+        );
+      }
+      preambleStatements.push(
+        b.importDeclaration(
+          specifiers,
+          b.stringLiteral(moduleSpecifier),
+          'type',
+        ),
+      );
+    }
   }
 
   function convertEntityNameAsType(
