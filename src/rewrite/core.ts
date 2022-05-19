@@ -42,18 +42,16 @@ export interface RenameType extends TypeRewriteBase {
 /**
  * Substitute this type, with a definition of our own.
  *
- * The substitute will define a type alias of the stated name (and
- * possibly additional definitions for its own internal use).  This will
+ * The substitute will define a type of the stated name.  This will
  * accept exactly the same type arguments, or none, as the original.
  *
- * The name (and the names of any auxiliary definitions) must be distinct
- * from any other substitution, and prefixed to avoid collision with user
- * code.
+ * The name must be distinct from any other substitution, and prefixed to
+ * avoid collision with user code.
  */
 export interface SubstituteType extends TypeRewriteBase {
   readonly kind: 'SubstituteType';
   readonly name: string;
-  readonly substitute: () => K.StatementKind[];
+  readonly substitute: () => K.StatementKind;
   readonly dependencies?: SubstituteType[];
 }
 
@@ -101,7 +99,7 @@ export function mkFixedName(name: string): FixedName {
 
 export function mkSubstituteType(
   name: string,
-  substitute: () => K.StatementKind[],
+  substitute: () => K.StatementKind,
   dependencies?: SubstituteType[],
 ): SubstituteType {
   return { kind: 'SubstituteType', name, substitute, dependencies };
@@ -138,7 +136,7 @@ export function prepImportSubstitute(
   localName: string,
   moduleSpecifier: string,
 ) {
-  return mkSubstituteType(localName, () => [
+  return mkSubstituteType(localName, () =>
     b.importDeclaration(
       [
         b.importSpecifier.from({
@@ -149,5 +147,5 @@ export function prepImportSubstitute(
       ],
       b.stringLiteral(moduleSpecifier),
     ),
-  ]);
+  );
 }

@@ -1193,7 +1193,7 @@ export function convertSourceFile(
     if (substituteTypes.has(rewrite.name)) return;
     substituteTypes.add(rewrite.name);
     forEach(rewrite.dependencies, ensureEmittedSubstitute);
-    preambleStatements.push(...rewrite.substitute());
+    preambleStatements.push(rewrite.substitute());
   }
 
   function convertEntityNameAsType(
