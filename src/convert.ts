@@ -1,7 +1,7 @@
 import ts from 'typescript';
 import { builders as b, namedTypes as n } from 'ast-types';
 import K from 'ast-types/gen/kinds';
-import { forEach, map, some } from './util';
+import { map, some } from './util';
 import { Mapper } from './mapper';
 import {
   equivalentNodes,
@@ -1192,7 +1192,6 @@ export function convertSourceFile(
   function ensureEmittedSubstitute(rewrite: SubstituteType) {
     if (substituteTypes.has(rewrite.name)) return;
     substituteTypes.add(rewrite.name);
-    forEach(rewrite.dependencies, ensureEmittedSubstitute);
     preambleStatements.push(rewrite.substitute());
   }
 
