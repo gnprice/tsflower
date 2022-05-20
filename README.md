@@ -32,10 +32,6 @@ For more, see:
     Therefore rewrite type references to get the intended types.
     (2 errors)
 
-    - This one has a prerequisite: when an import has a SubstituteType
-      rewrite, but also a value binding, keep the import, in case
-      there's a `typeof` reference.
-
   - Convert `import type { someValue }` to `import typeof`; and then
     any references to it in `typeof` (which should be the only
     references to it) to just direct type references.  (8 errors)
@@ -167,6 +163,13 @@ For more, see:
     statement, not only when there's an error.  Then use that when
     running on `t/sample/` files, so that the outputs are
     self-contained to read to look for discrepancies.
+
+  - Once the substitution system has a way for user projects to supply
+    their own substitutions, take advantage of that in the `t/sample/`
+    tests in order to directly exercise aspects of the behavior of
+    SubstituteType rewrites.  (For example, that we drop an import if
+    it's only of a type that's getting substituted, but keep it if
+    it's also of a value.)
 
   - Have `integration/run` check that Flow accepts the output, once
     we've gotten to the point where it indeed does.

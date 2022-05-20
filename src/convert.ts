@@ -317,9 +317,16 @@ export function convertSourceFile(
           case 'SubstituteType':
             // We're going to rewrite references to this type to do
             // something else instead; this type may not even exist in the
-            // Flow version of the imported module.  Drop this import.
-            // TODO: Keep the import if it binds not only a type but a value.
-            return;
+            // Flow version of the imported module.
+            if (symbolIsValueless) {
+              // The import is of only this type we're substituting (and
+              // possibly a namespace); there isn't also a value it's
+              // importing.  So drop it.
+              return;
+            } else {
+              // The import is of a value too.  Keep it for that reason.
+              break;
+            }
 
           case 'FixedName':
           case 'TypeMacro':
