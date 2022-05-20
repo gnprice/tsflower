@@ -37,44 +37,82 @@ export type {
   SyntheticEvent as NativeSyntheticEvent,
 } from 'react-native/Libraries/Types/CoreEventTypes';
 
-// Components' props types.
+// Components and their props types.
+import {
+  // TODO: add the whole list of RN components (this is just what came up
+  //   in one version of the integration suite)
+  typeof DrawerLayoutAndroid as _DrawerLayoutAndroid,
+  typeof FlatList as _FlatList,
+  typeof Pressable as _Pressable,
+  typeof ScrollView as _ScrollView,
+  typeof Switch as _Switch,
+  typeof TextInput as _TextInput,
+  typeof Text as _Text,
+  typeof TouchableHighlight as _TouchableHighlight,
+  typeof TouchableNativeFeedback as _TouchableNativeFeedback,
+  typeof TouchableOpacity as _TouchableOpacity,
+  typeof TouchableWithoutFeedback as _TouchableWithoutFeedback,
+  typeof View as _View,
+} from 'react-native';
+
+// `@types/react-native` declares the components as classes, like:
+//   declare class ViewComponent extends React.Component<ViewProps> {}
+//   declare const ViewBase: Constructor<NativeMethods> & typeof ViewComponent;
+//   export class View extends ViewBase {
 //
+// But in reality they're not classes.  For example:
+//   // react-native/Libraries/Components/View/View.js
+//   const View: React.AbstractComponent<
+//     ViewProps,
+//     React.ElementRef<typeof ViewNativeComponent>,
+//   > = React.forwardRef((props: ViewProps, forwardedRef) => {
+//
+//   // react-native/Libraries/Components/View/ViewNativeComponent.js
+//   const ViewNativeComponent: HostComponent<Props> =
+//     NativeComponentRegistry.get<Props>('RCTView', () =>
+//
+//   // react-native/Libraries/Renderer/shims/ReactNativeTypes.js
+//   export type HostComponent<T> = AbstractComponent<T, $ReadOnly<NativeMethods>>;
+//
+// Here, we want the types that those TS classes represent as types…
+// so the types of the "class instances", i.e. of the things you can
+// get a ref to.  That's the second type argument to React.AbstractComponent,
+// and we can extract it with React.ElementRef.
+export type DrawerLayoutAndroid = React.ElementRef<_DrawerLayoutAndroid>;
+export type FlatList = React.ElementRef<_FlatList>;
+export type Pressable = React.ElementRef<_Pressable>;
+export type ScrollView = React.ElementRef<_ScrollView>;
+export type Switch = React.ElementRef<_Switch>;
+export type TextInput = React.ElementRef<_TextInput>;
+export type Text = React.ElementRef<_Text>;
+export type TouchableHighlight = React.ElementRef<_TouchableHighlight>;
+export type TouchableNativeFeedback =
+  React.ElementRef<_TouchableNativeFeedback>;
+export type TouchableOpacity = React.ElementRef<_TouchableOpacity>;
+export type TouchableWithoutFeedback =
+  React.ElementRef<_TouchableWithoutFeedback>;
+export type View = React.ElementRef<_View>;
+
 // Note we don't translate these to refer directly to the actual props
 // types from RN.  Those are exact object types, whereas the ones in
 // `@types/react-native` (like all TS object types) are inexact.  And
 // RN-using TS code often relies on that, by making intersections as a
 // way of adding more properties.
 type InexactProps<C> = { ...React.ElementConfig<C>, ... };
-import {
-  // TODO: add the whole list of RN components (this is just what came up
-  //   in one version of the integration suite)
-  typeof DrawerLayoutAndroid,
-  typeof FlatList,
-  typeof Pressable,
-  typeof ScrollView,
-  typeof Switch,
-  typeof TextInput,
-  typeof Text,
-  typeof TouchableHighlight,
-  typeof TouchableNativeFeedback,
-  typeof TouchableOpacity,
-  typeof TouchableWithoutFeedback,
-  typeof View,
-} from 'react-native';
-export type DrawerLayoutAndroidProps = InexactProps<DrawerLayoutAndroid>;
-export type FlatListProps = InexactProps<FlatList>;
-export type PressableProps = InexactProps<Pressable>;
-export type ScrollViewProps = InexactProps<ScrollView>;
-export type SwitchProps = InexactProps<Switch>;
-export type TextInputProps = InexactProps<TextInput>;
-export type TextProps = InexactProps<Text>;
-export type TouchableHighlightProps = InexactProps<TouchableHighlight>;
+export type DrawerLayoutAndroidProps = InexactProps<_DrawerLayoutAndroid>;
+export type FlatListProps = InexactProps<_FlatList>;
+export type PressableProps = InexactProps<_Pressable>;
+export type ScrollViewProps = InexactProps<_ScrollView>;
+export type SwitchProps = InexactProps<_Switch>;
+export type TextInputProps = InexactProps<_TextInput>;
+export type TextProps = InexactProps<_Text>;
+export type TouchableHighlightProps = InexactProps<_TouchableHighlight>;
 export type TouchableNativeFeedbackProps =
-  InexactProps<TouchableNativeFeedback>;
-export type TouchableOpacityProps = InexactProps<TouchableOpacity>;
+  InexactProps<_TouchableNativeFeedback>;
+export type TouchableOpacityProps = InexactProps<_TouchableOpacity>;
 export type TouchableWithoutFeedbackProps =
-  InexactProps<TouchableWithoutFeedback>;
-export type ViewProps = InexactProps<View>;
+  InexactProps<_TouchableWithoutFeedback>;
+export type ViewProps = InexactProps<_View>;
 
 // Miscellaneous types related to particular components.
 export type { StatusBarAnimation } from 'react-native/Libraries/Components/StatusBar/StatusBar';

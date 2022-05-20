@@ -7,6 +7,7 @@ import {
   ViewProps,
   GestureResponderEvent,
   Animated,
+  View,
 } from 'react-native';
 import RN from 'react-native';
 
@@ -28,7 +29,24 @@ declare var events: {
   nativeSynthetic: RN.NativeSyntheticEvent<{ x: number }>;
 };
 
-declare var props: {
+// The types for instances of (or refs for) various components.
+declare var componentInstanceTypes: {
+  drawerLayoutAndroid: RN.DrawerLayoutAndroid;
+  flatList: RN.FlatList;
+  pressable: RN.Pressable;
+  scrollView: RN.ScrollView;
+  switch: RN.Switch;
+  textInput: RN.TextInput;
+  text: RN.Text;
+  touchableHighlight: RN.TouchableHighlight;
+  touchableNativeFeedback: RN.TouchableNativeFeedback;
+  touchableOpacity: RN.TouchableOpacity;
+  touchableWithoutFeedback: RN.TouchableWithoutFeedback;
+  view: View;
+};
+
+// The types for props for various components.
+declare var componentProps: {
   drawerLayoutAndroidProps: RN.DrawerLayoutAndroidProps;
   flatListProps: RN.FlatListProps;
   pressableProps: RN.PressableProps;
@@ -45,8 +63,9 @@ declare var props: {
   viewPropsPlus: ViewProps & { foo: string };
 };
 
-// Other than the components' respective props types, which are above.
-declare var components: {
+// Types related to particular components, other than the instance and
+// props types above.
+declare var componentMisc: {
   statusBar: {
     animation: RN.StatusBarAnimation;
   };

@@ -10,6 +10,18 @@ import type {
     GestureResponderEvent as $tsflower_subst$RN$GestureResponderEvent,
     LayoutChangeEvent as $tsflower_subst$RN$LayoutChangeEvent,
     NativeSyntheticEvent as $tsflower_subst$RN$NativeSyntheticEvent,
+    DrawerLayoutAndroid as $tsflower_subst$RN$DrawerLayoutAndroid,
+    FlatList as $tsflower_subst$RN$FlatList,
+    Pressable as $tsflower_subst$RN$Pressable,
+    ScrollView as $tsflower_subst$RN$ScrollView,
+    Switch as $tsflower_subst$RN$Switch,
+    TextInput as $tsflower_subst$RN$TextInput,
+    Text as $tsflower_subst$RN$Text,
+    TouchableHighlight as $tsflower_subst$RN$TouchableHighlight,
+    TouchableNativeFeedback as $tsflower_subst$RN$TouchableNativeFeedback,
+    TouchableOpacity as $tsflower_subst$RN$TouchableOpacity,
+    TouchableWithoutFeedback as $tsflower_subst$RN$TouchableWithoutFeedback,
+    View as $tsflower_subst$RN$View,
     DrawerLayoutAndroidProps as $tsflower_subst$RN$DrawerLayoutAndroidProps,
     FlatListProps as $tsflower_subst$RN$FlatListProps,
     PressableProps as $tsflower_subst$RN$PressableProps,
@@ -28,7 +40,7 @@ import type {
     WithAnimatedValue as $tsflower_subst$RN$Animated$WithAnimatedValue,
 } from "tsflower/subst/react-native";
 
-import { Animated } from "react-native";
+import { Animated, View } from "react-native";
 import RN from "react-native";
 
 declare var style: {
@@ -48,7 +60,23 @@ declare var events: {
     ...
 };
 
-declare var props: {
+declare var componentInstanceTypes: {
+    drawerLayoutAndroid: $tsflower_subst$RN$DrawerLayoutAndroid,
+    flatList: $tsflower_subst$RN$FlatList,
+    pressable: $tsflower_subst$RN$Pressable,
+    scrollView: $tsflower_subst$RN$ScrollView,
+    switch: $tsflower_subst$RN$Switch,
+    textInput: $tsflower_subst$RN$TextInput,
+    text: $tsflower_subst$RN$Text,
+    touchableHighlight: $tsflower_subst$RN$TouchableHighlight,
+    touchableNativeFeedback: $tsflower_subst$RN$TouchableNativeFeedback,
+    touchableOpacity: $tsflower_subst$RN$TouchableOpacity,
+    touchableWithoutFeedback: $tsflower_subst$RN$TouchableWithoutFeedback,
+    view: $tsflower_subst$RN$View,
+    ...
+};
+
+declare var componentProps: {
     drawerLayoutAndroidProps: $tsflower_subst$RN$DrawerLayoutAndroidProps,
     flatListProps: $tsflower_subst$RN$FlatListProps,
     pressableProps: $tsflower_subst$RN$PressableProps,
@@ -65,7 +93,7 @@ declare var props: {
     ...
 };
 
-declare var components: { statusBar: { animation: $tsflower_subst$RN$StatusBarAnimation, ... }, ... };
+declare var componentMisc: { statusBar: { animation: $tsflower_subst$RN$StatusBarAnimation, ... }, ... };
 
 declare var animated: {
     addition: $tsflower_subst$RN$Animated$AnimatedAddition,

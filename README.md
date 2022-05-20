@@ -22,15 +22,10 @@ For more, see:
 - Get the current integration suite working (so `@react-navigation/*`,
   in addition to `react-native-safe-area-context`.)
 
-  There are 36 Flow errors.  Here's the list of remaining issues, with
+  There are ~~36~~ 34 Flow errors.  Here's the list of remaining issues, with
   the number of errors they each account for (not to prioritize, but
   to help check that all errors are accounted for).  Several are
   discussed in more detail below.
-
-  - Substitute for RN component types like `View`: `@types` has them
-    as classes, but the real things are not, so not usable as types.
-    Therefore rewrite type references to get the intended types.
-    (2 errors)
 
   - Convert `import type { someValue }` to `import typeof`; and then
     any references to it in `typeof` (which should be the only
