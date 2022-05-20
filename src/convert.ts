@@ -302,6 +302,15 @@ export function convertSourceFile(
       const { name } = binding;
       const propertyName = binding.propertyName ?? name;
 
+      const localSymbol = checker.getSymbolAtLocation(name);
+      const importedSymbol =
+        localSymbol && checker.getImmediateAliasedSymbol(localSymbol);
+
+      // This means the symbol is declared only as a type and/or a
+      // namespace, but not a value.  (It might have any combination.)
+      const symbolIsValueless =
+        importedSymbol && !(importedSymbol.flags & ts.SymbolFlags.Value);
+
       const mappedViaModule = mappedModule?.types?.get(propertyName.text);
       if (mappedViaModule) {
         switch (mappedViaModule.kind) {
@@ -341,10 +350,6 @@ export function convertSourceFile(
             );
         }
       }
-
-      const localSymbol = checker.getSymbolAtLocation(name);
-      const importedSymbol =
-        localSymbol && checker.getImmediateAliasedSymbol(localSymbol);
 
       const mapped = importedSymbol && mapper.getSymbolAsType(importedSymbol);
       if (mapped) {
@@ -397,11 +402,9 @@ export function convertSourceFile(
       const isTypeOnly =
         binding.isTypeOnly ||
         // If the symbol is declared only as a type, not a value, then in
-        // Flow we need to say "type" on the import.  (It might have both:
-        // for example, both an interface and class declaration, like
-        // React.Component does.)
-        (importedSymbol &&
-          !(importedSymbol.flags & ts.SymbolFlags.Value) &&
+        // Flow we need to say "type" on the import.
+        // TODO: what if it's only a namespace?  Just drop it, right?
+        (symbolIsValueless &&
           // But if it's already an `import type`, avoid redundancy
           // (which would be a syntax error.)
           !importClause.isTypeOnly);
