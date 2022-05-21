@@ -1160,25 +1160,26 @@ export function convertSourceFile(
         return errorType(node, `Whole module from 'import(…)' used as a type`);
       }
 
-      if (!ts.isIdentifier(qualifier)) {
-        // On the other hand if you write more than one indirection, like
-        // `import("foo").bar.baz` -- without `typeof` -- then the
-        // intermediate ones must be TS namespaces.  After all, the only
-        // things a type can be nested in are a module (aka a TS "external
-        // module", corresponding to a real JS module) or a TS namespace
-        // (aka a TS "internal module").
-        //
-        // Namespaced types don't have a direct equivalent in Flow, and we
-        // don't yet support them.
-        return unimplementedType(node, `namespaced type via import(…)`);
+      let localName;
+      const mappedName = getMappedImportType(moduleSpecifier, qualifier);
+      if (mappedName) {
+        localName = mappedName;
+      } else {
+        if (!ts.isIdentifier(qualifier)) {
+          // On the other hand if you write more than one indirection, like
+          // `import("foo").bar.baz` -- without `typeof` -- then the
+          // intermediate ones must be TS namespaces.  After all, the only
+          // things a type can be nested in are a module (aka a TS "external
+          // module", corresponding to a real JS module) or a TS namespace
+          // (aka a TS "internal module").
+          //
+          // Namespaced types don't have a direct equivalent in Flow, and we
+          // don't yet support them.
+          return unimplementedType(node, `namespaced type via import(…)`);
+        }
+        localName = ensureImportTypeIndividual(moduleSpecifier, qualifier.text);
       }
 
-      // TODO Send the type through the mapper.
-
-      const localName = ensureImportTypeIndividual(
-        moduleSpecifier,
-        qualifier.text,
-      );
       return b.genericTypeAnnotation(
         b.identifier(localName),
         convertTypeArguments(
@@ -1186,6 +1187,39 @@ export function convertSourceFile(
           node.typeArguments,
         ),
       );
+    }
+
+    function getMappedImportType(
+      moduleSpecifier: string,
+      qualifier: ts.EntityName,
+    ): undefined | string {
+      let mappedNs: void | NamespaceRewrite = mapper.getModule(moduleSpecifier);
+      if (!mappedNs) return;
+      const components = getNameComponents(qualifier);
+      let i;
+      for (i = 0; i + 1 < components.length; i++) {
+        mappedNs = mappedNs?.namespaces?.get(components[i].text);
+        if (!mappedNs) return;
+      }
+      const mapped = mappedNs?.types?.get(components[i].text);
+      if (!mapped) return;
+      switch (mapped.kind) {
+        case 'SubstituteType':
+          ensureWillEmitSubstitute(mapped);
+        // fallthrough
+
+        case 'FixedName':
+        case 'RenameType':
+          return mapped.name;
+
+        case 'TypeMacro':
+        case 'TypeReferenceMacro':
+          // TODO should we do something for ImportType on these rewrites too?
+          return;
+
+        default:
+          assertUnreachable(mapped, (m) => `TypeRewrite kind: ${m.kind}`);
+      }
     }
 
     function ensureImportTypeofWhole(moduleSpecifier: string) {
@@ -1228,6 +1262,16 @@ export function convertSourceFile(
         );
       }
       return localName;
+    }
+
+    function getNameComponents(qualifier: ts.EntityName): ts.Identifier[] {
+      const revResult = [];
+      while (ts.isQualifiedName(qualifier)) {
+        revResult.push(qualifier.right);
+        qualifier = qualifier.left;
+      }
+      revResult.push(qualifier);
+      return revResult.reverse();
     }
   }
 
