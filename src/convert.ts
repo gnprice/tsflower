@@ -389,6 +389,11 @@ export function convertSourceFile(
         }
       }
 
+      // TODO: Convert `import type { someValue }` to `import typeof`; and
+      //   then any references to it in `typeof` (which should be the only
+      //   references to it) to just direct type references.
+      //   (This is at least 8 of our remaining integration errors)
+
       const isTypeOnly =
         binding.isTypeOnly ||
         // If the symbol is declared only as a type, not a value, then in
@@ -1147,6 +1152,10 @@ export function convertSourceFile(
     const mapped = mapper.getTypeName(typeName);
     if (!mapped) {
       return b.genericTypeAnnotation.from({
+        // TODO: If typeName is qualified and the left isn't just a module,
+        //   then this verbatim translation won't work.  Need to rewrite.
+        //   (E.g. `CommonActions` error in integration suite.  That's from
+        //   the import; we'll drop that while rewriting references.)
         id: convertEntityNameAsType(typeName),
         typeParameters: convertTypeArguments(
           checker.getSymbolAtLocation(typeName),

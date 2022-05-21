@@ -19,6 +19,50 @@ For more, see:
 
 ## TODO
 
+- Get the current integration suite working (so `@react-navigation/*`,
+  in addition to `react-native-safe-area-context`.)
+
+  There are 36 Flow errors.  Here's the list of remaining issues, with
+  the number of errors they each account for (not to prioritize, but
+  to help check that all errors are accounted for).  Several are
+  discussed in more detail below.
+
+  - Substitute for RN component types like `View`: `@types` has them
+    as classes, but the real things are not, so not usable as types.
+    Therefore rewrite type references to get the intended types.
+    (2 errors)
+
+    - This one has a prerequisite: when an import has a SubstituteType
+      rewrite, but also a value binding, keep the import, in case
+      there's a `typeof` reference.
+
+  - Convert `import type { someValue }` to `import typeof`; and then
+    any references to it in `typeof` (which should be the only
+    references to it) to just direct type references.  (8 errors)
+
+  - Drop imports that are of only a namespace (or a namespace and a
+    value, if no `import typeof` was needed.)  (2 errors at
+    `Animated`; plus the one at `CommonActions` again)
+
+  - Rewrite type references `Foo.Bar` where `Foo` comes from an import
+    specifier, `import { Foo, …`.  We'll need to emit a more direct
+    import of the type.  (1 error, at `CommonActions`)
+
+  - Substitute for the default lib's `PromiseLike`.  (3 errors)
+
+  - Substitute for the default lib's `Extract`.  (3 errors)
+
+  - Handle `/// <reference types="react" />`.  (6 errors)
+
+  - (Just fudge this for the present:) `react-native-gesture-handler`
+    remains untyped.  (8 errors)
+
+  - Errors where "an unknown property that may exist" on one object
+    type "is incompatible with" another object type; all in
+    `@react-navigation/core/types`.  Might fudge these for the
+    present; I'm a bit puzzled that TS accepts these types in the
+    first place.  (3 errors)
+
 - Convert more kinds of nodes.  Almost everything found in our
   integration suite (a selection of third-party TS libraries) is
   covered, but some remain.
