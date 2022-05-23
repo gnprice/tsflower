@@ -305,6 +305,10 @@ export function convertSourceFile(
       const { name } = binding;
       const propertyName = binding.propertyName ?? name;
 
+      // Whether this TS import specifier has type-only semantics,
+      // either from `import type { …` or `import { type …`.
+      const isTypeOnly = binding.isTypeOnly || importClause.isTypeOnly;
+
       const localSymbol = checker.getSymbolAtLocation(name);
       const importedSymbol =
         localSymbol && checker.getImmediateAliasedSymbol(localSymbol);
@@ -378,7 +382,7 @@ export function convertSourceFile(
             // Import the type with `type`…
             addImportSpecifier('type', mapped.name, mappedLocal.name);
             // … and then the value, unless this import was type-only.
-            if (!(binding.isTypeOnly || importClause.isTypeOnly)) {
+            if (!isTypeOnly) {
               addImportSpecifier('value', propertyName.text, name.text);
             }
             return;
@@ -403,21 +407,16 @@ export function convertSourceFile(
       //   references to it) to just direct type references.
       //   (This is at least 8 of our remaining integration errors)
 
-      const isTypeOnly =
-        // We express both `import type { …` and `import { type …` by putting
-        // `type` here on the individual import specifier.
-        binding.isTypeOnly ||
-        importClause.isTypeOnly ||
+      const importKind =
+        isTypeOnly ||
         // If the symbol is declared only as a type, not a value, then in
         // Flow we need to say "type" on the import.
         // TODO: what if it's only a namespace?  Just drop it, right?
-        symbolIsValueless;
+        symbolIsValueless
+          ? 'type'
+          : 'value';
 
-      addImportSpecifier(
-        isTypeOnly ? 'type' : 'value',
-        propertyName.text,
-        name.text,
-      );
+      addImportSpecifier(importKind, propertyName.text, name.text);
     }
 
     function addImportSpecifier(
