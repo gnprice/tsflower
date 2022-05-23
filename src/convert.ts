@@ -288,7 +288,10 @@ export function convertSourceFile(
     const importKind =
       importClause.isTypeOnly &&
       // TS accepts `import type * as …`, but Flow doesn't.
-      !(namedBindings && ts.isNamespaceImport(namedBindings))
+      // And for `import type { … }`, we push the `type` modifier down
+      // to individual import specifiers.
+      // TODO(runtime): Can that cause an import for side effects?
+      !namedBindings
         ? 'type'
         : 'value';
 
@@ -372,17 +375,11 @@ export function convertSourceFile(
               );
             }
 
-            if (importClause.isTypeOnly) {
-              // It's an `import type`.  Use the type's name, but don't say
-              // `type` (the redundancy is invalid in both Flow and TS.)
-              addImportSpecifier('value', mapped.name, mappedLocal.name);
-            } else {
-              // Not an `import type`.  Import the type with `type`…
-              addImportSpecifier('type', mapped.name, mappedLocal.name);
-              // … and then the value, unless this was `import { type Foo }`.
-              if (!binding.isTypeOnly) {
-                addImportSpecifier('value', propertyName.text, name.text);
-              }
+            // Import the type with `type`…
+            addImportSpecifier('type', mapped.name, mappedLocal.name);
+            // … and then the value, unless this import was type-only.
+            if (!(binding.isTypeOnly || importClause.isTypeOnly)) {
+              addImportSpecifier('value', propertyName.text, name.text);
             }
             return;
           }
@@ -407,14 +404,14 @@ export function convertSourceFile(
       //   (This is at least 8 of our remaining integration errors)
 
       const isTypeOnly =
+        // We express both `import type { …` and `import { type …` by putting
+        // `type` here on the individual import specifier.
         binding.isTypeOnly ||
+        importClause.isTypeOnly ||
         // If the symbol is declared only as a type, not a value, then in
         // Flow we need to say "type" on the import.
         // TODO: what if it's only a namespace?  Just drop it, right?
-        (symbolIsValueless &&
-          // But if it's already an `import type`, avoid redundancy
-          // (which would be a syntax error.)
-          !importClause.isTypeOnly);
+        symbolIsValueless;
 
       addImportSpecifier(
         isTypeOnly ? 'type' : 'value',
