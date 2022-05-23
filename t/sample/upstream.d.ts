@@ -7,7 +7,7 @@ export declare type ArrayArray<T> = T[][];
 export declare type ArrayArray2<T = string> = T[][];
 
 export declare var x: Num;
-export declare var xx: { y: { z: string } };
+export declare var anObject: { y: { z: string } };
 
 export { distantValue, distantType } from './upupstream';
 

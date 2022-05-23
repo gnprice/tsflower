@@ -6,6 +6,7 @@ import { Mapper } from './mapper';
 import {
   equivalentNodes,
   getAliasedSymbol,
+  getFirstIdentifier,
   getModuleSpecifier,
   hasModifier,
   isEntityNameOrEntityNameExpression,
@@ -63,6 +64,10 @@ export function convertSourceFile(
 
   // Map from a SubstituteType's module specifier, to name, to imported name.
   const substituteTypes: Map<string, Map<string, string>> = new Map();
+
+  // Symbols for which we've converted `import type` to `import typeof`,
+  // and should therefore drop `typeof` on references.
+  const typeofImports: Set<ts.Symbol> = new Set();
 
   const preambleStatements: K.StatementKind[] = [];
 
@@ -320,6 +325,11 @@ export function convertSourceFile(
       const symbolIsValueless =
         resolvedSymbol && !(resolvedSymbol.flags & ts.SymbolFlags.Value);
 
+      // This means the symbol is declared only as a value and/or a
+      // namespace, but not a type.
+      const symbolIsTypeless =
+        resolvedSymbol && !(resolvedSymbol.flags & ts.SymbolFlags.Type);
+
       const mappedViaModule = mappedModule?.types?.get(propertyName.text);
       if (mappedViaModule) {
         switch (mappedViaModule.kind) {
@@ -367,6 +377,38 @@ export function convertSourceFile(
         }
       }
 
+      if (symbolIsTypeless && isTypeOnly) {
+        // This is a type-only import of a symbol that doesn't refer to any
+        // type.  These are good for just two things: (a) namespaces, and
+        // (b) value bindings to pass to `typeof`.
+        //
+        // For a namespace, there's nothing to do here: from Flow's
+        // perspective, there's nothing to import.  (The mapper will have
+        // noticed this import if it does refer to a namespace, and when we
+        // see any type references using the imported namespace we'll emit
+        // appropriate imports for those types.)  So just take care of the
+        // value binding, if any.
+        if (symbolIsValueless) {
+          // The symbol doesn't have any value binding, either.  Nothing to
+          // do.
+          return undefined;
+        }
+        // This is a type-only import of a value binding.  Flow provides an
+        // equivalent feature with different syntax: write `import typeof`,
+        // and then the name refers not to the value binding but to its
+        // type, so you don't say `typeof` at references to it.
+
+        // TODO: This might be a namespace as well as value, and in that
+        //   case the input might have only namespace references to it, no
+        //   value references.  In that case we currently emit an `import
+        //   typeof` we won't use.  It'd be nice to drop the import instead.
+
+        typeofImports.add(localSymbol);
+
+        addImportSpecifier('typeof', propertyName.text, name.text);
+        return;
+      }
+
       const mapped = importedSymbol && mapper.getSymbolAsType(importedSymbol);
       if (mapped) {
         switch (mapped.kind) {
@@ -403,11 +445,6 @@ export function convertSourceFile(
             assertUnreachable(mapped, (m) => `TypeRewrite kind: ${m.kind}`);
         }
       }
-
-      // TODO: Convert `import type { someValue }` to `import typeof`; and
-      //   then any references to it in `typeof` (which should be the only
-      //   references to it) to just direct type references.
-      //   (This is at least 8 of our remaining integration errors)
 
       const importKind =
         isTypeOnly ||
@@ -983,6 +1020,42 @@ export function convertSourceFile(
 
   function convertTypeQuery(node: ts.TypeQueryNode) {
     const { exprName } = node;
+
+    const symbol = checker.getSymbolAtLocation(getFirstIdentifier(exprName));
+    if (symbol && typeofImports.has(symbol)) {
+      // This value reference came to us through a TS `import type`, which
+      // we converted to a Flow `import typeof`.  That means the name in
+      // Flow is already a type, so drop `typeof` here at the reference.
+
+      // If the reference is directly to the imported name, that's all:
+      if (ts.isIdentifier(exprName)) {
+        return b.genericTypeAnnotation(convertIdentifier(exprName), null);
+      }
+
+      // If it's instead to some property-access chain on it, then convert
+      // those to `$ElementType`.  First build up the list of names:
+      const names = [];
+      let reference: ts.EntityName = exprName;
+      do {
+        names.push(reference.right.text);
+        reference = reference.left;
+      } while (!ts.isIdentifier(reference));
+
+      // … then apply them:
+      let result: K.FlowTypeKind = b.genericTypeAnnotation(
+        convertIdentifier(reference),
+        null,
+      );
+      let name;
+      while ((name = names.pop()) !== undefined) {
+        result = buildElementType(
+          result,
+          b.stringLiteralTypeAnnotation(name, name),
+        );
+      }
+      return result;
+    }
+
     return b.typeofTypeAnnotation(
       b.genericTypeAnnotation(convertEntityNameAsType(exprName), null),
     );

@@ -24,7 +24,7 @@ export type NumArray = Array<upstream.Num>;
 declare var importType: {
     whole: $tsflower_import_typeof$_$_2e__2f_upstream,
     value: $ElementType<$tsflower_import_typeof$_$_2e__2f_upstream, "x">,
-    subvalue: $ElementType<$ElementType<$ElementType<$tsflower_import_typeof$_$_2e__2f_upstream, "xx">, "y">, "z">,
+    subvalue: $ElementType<$ElementType<$ElementType<$tsflower_import_typeof$_$_2e__2f_upstream, "anObject">, "y">, "z">,
     type: $tsflower_import_type$_$_2e__2f_upstream$Num,
     typeArgs: $tsflower_import_type$_$_2e__2f_upstream$ArrayArray<number>,
     typeDefaultArgs: $tsflower_import_type$_$_2e__2f_upstream$ArrayArray2<>,
@@ -37,5 +37,11 @@ declare export var y: "a";
 declare export var z: string;
 declare export class C<T> {};
 declare function ff(x: boolean): void;
+import { typeof anObject } from "./upstream";
+import { typeof anObject as anObject2 } from "./upstream";
+type v1<T: anObject={ y: { z: string, ... }, ... }, U: { y: { z: string, ... }, ... }=anObject> = void;
+type v2<T: anObject2={ y: { z: string, ... }, ... }, U: { y: { z: string, ... }, ... }=anObject2> = void;
+type v3<T: $ElementType<anObject, "y">={ z: string, ... }, U: { z: string, ... }=$ElementType<anObject, "y">> = void;
+type v4<T: $ElementType<$ElementType<anObject2, "y">, "z">=string, U: string=$ElementType<$ElementType<anObject2, "y">, "z">> = void;
 export {};
 export { ff as fff, C as CC };

@@ -22,26 +22,26 @@ For more, see:
 - Get the current integration suite working (so `@react-navigation/*`,
   in addition to `react-native-safe-area-context`.)
 
-  There are ~~36~~ 26 Flow errors.  Here's the list of remaining issues, with
+  There are ~~36~~ 22 Flow errors.  Here's the list of remaining issues, with
   the number of errors they each account for (not to prioritize, but
   to help check that all errors are accounted for).  Several are
   discussed in more detail below.
-
-  - Convert `import type { someValue }` to `import typeof`; and then
-    any references to it in `typeof` (which should be the only
-    references to it) to just direct type references.  (8 errors)
-
-  - Drop imports that are of only a namespace (or a namespace and a
-    value, if no `import typeof` was needed.)  (2 errors at
-    `Animated`; plus the one at `CommonActions` again)
 
   - Rewrite type references `Foo.Bar` where `Foo` comes from an import
     specifier, `import { Foo, …`.  We'll need to emit a more direct
     import of the type.  (1 error, at `CommonActions`)
 
+  - On `typeof` of a generic value (generic function, at least) --
+    including one we turn into a plain type reference to an `import
+    typeof` -- turn a missing type-argument list to an empty one where
+    needed, just as we do for type references.  (2 errors)
+
   - Substitute for the default lib's `PromiseLike`.  (3 errors)
 
   - Substitute for the default lib's `Extract`.  (3 errors)
+
+  - Substitute for RN's `Animated.{,Timing,Spring}AnimationConfig`.
+    (4 errors)
 
   - Handle `/// <reference types="react" />`.  (6 errors)
 
