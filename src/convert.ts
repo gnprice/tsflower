@@ -312,11 +312,13 @@ export function convertSourceFile(
       const localSymbol = checker.getSymbolAtLocation(name);
       const importedSymbol =
         localSymbol && checker.getImmediateAliasedSymbol(localSymbol);
+      const resolvedSymbol =
+        localSymbol && checker.getAliasedSymbol(localSymbol);
 
       // This means the symbol is declared only as a type and/or a
       // namespace, but not a value.  (It might have any combination.)
       const symbolIsValueless =
-        importedSymbol && !(importedSymbol.flags & ts.SymbolFlags.Value);
+        resolvedSymbol && !(resolvedSymbol.flags & ts.SymbolFlags.Value);
 
       const mappedViaModule = mappedModule?.types?.get(propertyName.text);
       if (mappedViaModule) {

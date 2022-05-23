@@ -6,6 +6,7 @@ import upstream2 from './upstream';
 import type * as upstreamTypeOnly from './upstream';
 import { C as UpC, type C as UpCT } from './upstream';
 import type { C as UpCTT } from './upstream';
+import { distantValue, distantType } from './upstream';
 import { Component } from '../imported/minireact';
 
 export { x, x as uux } from './upstream';
