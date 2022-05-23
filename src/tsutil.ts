@@ -33,6 +33,26 @@ export function isEntityNameOrEntityNameExpression(
   return false;
 }
 
+// Copied from TS's getFirstIdentifier in src/compiler/utilities.ts.
+export function getFirstIdentifier(
+  node: ts.EntityNameOrEntityNameExpression,
+): ts.Identifier {
+  switch (node.kind) {
+    case ts.SyntaxKind.Identifier:
+      return node;
+    case ts.SyntaxKind.QualifiedName:
+      do {
+        node = node.left;
+      } while (node.kind !== ts.SyntaxKind.Identifier);
+      return node;
+    case ts.SyntaxKind.PropertyAccessExpression:
+      do {
+        node = node.expression;
+      } while (node.kind !== ts.SyntaxKind.Identifier);
+      return node;
+  }
+}
+
 // Based on TS's isNamedDeclaration in src/compiler/utilitiesPublic.ts.
 export function isNamedDeclaration(
   node: ts.Node,
