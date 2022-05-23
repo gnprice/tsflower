@@ -31,11 +31,6 @@ For more, see:
     specifier, `import { Foo, …`.  We'll need to emit a more direct
     import of the type.  (1 error, at `CommonActions`)
 
-  - On `typeof` of a generic value (generic function, at least) --
-    including one we turn into a plain type reference to an `import
-    typeof` -- turn a missing type-argument list to an empty one where
-    needed, just as we do for type references.  (2 errors)
-
   - Substitute for the default lib's `PromiseLike`.  (3 errors)
 
   - Substitute for the default lib's `Extract`.  (3 errors)
@@ -50,6 +45,28 @@ For more, see:
     `@react-navigation/core/types`.  Might fudge these for the
     present; I'm a bit puzzled that TS accepts these types in the
     first place.  (3 errors)
+
+  - Errors on lack of type arguments at a type reference to an
+    `import typeof`.  (2 errors)
+
+    This actually seems like a Flow bug: if you have a generic
+    `function f<T>() {}` and then say `typeof f`, that's a perfectly
+    good type: `<T>() => void`.  If OTOH you say `import { typeof f }`
+    and then try to refer to `f`, you get this error.
+
+    At the same time, I'm pretty sure it's also a bug in these TS type
+    definitions (in `@react-navigation/native/types` at
+    `LinkingOptions`): what it's literally saying is that if you pass
+    one of these options, it must be a function that's *generic* in
+    `ParamList`, which is much too demanding.  I suspect what it wants
+    to say is that the function must reflect the `ParamList` type
+    argument to `LinkingOptions` itself.  If anybody's passing these
+    options in real life and not getting a TS error, that's probably
+    an unsoundness in TypeScript.
+
+    So the right solution here will probably be for the user project
+    (including the integration suite) to fudge it: to supply an
+    output patch that rewrites these two names.
 
   - (Fudged this one for the present, with a stub file in
     `integration/types/`.)  `react-native-gesture-handler` remains
