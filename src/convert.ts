@@ -860,12 +860,8 @@ export function convertSourceFile(
       case ts.SyntaxKind.LiteralType:
         return convertLiteralType(node as ts.LiteralTypeNode);
 
-      case ts.SyntaxKind.TypeQuery: {
-        const { exprName } = node as ts.TypeQueryNode;
-        return b.typeofTypeAnnotation(
-          b.genericTypeAnnotation(convertEntityNameAsType(exprName), null),
-        );
-      }
+      case ts.SyntaxKind.TypeQuery:
+        return convertTypeQuery(node as ts.TypeQueryNode);
 
       case ts.SyntaxKind.TypeOperator:
         return convertTypeOperator(node as ts.TypeOperatorNode);
@@ -981,6 +977,13 @@ export function convertSourceFile(
           )}`,
         );
     }
+  }
+
+  function convertTypeQuery(node: ts.TypeQueryNode) {
+    const { exprName } = node;
+    return b.typeofTypeAnnotation(
+      b.genericTypeAnnotation(convertEntityNameAsType(exprName), null),
+    );
   }
 
   function convertTypeOperator(node: ts.TypeOperatorNode): K.FlowTypeKind {
