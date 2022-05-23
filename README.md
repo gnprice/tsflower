@@ -22,7 +22,7 @@ For more, see:
 - Get the current integration suite working (so `@react-navigation/*`,
   in addition to `react-native-safe-area-context`.)
 
-  There are ~~36~~ 34 Flow errors.  Here's the list of remaining issues, with
+  There are ~~36~~ 26 Flow errors.  Here's the list of remaining issues, with
   the number of errors they each account for (not to prioritize, but
   to help check that all errors are accounted for).  Several are
   discussed in more detail below.
@@ -45,14 +45,15 @@ For more, see:
 
   - Handle `/// <reference types="react" />`.  (6 errors)
 
-  - (Just fudge this for the present:) `react-native-gesture-handler`
-    remains untyped.  (8 errors)
-
   - Errors where "an unknown property that may exist" on one object
     type "is incompatible with" another object type; all in
     `@react-navigation/core/types`.  Might fudge these for the
     present; I'm a bit puzzled that TS accepts these types in the
     first place.  (3 errors)
+
+  - (Fudged this one for the present, with a stub file in
+    `integration/types/`.)  `react-native-gesture-handler` remains
+    untyped.  (8 errors, suppressed by stub)
 
 - Convert more kinds of nodes.  Almost everything found in our
   integration suite (a selection of third-party TS libraries) is

@@ -6,15 +6,17 @@
 
 trees=(
   @react-navigation
+  # react-native-gesture-handler is stubbed out
   react-native-safe-area-context
 )
 
 packages=(
   @react-navigation/{core,elements,routers,native}
+  # react-native-gesture-handler is stubbed out
   react-native-safe-area-context
 )
 
-rm integration/types/ -rf
+git clean -fxd integration/types/
 
 # TODO: Do all packages as a single run, so the mapper works across them.
 for tree in "${trees[@]}"; do

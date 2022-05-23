@@ -1,0 +1,10 @@
+// These are hand-written stubs, while we focus on other libraries
+// that consume this one.
+// @flow
+
+export type PanGestureHandlerProps = $FlowFixMe;
+export type PanGestureHandlerProperties = $FlowFixMe;
+export type PanGestureHandlerGestureEvent = $FlowFixMe;
+export type State = $FlowFixMe;
+
+declare export var GestureHandlerRootView: $FlowFixMe;
