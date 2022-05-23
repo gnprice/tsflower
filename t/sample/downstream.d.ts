@@ -6,7 +6,7 @@ import upstream2 from './upstream';
 import type * as upstreamTypeOnly from './upstream';
 import { C as UpC, type C as UpCT } from './upstream';
 import type { C as UpCTT } from './upstream';
-import { Component } from '../imported/upupstream';
+import { Component } from '../imported/minireact';
 
 export { x, x as uux } from './upstream';
 export { type Num } from './upstream'; // TODO wrong results: need exportKind
