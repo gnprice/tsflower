@@ -349,20 +349,26 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
 
       function visitImportSpecifier(node: ts.ImportSpecifier) {
         const localSymbol = checker.getSymbolAtLocation(node.name);
-        if (!localSymbol || symbolTypeRewrites.has(localSymbol)) {
-          return;
-        }
-
+        if (!localSymbol) return;
         const importedSymbol = checker.getImmediateAliasedSymbol(localSymbol);
-        const mapped = importedSymbol && mapper.getSymbolAsType(importedSymbol);
-        if (!mapped || mapped.kind !== 'RenameType') {
-          return;
-        }
+        if (!importedSymbol) return;
 
-        // TODO pick non-colliding name
-        const name = `${localSymbol.name}T`;
-        symbolTypeRewrites.set(localSymbol, { kind: 'RenameType', name });
-        hadRenames = true;
+        propagateTypeRename(localSymbol, importedSymbol);
+
+        function propagateTypeRename(
+          localSymbol: ts.Symbol,
+          importedSymbol: ts.Symbol,
+        ) {
+          if (symbolTypeRewrites.has(localSymbol)) return;
+
+          const mapped = mapper.getSymbolAsType(importedSymbol);
+          if (!mapped || mapped.kind !== 'RenameType') return;
+
+          // TODO pick non-colliding name
+          const name = `${localSymbol.name}T`;
+          symbolTypeRewrites.set(localSymbol, { kind: 'RenameType', name });
+          hadRenames = true;
+        }
       }
     }
   }
