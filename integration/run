@@ -5,12 +5,14 @@
 # output.  For inspecting those, see integration/README.md .
 
 trees=(
+  @react-native-masked-view
   @react-navigation
   # react-native-gesture-handler is stubbed out
   react-native-safe-area-context
 )
 
 packages=(
+  @react-native-masked-view/masked-view
   @react-navigation/{core,routers,native}
   # react-native-gesture-handler is stubbed out
   react-native-safe-area-context

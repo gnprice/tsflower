@@ -1,0 +1,2 @@
+// @flow
+export * from '@react-native-masked-view/masked-view';
