@@ -15,4 +15,17 @@ export type { $ReadOnlyArray as ReadonlyArray };
 //   type Partial<T> = { [P in keyof T]?: T[P]; };
 export type Partial<T> = $Rest<T, { ... }>;
 
-// TODO: PromiseLike; Extract; then that covers the integration suite!
+// From lib.es5.d.ts, `interface PromiseLike<T>` is just like `Promise`,
+// but with only `then` and no `catch` or `finally` etc; and with `then`
+// returning another PromiseLike.
+//
+// Then the way that's used is that the callback arguments to `then` -- both
+// versions of it -- as well as to some other things like `Promise.any` and
+// some Node methods, are only required to provide a `T | PromiseLike<T>`,
+// not `T | Promise<T>`.
+//
+// In flowlib, `then` and `Promise.allSettled` take `T | Promise<T>`.  So
+// just alias PromiseLike to Promise.
+export type { Promise as PromiseLike };
+
+// TODO: Extract; then that covers the integration suite!

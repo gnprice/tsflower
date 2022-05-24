@@ -170,7 +170,7 @@ export function prepDefaultLibraryRewrites() {
     // TODO: Have the mapper find these import substitutions directly from
     //   the declarations in subst/react.js.flow, rather than list them here
     ...Object.fromEntries(
-      ['Readonly', 'ReadonlyArray', 'Partial'].map((name) => [
+      ['Readonly', 'ReadonlyArray', 'Partial', 'PromiseLike'].map((name) => [
         name,
         // No need to munge the names of these; the input code won't have
         // had to import them, so won't have a chance to pick a different

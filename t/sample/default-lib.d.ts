@@ -8,6 +8,11 @@ var readonlyArray: {
   a: ReadonlyArray<number>;
 };
 
+var promiseLike: {
+  // TODO(test): add Flow code to test this interoperates with flowlib
+  a: PromiseLike<string>;
+};
+
 var partial: {
   a: Partial<{ x: number; y?: string }>;
   b: Partial<{}>;
