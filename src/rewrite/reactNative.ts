@@ -68,6 +68,12 @@ export function prepReactNativeRewrites(): NamespaceRewrite {
           [
             'AnimatedAddition',
             'AnimatedInterpolation',
+
+            'AnimationConfig',
+            'DecayAnimationConfig',
+            'SpringAnimationConfig',
+            'TimingAnimationConfig',
+
             'WithAnimatedValue',
           ].map((name) => [
             name,

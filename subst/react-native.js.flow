@@ -117,12 +117,23 @@ export type ViewProps = InexactProps<_View>;
 // Miscellaneous types related to particular components.
 export type { StatusBarAnimation } from 'react-native/Libraries/Components/StatusBar/StatusBar';
 
+//
 // Animation types.
+//
+// NB these go under the `Animated` namespace; the rewriter code that has a
+// list of what names to find in this file just knows that.
+// TODO: Express that better within this file.
+
 // TODO: Add the whole list of animated components.
 import AnimatedAddition from 'react-native/Libraries/Animated/nodes/AnimatedAddition';
 export { AnimatedAddition };
 import AnimatedInterpolation from 'react-native/Libraries/Animated/nodes/AnimatedInterpolation';
 export { AnimatedInterpolation };
+
+export type { AnimationConfig } from 'react-native/Libraries/Animated/animations/Animation';
+export type { DecayAnimationConfig } from 'react-native/Libraries/Animated/animations/DecayAnimation';
+export type { SpringAnimationConfig } from 'react-native/Libraries/Animated/animations/SpringAnimation';
+export type { TimingAnimationConfig } from 'react-native/Libraries/Animated/animations/TimingAnimation';
 
 // @types/react-native has:
 //    export type WithAnimatedValue<T> = T extends Builtin | Nullable

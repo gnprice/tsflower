@@ -22,7 +22,7 @@ For more, see:
 - Get the current integration suite working (so `@react-navigation/*`,
   in addition to `react-native-safe-area-context`.)
 
-  There are ~~36~~ 16 Flow errors.  Here's the list of remaining issues, with
+  There are ~~36~~ 12 Flow errors.  Here's the list of remaining issues, with
   the number of errors they each account for (not to prioritize, but
   to help check that all errors are accounted for).  Several are
   discussed in more detail below.
@@ -30,9 +30,6 @@ For more, see:
   - Rewrite type references `Foo.Bar` where `Foo` comes from an import
     specifier, `import { Foo, …`.  We'll need to emit a more direct
     import of the type.  (1 error, at `CommonActions`)
-
-  - Substitute for RN's `Animated.{,Timing,Spring}AnimationConfig`.
-    (4 errors)
 
   - Handle `/// <reference types="react" />`.  (6 errors)
 

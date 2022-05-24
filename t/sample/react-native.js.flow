@@ -37,6 +37,10 @@ import type {
     StatusBarAnimation as $tsflower_subst$RN$StatusBarAnimation,
     AnimatedAddition as $tsflower_subst$RN$Animated$AnimatedAddition,
     AnimatedInterpolation as $tsflower_subst$RN$Animated$AnimatedInterpolation,
+    AnimationConfig as $tsflower_subst$RN$Animated$AnimationConfig,
+    DecayAnimationConfig as $tsflower_subst$RN$Animated$DecayAnimationConfig,
+    SpringAnimationConfig as $tsflower_subst$RN$Animated$SpringAnimationConfig,
+    TimingAnimationConfig as $tsflower_subst$RN$Animated$TimingAnimationConfig,
     WithAnimatedValue as $tsflower_subst$RN$Animated$WithAnimatedValue,
 } from "tsflower/subst/react-native";
 
@@ -98,6 +102,10 @@ declare var componentMisc: { statusBar: { animation: $tsflower_subst$RN$StatusBa
 declare var animated: {
     addition: $tsflower_subst$RN$Animated$AnimatedAddition,
     interpolation: $tsflower_subst$RN$Animated$AnimatedInterpolation,
+    animationConfig: $tsflower_subst$RN$Animated$AnimationConfig,
+    decayAnimationConfig: $tsflower_subst$RN$Animated$DecayAnimationConfig,
+    springAnimationConfig: $tsflower_subst$RN$Animated$SpringAnimationConfig,
+    timingAnimationConfig: $tsflower_subst$RN$Animated$TimingAnimationConfig,
     withAnimatedValue: $tsflower_subst$RN$Animated$WithAnimatedValue<>,
     addition2: $tsflower_subst$RN$Animated$AnimatedAddition,
     ...

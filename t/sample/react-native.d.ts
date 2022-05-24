@@ -74,6 +74,12 @@ declare var componentMisc: {
 declare var animated: {
   addition: Animated.AnimatedAddition;
   interpolation: Animated.AnimatedInterpolation;
+
+  animationConfig: Animated.AnimationConfig;
+  decayAnimationConfig: Animated.DecayAnimationConfig;
+  springAnimationConfig: Animated.SpringAnimationConfig;
+  timingAnimationConfig: Animated.TimingAnimationConfig;
+
   withAnimatedValue: Animated.WithAnimatedValue;
 
   addition2: RN.Animated.AnimatedAddition;
