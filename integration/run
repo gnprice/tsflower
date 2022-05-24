@@ -11,7 +11,7 @@ trees=(
 )
 
 packages=(
-  @react-navigation/{core,elements,routers,native}
+  @react-navigation/{core,routers,native}
   # react-native-gesture-handler is stubbed out
   react-native-safe-area-context
 )
