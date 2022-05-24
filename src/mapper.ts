@@ -147,6 +147,19 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
         if (seenSymbols.has(symbol)) return;
         seenSymbols.add(symbol);
 
+        if (symbol.flags & ts.SymbolFlags.Namespace && symbol.exports) {
+          // TODO only do this if the namespace is getting exported
+          const typeMembers = [];
+          // @ts-expect-error TODO what is this error saying?
+          for (const member of symbol.exports.values()) {
+            if (member.flags & ts.SymbolFlags.Type) typeMembers.push(member);
+            // TODO also namespace members, recursively
+          }
+          // TODO stick something in symbolNamespaceRewrites so references
+          //   to Namespace.Member get rewritten to Namespace_Member, and so
+          //   we emit `export type Namespace_Member = Namespace.Member;` here
+        }
+
         if (
           symbol.flags & ts.SymbolFlags.TypeAlias &&
           symbol.flags & ts.SymbolFlags.Value
