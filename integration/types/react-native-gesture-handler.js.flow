@@ -2,9 +2,13 @@
 // that consume this one.
 // @flow
 
+export type PanGestureHandler = $FlowFixMe;
 export type PanGestureHandlerProps = $FlowFixMe;
 export type PanGestureHandlerProperties = $FlowFixMe;
 export type PanGestureHandlerGestureEvent = $FlowFixMe;
+export type TapGestureHandler = $FlowFixMe;
+export type TapGestureHandlerProperties = $FlowFixMe;
 export type State = $FlowFixMe;
 
 declare export var GestureHandlerRootView: $FlowFixMe;
+declare export var BaseButton: $FlowFixMe;
