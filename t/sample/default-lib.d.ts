@@ -42,6 +42,12 @@ var record: {
   // unionAll: Record<string | number | symbol, number>;
 };
 
+var extract: {
+  // loosely based on a definition in @react-navigation/core/types:
+  //   type Keyof<T extends {}> = Extract<keyof T, string>;
+  keyOf: <T extends {}>(k: keyof T) => Extract<keyof T, string>;
+};
+
 var omit: {
   a: Omit<{ a: string; b: number }, 'a'>;
   b: Omit<{ a: string; b: number }, 'a' | 'c'>;

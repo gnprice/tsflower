@@ -170,13 +170,15 @@ export function prepDefaultLibraryRewrites() {
     // TODO: Have the mapper find these import substitutions directly from
     //   the declarations in subst/react.js.flow, rather than list them here
     ...Object.fromEntries(
-      ['Readonly', 'ReadonlyArray', 'Partial', 'PromiseLike'].map((name) => [
-        name,
-        // No need to munge the names of these; the input code won't have
-        // had to import them, so won't have a chance to pick a different
-        // name.  Keep TS's name, and just supply a Flow definition.
-        prepImportSubstitute(name, `${name}`, 'tsflower/subst/lib'),
-      ]),
+      ['Readonly', 'ReadonlyArray', 'Partial', 'PromiseLike', 'Extract'].map(
+        (name) => [
+          name,
+          // No need to munge the names of these; the input code won't have
+          // had to import them, so won't have a chance to pick a different
+          // name.  Keep TS's name, and just supply a Flow definition.
+          prepImportSubstitute(name, `${name}`, 'tsflower/subst/lib'),
+        ],
+      ),
     ),
 
     // If adding to this: note that any `namespaces` map is ignored.

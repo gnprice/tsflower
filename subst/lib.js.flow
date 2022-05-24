@@ -28,4 +28,10 @@ export type Partial<T> = $Rest<T, { ... }>;
 // just alias PromiseLike to Promise.
 export type { Promise as PromiseLike };
 
-// TODO: Extract; then that covers the integration suite!
+// The actual definition of Extract is rather like this except it's
+// "distributive" over unions, and all-or-nothing for each union member.
+// But so far, uses of it in practice seem to be all `Extract<Foo, string>`
+// (moreover where Foo is either `keyof Bar` or something that's basically
+// expected to be of that form.)  I think when the second type argument is
+// `string`, that may actually just be equivalent to this intersection.
+export type Extract<+T, +U> = T & U;
