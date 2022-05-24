@@ -16,7 +16,7 @@ packages=(
   react-native-safe-area-context
 )
 
-git clean -fxd integration/types/
+git clean -qfxd integration/types/
 
 # TODO: Do all packages as a single run, so the mapper works across them.
 for tree in "${trees[@]}"; do
