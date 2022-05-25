@@ -13,7 +13,11 @@ import {
 } from './tsutil';
 import { assertUnreachable, ensureUnreachable } from './generics';
 import { escapeNamesAsIdentifierWithPrefix } from './names';
-import { formatEntityNameExpression, formatSyntaxKind } from './tsdebug';
+import {
+  formatEntityNameExpression,
+  formatSymbol,
+  formatSyntaxKind,
+} from './tsdebug';
 import { NamespaceRewrite, SubstituteType } from './rewrite/core';
 
 export type ErrorDescription = {
@@ -322,6 +326,9 @@ export function convertSourceFile(
 
       // This means the symbol is declared only as a type and/or a
       // namespace, but not a value.  (It might have any combination.)
+      // TODO this isn't right if `getAliasedSymbol` fails: it doesn't
+      //   return falsy, but rather an "undefined" symbol.  Which ends up
+      //   looking typeless/non-valueless, because flags Property|Transient.
       const symbolIsValueless =
         resolvedSymbol && !(resolvedSymbol.flags & ts.SymbolFlags.Value);
 
@@ -329,6 +336,16 @@ export function convertSourceFile(
       // namespace, but not a type.
       const symbolIsTypeless =
         resolvedSymbol && !(resolvedSymbol.flags & ts.SymbolFlags.Type);
+
+      if (name.text === 'StyleProp') {
+        console.log(
+          formatSymbol(localSymbol),
+          formatSymbol(importedSymbol),
+          formatSymbol(resolvedSymbol),
+          symbolIsValueless,
+          symbolIsTypeless,
+        );
+      }
 
       const mappedViaModule = mappedModule?.types?.get(propertyName.text);
       if (mappedViaModule) {

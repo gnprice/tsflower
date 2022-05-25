@@ -70,6 +70,8 @@ function createProgram(rootNames: readonly string[]) {
     );
   }
 
+  console.log(program.getSourceFiles().map((f) => f.fileName));
+
   // Other kinds of TS diagnostics:
   //   program.getGlobalDiagnostics()
   //   program.getSyntacticDiagnostics()
