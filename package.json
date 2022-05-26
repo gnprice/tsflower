@@ -36,7 +36,8 @@
     "tsflower": "bin/tsflower"
   },
   "scripts": {
-    "prepublishOnly": "npm run lint && npm run clean && npm run build && npm run test",
+    "prepare": "npm run clean && npm run build",
+    "postpack": "npm run lint && npm run test",
     "test": "t/run",
     "lint": "eslint 'src/**/*.ts' 't/**/*.d.ts'",
     "format": "prettier --write .",
