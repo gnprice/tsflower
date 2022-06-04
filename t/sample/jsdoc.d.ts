@@ -4,7 +4,7 @@
 /*! Pinned comment. */ /** Here's some jsdoc. */
 
 /* Block implementation comment. */
-export declare type T = number;
+export declare type T = number; /** more on T */
 
 export type TT = {
   x: {

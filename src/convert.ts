@@ -105,26 +105,30 @@ export function convertSourceFile(
       sourceFile.text,
       node.pos,
       (pos, end, kind, hasTrailingNewline) => {
-        if (kind === ts.SyntaxKind.MultiLineCommentTrivia) {
-          if (/^..(!|\*[^/])/.test(sourceFile.text.slice(pos))) {
-            comments = append(
-              comments,
-              b.commentBlock(sourceFile.text.slice(pos + 2, end - 2), true),
-            );
-          }
-        } else {
-          if (/^..\//.test(sourceFile.text.slice(pos))) {
-            comments = append(
-              comments,
-              b.commentLine(sourceFile.text.slice(pos + 2, end), true),
-            );
-          }
-        }
+        if (kind === ts.SyntaxKind.SingleLineCommentTrivia) return;
+        if (!shouldWriteComment(pos)) return;
+        const text = sourceFile.text.slice(pos + 2, end - 2);
+        comments = append(comments, b.commentBlock(text, true));
+      },
+    );
+
+    ts.forEachTrailingCommentRange(
+      sourceFile.text,
+      node.end,
+      (pos, end, kind, hasTrailingNewline) => {
+        if (kind === ts.SyntaxKind.SingleLineCommentTrivia) return;
+        if (!shouldWriteComment(pos)) return;
+        const text = sourceFile.text.slice(pos + 2, end - 2);
+        comments = append(comments, b.commentBlock(text, false, true));
       },
     );
 
     if (!comments) return out;
     return { ...out, comments };
+
+    function shouldWriteComment(pos: number): boolean {
+      return /^..(!|\*[^/])/.test(sourceFile.text.slice(pos));
+    }
   }
 
   function convertStatement(node: ts.Statement): K.StatementKind {

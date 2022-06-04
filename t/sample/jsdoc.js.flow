@@ -4,7 +4,7 @@
 /** Toplevel. */
 /*! Pinned comment. */
 /** Here's some jsdoc. */
-export type T = number;
+export type T = number;/** more on T */
 
 export type TT = { x: { y: { z: number, ... }, ... }, ... };
 
@@ -14,5 +14,4 @@ export type TT = { x: { y: { z: number, ... }, ... }, ... };
  *
   @param x an argument
  */
-/// A triple-slash comment.
 declare export function f(x: string): any;
