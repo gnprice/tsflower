@@ -98,47 +98,6 @@ export function convertSourceFile(
     sourceFile.fileName,
   );
 
-  function maybeAddJsdoc<N extends K.NodeKind>(out: N, node: ts.Node): N {
-    let comments: undefined | n.Comment[] = undefined;
-
-    ts.forEachLeadingCommentRange(
-      sourceFile.text,
-      node.pos,
-      (pos, end, kind, hasTrailingNewline) => {
-        if (kind === ts.SyntaxKind.SingleLineCommentTrivia) return;
-        if (!shouldWriteBlockComment(pos)) return;
-        const text = sourceFile.text.slice(pos + 2, end - 2);
-        comments = append(comments, b.commentBlock(text, true));
-      },
-    );
-
-    ts.forEachTrailingCommentRange(
-      sourceFile.text,
-      node.end,
-      (pos, end, kind, hasTrailingNewline) => {
-        if (kind === ts.SyntaxKind.SingleLineCommentTrivia) return;
-        if (!shouldWriteBlockComment(pos)) return;
-        const text = sourceFile.text.slice(pos + 2, end - 2);
-        comments = append(comments, b.commentBlock(text, false, true));
-      },
-    );
-
-    if (!comments) return out;
-    return { ...out, comments };
-
-    /** Whether tsc would emit the comment in a .d.ts by default. */
-    // This corresponds to shouldWriteComment in src/compiler/emitter.ts,
-    // when onlyPrintJsDocStyle is true.
-    function shouldWriteBlockComment(pos: number): boolean {
-      const text = sourceFile.text;
-      // A JSDoc comment: /**…*/.
-      if (text[pos + 2] === '*' && text[pos + 3] !== '/') return true;
-      // A "pinned comment": /*!…*/.
-      if (text[pos + 2] === '!') return true;
-      return false;
-    }
-  }
-
   function convertStatement(node: ts.Statement): K.StatementKind {
     try {
       let result = convertStatementExceptExport(node);
@@ -1938,6 +1897,51 @@ export function convertSourceFile(
           name: node.text,
           typeAnnotation: b.typeAnnotation(type),
         });
+  }
+
+  /** Attach any JsDoc comments on node to the output node. */
+  function maybeAddJsdoc<N extends K.NodeKind>(
+    outputNode: N,
+    node: ts.Node,
+  ): N {
+    let comments: undefined | n.Comment[] = undefined;
+
+    ts.forEachLeadingCommentRange(
+      sourceFile.text,
+      node.pos,
+      (pos, end, kind, hasTrailingNewline) => {
+        if (kind === ts.SyntaxKind.SingleLineCommentTrivia) return;
+        if (!shouldWriteBlockComment(pos)) return;
+        const text = sourceFile.text.slice(pos + 2, end - 2);
+        comments = append(comments, b.commentBlock(text, true));
+      },
+    );
+
+    ts.forEachTrailingCommentRange(
+      sourceFile.text,
+      node.end,
+      (pos, end, kind, hasTrailingNewline) => {
+        if (kind === ts.SyntaxKind.SingleLineCommentTrivia) return;
+        if (!shouldWriteBlockComment(pos)) return;
+        const text = sourceFile.text.slice(pos + 2, end - 2);
+        comments = append(comments, b.commentBlock(text, false, true));
+      },
+    );
+
+    if (!comments) return outputNode;
+    return { ...outputNode, comments };
+
+    /** Whether tsc would emit the comment in a .d.ts by default. */
+    // This corresponds to shouldWriteComment in src/compiler/emitter.ts,
+    // when onlyPrintJsDocStyle is true.
+    function shouldWriteBlockComment(pos: number): boolean {
+      const text = sourceFile.text;
+      // A JSDoc comment: /**…*/.
+      if (text[pos + 2] === '*' && text[pos + 3] !== '/') return true;
+      // A "pinned comment": /*!…*/.
+      if (text[pos + 2] === '!') return true;
+      return false;
+    }
   }
 
   function buildElementType(
