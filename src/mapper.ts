@@ -10,6 +10,7 @@ import {
 } from './rewrite';
 import { assertUnreachable } from './generics';
 import { formatSyntaxKind } from './tsdebug';
+import { useName } from './rewrite/core';
 
 /*
  * See docs/notes/mapper.md for some scratch notes on the background
@@ -160,10 +161,24 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
             const rewrites = libraryRewrites.get(module);
             if (!rewrites) return;
             const name = (decl.propertyName ?? decl.name).text;
-            const typeRewrite = rewrites.types?.get(name);
-            if (typeRewrite) symbolTypeRewrites.set(symbol, typeRewrite);
+
+            let typeRewrite = rewrites.types?.get(name);
+            if (typeRewrite) {
+              const resolvedSymbol = checker.getAliasedSymbol(symbol);
+              const symbolIsValueless =
+                resolvedSymbol &&
+                !(resolvedSymbol.flags & ts.SymbolFlags.Value);
+              if (symbolIsValueless) {
+                // We're going to drop this import, in convertImportSpecifier.
+                // So we can reuse its name.
+                typeRewrite = useName(typeRewrite, name);
+              }
+              symbolTypeRewrites.set(symbol, typeRewrite);
+            }
+
             const nsRewrite = rewrites.namespaces?.get(name);
             if (nsRewrite) symbolNamespaceRewrites.set(symbol, nsRewrite);
+
             return;
           } else if (ts.isImportClause(decl) || ts.isNamespaceImport(decl)) {
             // TODO: Do `import foo` and `import * as foo` need any different treatment?

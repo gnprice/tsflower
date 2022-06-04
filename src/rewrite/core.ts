@@ -141,3 +141,18 @@ export function prepImportSubstitute(
 ) {
   return mkSubstituteType(localName, importedName, moduleSpecifier);
 }
+
+/**
+ * Adjust the rewrite to use the given local name, if possible.
+ *
+ * The caller must guarantee that the name won't collide with or be
+ * inappropriately shadowed by another declaration.
+ */
+export function useName(rewrite: TypeRewrite, name: string): TypeRewrite {
+  switch (rewrite.kind) {
+    case 'SubstituteType':
+      return { ...rewrite, name };
+    default:
+      return rewrite;
+  }
+}
