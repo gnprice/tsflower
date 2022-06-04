@@ -862,6 +862,11 @@ export function convertSourceFile(
   }
 
   function convertType(node: ts.TypeNode): K.FlowTypeKind {
+    const result = convertTypeWorker(node);
+    return maybeAddJsdoc(result, node);
+  }
+
+  function convertTypeWorker(node: ts.TypeNode): K.FlowTypeKind {
     switch (node.kind) {
       case ts.SyntaxKind.UnknownKeyword:
         return b.mixedTypeAnnotation();

@@ -6,6 +6,8 @@
 /* Block implementation comment. */
 export declare type T = number; /** more on T */
 
+export type U = /** a TODO why missing? */ 'a' | 'b' /** b */ | 'c';
+
 export type TT = {
   x: {
     y: {

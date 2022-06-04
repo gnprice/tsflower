@@ -6,6 +6,7 @@
 /** Here's some jsdoc. */
 export type T = number;/** more on T */
 
+export type U = "a" | "b"/** b */ | "c";
 export type TT = { x: { y: { z: number, ... }, ... }, ... };
 
 /** Stray jsdoc */
