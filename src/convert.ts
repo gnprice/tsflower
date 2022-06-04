@@ -1,7 +1,7 @@
 import ts from 'typescript';
 import { builders as b, namedTypes as n } from 'ast-types';
 import K from 'ast-types/gen/kinds';
-import { map, some } from './util';
+import { append, map, some } from './util';
 import { Mapper } from './mapper';
 import {
   equivalentNodes,
@@ -13,11 +13,7 @@ import {
 } from './tsutil';
 import { assertUnreachable, ensureUnreachable } from './generics';
 import { escapeNamesAsIdentifierWithPrefix } from './names';
-import {
-  debugFormatNode,
-  formatEntityNameExpression,
-  formatSyntaxKind,
-} from './tsdebug';
+import { formatEntityNameExpression, formatSyntaxKind } from './tsdebug';
 import { SubstituteType, uniqueIdentifierForSubstModule } from './rewrite/core';
 
 export type ErrorDescription = {
@@ -102,27 +98,42 @@ export function convertSourceFile(
     sourceFile.fileName,
   );
 
-  function maybeAddJsdoc(out: K.StatementKind, node: ts.Node) {
-    const { jsDoc } = node as { readonly jsDoc?: ts.JSDoc[] }; // ts.JSDocContainer
-    if (!jsDoc || !jsDoc.length) return out;
-    console.log(jsDoc, ...jsDoc.map(debugFormatNode));
-    const p = ts.createPrinter();
-    for (const d of jsDoc)
-      console.log(
-        'jsdoc is: """' +
-          p.printNode(ts.EmitHint.Unspecified, d, sourceFile) +
-          '""".',
-      );
-    return out;
+  function maybeAddJsdoc<N extends K.NodeKind>(out: N, node: ts.Node): N {
+    let comments: undefined | n.Comment[] = undefined;
+
+    ts.forEachLeadingCommentRange(
+      sourceFile.text,
+      node.pos,
+      (pos, end, kind, hasTrailingNewline) => {
+        if (kind === ts.SyntaxKind.MultiLineCommentTrivia) {
+          if (/^..(!|\*[^/])/.test(sourceFile.text.slice(pos))) {
+            comments = append(
+              comments,
+              b.commentBlock(sourceFile.text.slice(pos + 2, end - 2), true),
+            );
+          }
+        } else {
+          if (/^..\//.test(sourceFile.text.slice(pos))) {
+            comments = append(
+              comments,
+              b.commentLine(sourceFile.text.slice(pos + 2, end), true),
+            );
+          }
+        }
+      },
+    );
+
+    if (!comments) return out;
+    return { ...out, comments };
   }
 
   function convertStatement(node: ts.Statement): K.StatementKind {
     try {
       let result = convertStatementExceptExport(node);
-      result = maybeAddJsdoc(result, node);
       if (hasModifier(node, ts.SyntaxKind.ExportKeyword)) {
         result = modifyStatementAsExport(result, node);
       }
+      result = maybeAddJsdoc(result, node);
       return result;
     } catch (err) {
       console.error(err);
