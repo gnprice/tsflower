@@ -1465,12 +1465,15 @@ export function convertSourceFile(
       }
 
       params.push(
-        b.functionTypeParam(
-          name,
-          // TS function parameter types must have names, but can lack types.
-          // When missing, the type is implicitly `any`.
-          param.type ? convertType(param.type) : b.anyTypeAnnotation(),
-          !!param.questionToken,
+        maybeAddJsdoc(
+          b.functionTypeParam(
+            name,
+            // TS function parameter types must have names, but can lack types.
+            // When missing, the type is implicitly `any`.
+            param.type ? convertType(param.type) : b.anyTypeAnnotation(),
+            !!param.questionToken,
+          ),
+          param,
         ),
       );
     }

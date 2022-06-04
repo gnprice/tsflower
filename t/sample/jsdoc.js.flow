@@ -21,4 +21,7 @@ export type TT = { x: { y: { z: number, ... }, ... }, ... };
  *
   @param x an argument
  */
-declare export function f(x: string): any;
+declare export function f(
+    /** About parameter x */
+    x: string
+): any;

@@ -31,4 +31,7 @@ export type TT = {
  */
 // An implementation comment.
 /// A triple-slash comment.
-export declare function f(x: string);
+export declare function f(
+  /** About parameter x */
+  x: string,
+);
