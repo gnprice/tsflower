@@ -14,7 +14,7 @@ import {
 import { assertUnreachable, ensureUnreachable } from './generics';
 import { escapeNamesAsIdentifierWithPrefix } from './names';
 import { formatEntityNameExpression, formatSyntaxKind } from './tsdebug';
-import { SubstituteType } from './rewrite/core';
+import { SubstituteType, uniqueIdentifierForSubstModule } from './rewrite/core';
 
 export type ErrorDescription = {
   kind: 'unimplemented' | 'error';
@@ -1307,10 +1307,7 @@ export function convertSourceFile(
   function ensureSubstituteNamespace(moduleSpecifier: string) {
     let importedName = substituteTypeModules.get(moduleSpecifier);
     if (importedName == null) {
-      const name = escapeNamesAsIdentifierWithPrefix(
-        '$tsflower_import',
-        moduleSpecifier,
-      );
+      const name = uniqueIdentifierForSubstModule(moduleSpecifier);
       importedName = b.identifier(name);
       substituteTypeModules.set(moduleSpecifier, importedName);
     }

@@ -2,6 +2,7 @@ import ts from 'typescript';
 import { namedTypes as n } from 'ast-types';
 import K from 'ast-types/gen/kinds';
 import { Converter, ErrorOr } from '../convert';
+import { escapeNamesAsIdentifierWithPrefix } from '../names';
 
 interface TypeRewriteBase {
   readonly kind: string;
@@ -155,4 +156,29 @@ export function useName(rewrite: TypeRewrite, name: string): TypeRewrite {
     default:
       return rewrite;
   }
+}
+
+export function shortIdentifierForSubstModule(
+  moduleSpecifier: string,
+): void | string {
+  if (moduleSpecifier.startsWith('tsflower/subst/')) {
+    const rest = moduleSpecifier.replace('tsflower/subst/', '');
+    if (rest === 'lib') return 'TsLib';
+    // e.g.: tsflower/subst/react -> React
+    //       tsflower/subst/react-native -> ReactNative
+    return rest
+      .replace(/^./, (c) => c.toUpperCase())
+      .replace(/-./g, (s) => s.slice(1).toUpperCase());
+  }
+  return undefined;
+}
+
+export function uniqueIdentifierForSubstModule(
+  moduleSpecifier: string,
+): string {
+  const short = shortIdentifierForSubstModule(moduleSpecifier);
+  if (short != null) {
+    return escapeNamesAsIdentifierWithPrefix('$tsflower_subst', short);
+  }
+  return escapeNamesAsIdentifierWithPrefix('$tsflower_import', moduleSpecifier);
 }
