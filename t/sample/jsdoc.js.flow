@@ -13,10 +13,12 @@ export type U1 = /** a */
 "a" | "b"/** b */ | "c";
 
 export type U2 = "a" | "b"/** b */ | "c";
+export type U3 = "a" | "b"/** b */ | "c";
 
-export type TT = { x: { y: { /** About
+export type TT</** JsDoc on type parameter S */
+S> = { x: { y: { /** About
  z */
-z: number, ... }, ... }, ... };
+z: S, ... }, ... }, ... };
 
 /** Stray jsdoc */
 /**

@@ -1860,15 +1860,18 @@ export function convertSourceFile(
       ? null
       : b.typeParameterDeclaration(
           params.map((param) =>
-            b.typeParameter(
-              param.name.text,
-              null,
-              // TODO consider calling `getEffectiveConstraintOfTypeParameter`,
-              //   per param.constraint jsdoc
-              !param.constraint
-                ? null
-                : b.typeAnnotation(convertType(param.constraint)),
-              !param.default ? null : convertType(param.default),
+            maybeAddJsdoc(
+              b.typeParameter(
+                param.name.text,
+                null,
+                // TODO consider calling `getEffectiveConstraintOfTypeParameter`,
+                //   per param.constraint jsdoc
+                !param.constraint
+                  ? null
+                  : b.typeAnnotation(convertType(param.constraint)),
+                !param.default ? null : convertType(param.default),
+              ),
+              param,
             ),
           ),
         );
