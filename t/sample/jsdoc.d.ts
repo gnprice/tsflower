@@ -15,18 +15,34 @@ export type U3 =
  | /** a TODO missing
   because "trailing" */ 'a' | 'b' /** b */ | 'c';
 
-export type TT<
+export type LongLengthyProfuselyVerboselyNamedTypeCalledT<
   /** JsDoc on type parameter S */
   S
 > = {
   x: {
     y: {
-      /** About
- z */
+      /**
+       * z of the y.
+       *
+       * Details about z
+       */
       z: S;
     };
   };
 };
+
+export type S = LongLengthyProfuselyVerboselyNamedTypeCalledT<{
+  /** Some jsdoc on this property */
+  a1: LongLengthyProfuselyVerboselyNamedTypeCalledT<
+      { 
+        /**
+         * Some jsdoc on this inner property.  How does it indent?
+         */
+        x: number;
+        y: void;
+      },
+    >;
+}>;
 
 /** Stray jsdoc */
 // Stray comment
