@@ -1527,11 +1527,11 @@ export function convertSourceFile(
     return [properties, indexers, callProperties];
 
     function addProperty(p: n.ObjectTypeProperty | n.ObjectTypeSpreadProperty) {
-      properties.push(p);
+      properties.push(maybeAddJsdoc(p, member));
     }
 
     function addIndexer(item: n.ObjectTypeIndexer) {
-      indexers.push(item);
+      indexers.push(maybeAddJsdoc(item, member));
     }
 
     // function addCallProperty(item: n.ObjectTypeCallProperty) {
