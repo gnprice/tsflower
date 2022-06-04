@@ -6,6 +6,9 @@ lib/
 # Generated files.
 t/sample/**/*.js.flow
 
+# This test file exercises unusual formatting situations.
+t/sample/jsdoc.d.ts
+
 # Prettier's behavior on prose is annoying and unhelpful.
 *.md
 

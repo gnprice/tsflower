@@ -1,12 +1,16 @@
 /** Toplevel. */
 
 /* eslint-disable  */
-/*! Pinned comment. */ /** Here's some jsdoc. */
+/*! Pinned comment. */   /** Here's some jsdoc. */
 
 /* Block implementation comment. */
 export declare type T = number; /** more on T */
 
-export type U = /** a TODO why missing? */ 'a' | 'b' /** b */ | 'c';
+export type U = /** a TODO missing because "trailing" */ 'a' | 'b' /** b */ | 'c';
+export type U1 =
+ /** a */ 'a' | 'b' /** b */ | 'c';
+ export type U2 =
+ | /** a TODO missing because "trailing" */ 'a' | 'b' /** b */ | 'c';
 
 export type TT = {
   x: {

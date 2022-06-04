@@ -7,6 +7,12 @@
 export type T = number;/** more on T */
 
 export type U = "a" | "b"/** b */ | "c";
+
+export type U1 = /** a */
+/** a */
+"a" | "b"/** b */ | "c";
+
+export type U2 = "a" | "b"/** b */ | "c";
 export type TT = { x: { y: { z: number, ... }, ... }, ... };
 
 /** Stray jsdoc */
