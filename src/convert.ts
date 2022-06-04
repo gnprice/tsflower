@@ -65,6 +65,9 @@ export function convertSourceFile(
   // Map from a SubstituteType's module specifier, to name, to imported name.
   const substituteTypes: Map<string, Map<string, string>> = new Map();
 
+  // Map from a SubstituteType's module specifier, to name imported as namespace.
+  const substituteTypeModules: Map<string, K.IdentifierKind> = new Map();
+
   // Symbols for which we've converted `import type` to `import typeof`,
   // and should therefore drop `typeof` on references.
   const typeofImports: Set<ts.Symbol> = new Set();
@@ -1242,6 +1245,20 @@ export function convertSourceFile(
     } else {
       switch (mapped.kind) {
         case 'SubstituteType':
+          if (ts.isQualifiedName(typeName)) {
+            const qualifier = ensureSubstituteNamespace(mapped.moduleSpecifier);
+            return b.genericTypeAnnotation.from({
+              id: b.qualifiedTypeIdentifier(
+                qualifier,
+                b.identifier(mapped.importedName),
+              ),
+              typeParameters: convertTypeArguments(
+                checker.getSymbolAtLocation(typeName),
+                typeArguments,
+              ),
+            });
+          }
+
           ensureWillEmitSubstitute(mapped);
         // fallthrough
 
@@ -1287,7 +1304,29 @@ export function convertSourceFile(
     perModule.set(rewrite.name, rewrite.importedName);
   }
 
+  function ensureSubstituteNamespace(moduleSpecifier: string) {
+    let importedName = substituteTypeModules.get(moduleSpecifier);
+    if (importedName == null) {
+      const name = escapeNamesAsIdentifierWithPrefix(
+        '$tsflower_import',
+        moduleSpecifier,
+      );
+      importedName = b.identifier(name);
+      substituteTypeModules.set(moduleSpecifier, importedName);
+    }
+    return importedName;
+  }
+
   function emitSubstitutes() {
+    for (const [moduleSpecifier, name] of substituteTypeModules.entries()) {
+      preambleStatements.push(
+        b.importDeclaration(
+          [b.importNamespaceSpecifier(name)],
+          b.stringLiteral(moduleSpecifier),
+        ),
+      );
+    }
+
     for (const [moduleSpecifier, perModule] of substituteTypes.entries()) {
       const specifiers = [];
       for (const [name, importedName] of perModule) {
