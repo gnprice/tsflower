@@ -13,7 +13,11 @@ import {
 } from './tsutil';
 import { assertUnreachable, ensureUnreachable } from './generics';
 import { escapeNamesAsIdentifierWithPrefix } from './names';
-import { formatEntityNameExpression, formatSyntaxKind } from './tsdebug';
+import {
+  debugFormatNode,
+  formatEntityNameExpression,
+  formatSyntaxKind,
+} from './tsdebug';
 import { SubstituteType, uniqueIdentifierForSubstModule } from './rewrite/core';
 
 export type ErrorDescription = {
@@ -98,15 +102,28 @@ export function convertSourceFile(
     sourceFile.fileName,
   );
 
+  function maybeAddJsdoc(out: K.StatementKind, node: ts.Node) {
+    const { jsDoc } = node as { readonly jsDoc?: ts.JSDoc[] }; // ts.JSDocContainer
+    if (!jsDoc || !jsDoc.length) return out;
+    console.log(jsDoc, ...jsDoc.map(debugFormatNode));
+    const p = ts.createPrinter();
+    for (const d of jsDoc)
+      console.log(
+        'jsdoc is: """' +
+          p.printNode(ts.EmitHint.Unspecified, d, sourceFile) +
+          '""".',
+      );
+    return out;
+  }
+
   function convertStatement(node: ts.Statement): K.StatementKind {
     try {
-      const inner = convertStatementExceptExport(node);
-
+      let result = convertStatementExceptExport(node);
+      result = maybeAddJsdoc(result, node);
       if (hasModifier(node, ts.SyntaxKind.ExportKeyword)) {
-        return modifyStatementAsExport(inner, node);
+        result = modifyStatementAsExport(result, node);
       }
-
-      return inner;
+      return result;
     } catch (err) {
       console.error(err);
       return errorStatement(node, `internal error: ${(err as Error).message}`);
