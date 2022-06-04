@@ -14,7 +14,7 @@ import {
 import { assertUnreachable, ensureUnreachable } from './generics';
 import { escapeNamesAsIdentifierWithPrefix } from './names';
 import { formatEntityNameExpression, formatSyntaxKind } from './tsdebug';
-import { NamespaceRewrite, SubstituteType } from './rewrite/core';
+import { SubstituteType } from './rewrite/core';
 
 export type ErrorDescription = {
   kind: 'unimplemented' | 'error';
@@ -272,13 +272,8 @@ export function convertSourceFile(
     const { namedBindings } = importClause;
     if (namedBindings) {
       if (ts.isNamedImports(namedBindings)) {
-        const mappedModule = mapper.getModule(getModuleSpecifier(node));
         for (const binding of namedBindings.elements) {
-          const err = convertImportSpecifier(
-            binding,
-            importClause,
-            mappedModule,
-          );
+          const err = convertImportSpecifier(binding, importClause);
           if (err) return err;
         }
       } else {
@@ -305,7 +300,6 @@ export function convertSourceFile(
     function convertImportSpecifier(
       binding: ts.ImportSpecifier,
       importClause: ts.ImportClause,
-      mappedModule: void | NamespaceRewrite,
     ): void | K.StatementKind {
       const { name } = binding;
       const propertyName = binding.propertyName ?? name;
@@ -330,9 +324,9 @@ export function convertSourceFile(
       const symbolIsTypeless =
         resolvedSymbol && !(resolvedSymbol.flags & ts.SymbolFlags.Type);
 
-      const mappedViaModule = mappedModule?.types?.get(propertyName.text);
-      if (mappedViaModule) {
-        switch (mappedViaModule.kind) {
+      const mappedLocal = localSymbol && mapper.getSymbolAsType(localSymbol);
+      if (mappedLocal) {
+        switch (mappedLocal.kind) {
           case 'SubstituteType':
             // We're going to rewrite references to this type to do
             // something else instead; this type may not even exist in the
@@ -371,7 +365,7 @@ export function convertSourceFile(
 
           default:
             assertUnreachable(
-              mappedViaModule,
+              mappedLocal,
               (m) => `TypeRewrite kind: ${m.kind}`,
             );
         }
@@ -413,7 +407,6 @@ export function convertSourceFile(
       if (mapped) {
         switch (mapped.kind) {
           case 'RenameType': {
-            const mappedLocal = mapper.getSymbolAsType(localSymbol);
             if (!mappedLocal || mappedLocal.kind !== 'RenameType') {
               // TODO(error): localize this to the one ts.ImportSpecifier
               return errorStatement(
