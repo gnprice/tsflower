@@ -17,10 +17,6 @@ import { formatSyntaxKind } from './tsdebug';
  */
 
 export interface Mapper {
-  /** (Yes, this API can only work for absolute imports.  For now this only
-   * supports our static rewrite rules anyway.) */
-  getModule(moduleSpecifier: string): void | NamespaceRewrite;
-
   /** (Each call to this in the converter should have a corresponding case
    * in the visitor in `createMapper`, to ensure that we find and
    * investigate that symbol.) */
@@ -56,7 +52,6 @@ export function createMapper(program: ts.Program, targetFilenames: string[]) {
   const symbolNamespaceRewrites: Map<ts.Symbol, NamespaceRewrite> = new Map();
 
   const mapper: Mapper = {
-    getModule: (specifier) => libraryRewrites.get(specifier),
     getSymbolAsType: (symbol) => symbolTypeRewrites.get(symbol),
     getTypeName,
     getNamespaceReference,
