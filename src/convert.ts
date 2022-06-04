@@ -1517,15 +1517,28 @@ export function convertSourceFile(
     const properties: (n.ObjectTypeProperty | n.ObjectTypeSpreadProperty)[] =
       [];
     const indexers: n.ObjectTypeIndexer[] = [];
-    const callProperties: n.ObjectTypeCallProperty[] | undefined = []; // TODO
+    const callProperties: n.ObjectTypeCallProperty[] = []; // TODO
 
-    for (const member of node.members) {
-      convertMember(member);
+    let member: ts.ClassElement | ts.TypeElement;
+    for (member of node.members) {
+      convertMember();
     }
 
     return [properties, indexers, callProperties];
 
-    function convertMember(member: ts.ClassElement | ts.TypeElement) {
+    function addProperty(p: n.ObjectTypeProperty | n.ObjectTypeSpreadProperty) {
+      properties.push(p);
+    }
+
+    function addIndexer(item: n.ObjectTypeIndexer) {
+      indexers.push(item);
+    }
+
+    // function addCallProperty(item: n.ObjectTypeCallProperty) {
+    //   callProperties.push(item);
+    // }
+
+    function convertMember() {
       switch (member.kind) {
         case ts.SyntaxKind.Constructor:
           convertConstructor(member as ts.ConstructorDeclaration);
@@ -1559,7 +1572,7 @@ export function convertSourceFile(
         case ts.SyntaxKind.ConstructSignature:
         case ts.SyntaxKind.SemicolonClassElement:
         case ts.SyntaxKind.ClassStaticBlockDeclaration:
-          properties.push(
+          addProperty(
             propertyOfError(
               member,
               mkUnimplemented(
@@ -1572,7 +1585,7 @@ export function convertSourceFile(
           break;
 
         default:
-          properties.push(
+          addProperty(
             propertyOfError(
               member,
               mkError(
@@ -1593,7 +1606,7 @@ export function convertSourceFile(
         const keyResult = convertName(name);
         if (!keyResult) return;
         if (keyResult.kind !== 'success') {
-          properties.push(propertyOfError(member, keyResult));
+          addProperty(propertyOfError(member, keyResult));
           return;
         }
         const key = keyResult.result;
@@ -1602,7 +1615,7 @@ export function convertSourceFile(
           ? 'plus'
           : null;
 
-        properties.push(
+        addProperty(
           b.objectTypeProperty.from({
             variance,
             key,
@@ -1617,7 +1630,7 @@ export function convertSourceFile(
       const { parameters, type: valueType } = member;
 
       if (parameters.length !== 1) {
-        properties.push(
+        addProperty(
           propertyOfError(
             member,
             mkError(`TS index signature must have exactly 1 parameter`),
@@ -1628,7 +1641,7 @@ export function convertSourceFile(
       const parameter = parameters[0];
       const { name, type: keyType } = parameter;
 
-      indexers.push(
+      addIndexer(
         b.objectTypeIndexer(
           // The "parameter" in a TS index signature is always an
           // identifier; if you try to write a binding pattern, it doesn't
@@ -1649,7 +1662,7 @@ export function convertSourceFile(
       const keyResult = convertName(name);
       if (!keyResult) return;
       if (keyResult.kind !== 'success') {
-        properties.push(propertyOfError(member, keyResult));
+        addProperty(propertyOfError(member, keyResult));
         return;
       }
       const key = keyResult.result;
@@ -1664,7 +1677,7 @@ export function convertSourceFile(
         typeParameters: null, // A TS accessor has no type parameters
       });
 
-      properties.push(
+      addProperty(
         b.objectTypeProperty.from({
           key,
           kind: 'get',
@@ -1680,7 +1693,7 @@ export function convertSourceFile(
       const keyResult = convertName(name);
       if (!keyResult) return;
       if (keyResult.kind !== 'success') {
-        properties.push(propertyOfError(member, keyResult));
+        addProperty(propertyOfError(member, keyResult));
         return;
       }
       const key = keyResult.result;
@@ -1688,7 +1701,7 @@ export function convertSourceFile(
       // TODO: Refactor convertFunctionType so as to reuse most of it here.
 
       if (parameters.length !== 1) {
-        properties.push(
+        addProperty(
           propertyOfError(
             member,
             mkError(`TS setter must take exactly 1 parameter`),
@@ -1717,7 +1730,7 @@ export function convertSourceFile(
         typeParameters: null, // A TS accessor has no type parameters
       });
 
-      properties.push(
+      addProperty(
         b.objectTypeProperty.from({
           key,
           kind: 'set',
@@ -1728,7 +1741,7 @@ export function convertSourceFile(
     }
 
     function convertConstructor(member: ts.ConstructorDeclaration) {
-      properties.push(
+      addProperty(
         b.objectTypeProperty.from({
           key: b.identifier('constructor'),
           // TODO: return type should be void, not any
@@ -1744,12 +1757,12 @@ export function convertSourceFile(
       const keyResult = convertName(name);
       if (!keyResult) return;
       if (keyResult.kind !== 'success') {
-        properties.push(propertyOfError(member, keyResult));
+        addProperty(propertyOfError(member, keyResult));
         return;
       }
       const key = keyResult.result;
 
-      properties.push(
+      addProperty(
         b.objectTypeProperty.from({
           key,
           value: convertFunctionType(member),
