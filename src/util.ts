@@ -12,6 +12,13 @@
  * implement equivalent functions here.  They're small and self-contained.
  */
 
+/** Append to an array, creating it if needed, and return the array. */
+export function append<T>(xs: T[] | void, x: T): T[] {
+  if (!xs) return [x];
+  xs.push(x);
+  return xs;
+}
+
 /** Like `Array#forEach`, but `undefined` behaves like an empty array. */
 export function forEach<T>(
   array: readonly T[] | void,
