@@ -27,6 +27,7 @@ declare var events: {
   gesture: GestureResponderEvent;
   layoutChange: RN.LayoutChangeEvent;
   nativeSynthetic: RN.NativeSyntheticEvent<{ x: number }>;
+  emitterSubscription: RN.EmitterSubscription;
 };
 
 // The types for instances of (or refs for) various components.

@@ -28,7 +28,13 @@ export type {
   ImageStyle,
 } from 'react-native/Libraries/StyleSheet/StyleSheet';
 
+//
 // Event types.
+//
+// Individual concrete events. For the conduits that events generically can
+// be passed around on, see the next section.
+//
+
 export type {
   // TODO: add the rest of the event types defined in `@types/react-native`
   //   (this is just what came up in one version of the integration suite)
@@ -36,6 +42,34 @@ export type {
   LayoutEvent as LayoutChangeEvent,
   SyntheticEvent as NativeSyntheticEvent,
 } from 'react-native/Libraries/Types/CoreEventTypes';
+
+//
+// Event emitter/subscription types.
+//
+// The conduits that events generically can be passed around on. For
+// individual concrete events, see the previous section.
+//
+
+// In real RN, this takes type params, so you can give a list of valid event
+// names it should know about:
+//
+//   class EmitterSubscription<EventDefinitions: {...}, K: $Keys<EventDefinitions>>
+//     extends _EventSubscription<EventDefinitions, K>
+//     implements EventSubscription {
+//
+// Not so in @types/react-native:
+//
+//   interface EmitterSubscription extends EventSubscription {
+//
+// It just uses `string` for an event name. So, match that unspecificity by
+// choosing unspecific type params.
+//
+// Separately: Not sure why @types/react-native has this as an `interface`
+// with a `new (…)` signature, when real RN has it as a `class`. Seems like
+// `class` is more correct; use that.
+import _EmitterSubscription from 'react-native/Libraries/vendor/emitter/_EmitterSubscription';
+declare export class EmitterSubscription
+  extends _EmitterSubscription<{| +[string]: mixed |}, string> {}
 
 // Components and their props types.
 import {
