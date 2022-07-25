@@ -12,6 +12,7 @@ import type {
     NativeSyntheticEvent as $tsflower_subst$RN$NativeSyntheticEvent,
     EmitterSubscription as $tsflower_subst$RN$EmitterSubscription,
     EventEmitter as $tsflower_subst$RN$EventEmitter,
+    NativeEventEmitter as $tsflower_subst$RN$NativeEventEmitter,
     DrawerLayoutAndroid as $tsflower_subst$RN$DrawerLayoutAndroid,
     FlatList as $tsflower_subst$RN$FlatList,
     Pressable as $tsflower_subst$RN$Pressable,
@@ -65,6 +66,7 @@ declare var events: {
     nativeSynthetic: $tsflower_subst$RN$NativeSyntheticEvent<{ x: number, ... }>,
     emitterSubscription: $tsflower_subst$RN$EmitterSubscription,
     eventEmitter: $tsflower_subst$RN$EventEmitter,
+    nativeEventEmitter: $tsflower_subst$RN$NativeEventEmitter,
     ...
 };
 
