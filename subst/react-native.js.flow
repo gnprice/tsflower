@@ -66,8 +66,8 @@ export type {
 //
 // Separately: Not sure why @types/react-native has this as an `interface`
 // with a `new (…)` signature, when real RN has it as a `class`. Seems like
-// `class` is more correct; use that. For contrast, see EventEmitter, where
-// @types/r-n uses `class`.
+// `class` is more correct; use that. For contrast, see
+// {Native,}EventEmitter, where @types/r-n uses `class`.
 import _EmitterSubscription from 'react-native/Libraries/vendor/emitter/_EmitterSubscription';
 declare export class EmitterSubscription
   extends _EmitterSubscription<{| +[string]: mixed |}, string> {}
@@ -80,6 +80,20 @@ declare export class EmitterSubscription
 import _EventEmitter from 'react-native/Libraries/vendor/emitter/_EventEmitter';
 declare export class EventEmitter
   extends _EventEmitter<{| +[string]: mixed |}> {}
+
+// Same comment as on EmitterSubscription about an event-names type param.
+//
+// Unlike with EmitterSubscription, @types/react-native follows real RN and
+// makes this a `class`, not `interface`. Following RN seems like the better
+// choice; shrug.
+//
+// One consequence of this definition is that NativeEventEmitter isn't a
+// subclass of EventEmitter, while it is in @types/react-native. But it
+// isn't in the real implementation, either… So, shrug, and we hope no
+// TS-based library tries to depend on that.
+import _NativeEventEmitter from 'react-native/Libraries/EventEmitter/NativeEventEmitter';
+declare export class NativeEventEmitter
+  extends _NativeEventEmitter<{| +[string]: mixed |}> {}
 
 // Components and their props types.
 import {
