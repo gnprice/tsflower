@@ -26,6 +26,7 @@ export function prepReactNativeRewrites(): NamespaceRewrite {
         'LayoutChangeEvent',
         'NativeSyntheticEvent',
         'EmitterSubscription',
+        'EventEmitter',
 
         'DrawerLayoutAndroid',
         'FlatList',
