@@ -10,6 +10,9 @@ import type {
     GestureResponderEvent as $tsflower_subst$RN$GestureResponderEvent,
     LayoutChangeEvent as $tsflower_subst$RN$LayoutChangeEvent,
     NativeSyntheticEvent as $tsflower_subst$RN$NativeSyntheticEvent,
+    EmitterSubscription as $tsflower_subst$RN$EmitterSubscription,
+    EventEmitter as $tsflower_subst$RN$EventEmitter,
+    NativeEventEmitter as $tsflower_subst$RN$NativeEventEmitter,
     DrawerLayoutAndroid as $tsflower_subst$RN$DrawerLayoutAndroid,
     FlatList as $tsflower_subst$RN$FlatList,
     Pressable as $tsflower_subst$RN$Pressable,
@@ -61,6 +64,9 @@ declare var events: {
     gesture: $tsflower_subst$RN$GestureResponderEvent,
     layoutChange: $tsflower_subst$RN$LayoutChangeEvent,
     nativeSynthetic: $tsflower_subst$RN$NativeSyntheticEvent<{ x: number, ... }>,
+    emitterSubscription: $tsflower_subst$RN$EmitterSubscription,
+    eventEmitter: $tsflower_subst$RN$EventEmitter,
+    nativeEventEmitter: $tsflower_subst$RN$NativeEventEmitter,
     ...
 };
 
