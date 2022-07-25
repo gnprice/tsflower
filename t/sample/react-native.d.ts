@@ -28,6 +28,7 @@ declare var events: {
   layoutChange: RN.LayoutChangeEvent;
   nativeSynthetic: RN.NativeSyntheticEvent<{ x: number }>;
   emitterSubscription: RN.EmitterSubscription;
+  eventEmitter: RN.EventEmitter;
 };
 
 // The types for instances of (or refs for) various components.
