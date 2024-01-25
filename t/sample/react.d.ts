@@ -118,6 +118,12 @@ var event: {
   mouseEvent: React.MouseEvent;
 };
 
+// The namespace `React.JSX` exists in `@types/react/index.d.ts`
+// at version 17.0.75, though it's gone as of version 18.0.9.
+var reactJsx: {
+  element: React.JSX.Element;
+};
+
 var jsx: {
   element: JSX.Element;
 };

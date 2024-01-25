@@ -129,4 +129,5 @@ var componentProps: { a: $tsflower_subst$React$ComponentProps<A>, ... };
 var memoExoticComponent: $tsflower_subst$React$MemoExoticComponent<A>;
 var mutableRefObject: $tsflower_subst$React$MutableRefObject<number>;
 var event: { mouseEvent: $tsflower_subst$React$MouseEvent<>, ... };
+var reactJsx: { element: $tsflower_subst$React$JSX$Element, ... };
 var jsx: { element: $tsflower_subst$React$JSX$Element, ... };

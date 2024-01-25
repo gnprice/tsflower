@@ -84,48 +84,59 @@ function convertReactElement(
 export function prepReactRewrites(): NamespaceRewrite {
   // All from `@types/react/index.d.ts`.
 
-  return mkNamespaceRewrite({
-    Component: mkTypeReferenceMacro(convertReactComponent),
-    ReactElement: mkTypeReferenceMacro(convertReactElement),
+  return mkNamespaceRewrite(
+    {
+      Component: mkTypeReferenceMacro(convertReactComponent),
+      ReactElement: mkTypeReferenceMacro(convertReactElement),
 
-    // TODO: Have the mapper find these import substitutions directly from
-    //   the declarations in subst/react.js.flow, rather than list them here
-    ...Object.fromEntries(
-      [
-        'JSXElementConstructor',
-        'RefObject',
-        'RefCallback',
-        'Ref',
-        'LegacyRef',
-        'ComponentState',
-        'RefAttributes',
-        'CElement',
-        'ComponentElement',
-        'ReactNode',
-        'ProviderProps',
-        'ConsumerProps',
-        'NamedExoticComponent',
-        'Provider',
-        'Consumer',
-        'Context',
-        'FunctionComponent',
-        'ForwardRefExoticComponent',
-        'PropsWithoutRef',
-        'PropsWithChildren',
-        'ComponentProps',
-        'MemoExoticComponent',
-        'MutableRefObject',
-        'MouseEvent',
-      ].map((name) => [
-        name,
-        prepImportSubstitute(name, `${prefix}${name}`, 'tsflower/subst/react'),
-      ]),
-    ),
+      // TODO: Have the mapper find these import substitutions directly from
+      //   the declarations in subst/react.js.flow, rather than list them here
+      ...Object.fromEntries(
+        [
+          'JSXElementConstructor',
+          'RefObject',
+          'RefCallback',
+          'Ref',
+          'LegacyRef',
+          'ComponentState',
+          'RefAttributes',
+          'CElement',
+          'ComponentElement',
+          'ReactNode',
+          'ProviderProps',
+          'ConsumerProps',
+          'NamedExoticComponent',
+          'Provider',
+          'Consumer',
+          'Context',
+          'FunctionComponent',
+          'ForwardRefExoticComponent',
+          'PropsWithoutRef',
+          'PropsWithChildren',
+          'ComponentProps',
+          'MemoExoticComponent',
+          'MutableRefObject',
+          'MouseEvent',
+        ].map((name) => [
+          name,
+          prepImportSubstitute(name, `${prefix}${name}`, 'tsflower/subst/react'),
+        ]),
+      ),
 
-    // If adding to this: note that currently any namespace rewrites within a
-    // given library are ignored!  That is, the `namespaces` property of one
-    // of these NamespaceRewrite values is never consulted.  See use sites.
-  });
+      // If adding to this: note that currently any namespace rewrites within a
+      // given library are ignored!  That is, the `namespaces` property of one
+      // of these NamespaceRewrite values is never consulted.  See use sites.
+    },
+    {
+      JSX: mkNamespaceRewrite({
+        Element: prepImportSubstitute(
+          'JSX$Element',
+          `${prefix}JSX$Element`,
+          'tsflower/subst/react',
+        ),
+      }),
+    },
+  );
 }
 
 /**
